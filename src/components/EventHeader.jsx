@@ -10,9 +10,12 @@ const EventHeader = () => {
   }
 
   return (
-    <nav className="bg-primary text-white shadow-md">
+    <nav className="bg-secondary text-white shadow-md">
       <div className="container mx-auto flex justify-between items-center p-4">
-        <NavLink to="new" className="text-xl font-bold hover:opacity-80">
+        <NavLink
+          to="/events/new"
+          className="btn text-xl font-bold hover:opacity-80"
+        >
           Create New Event
         </NavLink>
         <Form method="post" action="/logout" className="flex items-center">

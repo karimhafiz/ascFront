@@ -25,7 +25,7 @@ export default function EventCard({ event }) {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/events/${event._id}`,
+        `${process.env.DEV_URI}events/${event._id}`,
         {
           method: "DELETE",
           headers: {

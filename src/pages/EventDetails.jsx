@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 
 async function loadEvents(eventId) {
-  const response = await fetch(`http://localhost:5000/api/events/${eventId}`);
+  const response = await fetch(`${process.env.DEV_URI}events/${eventId}`);
   if (!response.ok) {
     throw new Error("Failed to fetch event details");
   }
@@ -34,9 +34,7 @@ export default function EventDetails() {
   } = useQuery({
     queryKey: ["event", eventId],
     queryFn: async () => {
-      const response = await fetch(
-        `http://localhost:5000/api/events/${eventId}`
-      );
+      const response = await fetch(`${process.env.DEV_URI}events/${eventId}`);
       if (!response.ok) {
         throw new Error("Failed to fetch event details");
       }
@@ -50,7 +48,7 @@ export default function EventDetails() {
       return;
     }
 
-    const response = await fetch("http://localhost:5000/api/payments/pay", {
+    const response = await fetch(`${process.env.DEV_URI}payments/pay`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

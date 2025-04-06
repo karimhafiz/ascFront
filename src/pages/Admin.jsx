@@ -1,11 +1,24 @@
 import React from "react";
-import { Form, useActionData, useNavigation } from "react-router-dom";
-import { redirect } from "react-router-dom";
+import {
+  Form,
+  useActionData,
+  useNavigation,
+  Navigate,
+  redirect,
+} from "react-router-dom";
 
 const Admin = () => {
   const data = useActionData();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
+
+  const token = localStorage.getItem("token");
+  const expiration = localStorage.getItem("expiration");
+
+  // Redirect to /admin if the user is already logged in
+  if (token && new Date(expiration) > new Date()) {
+    return <Navigate to="/admin" replace />;
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -72,7 +85,7 @@ export async function action({ request }) {
     });
 
     if (response.status === 422 || response.status === 401) {
-      return response;
+      return { message: "Invalid email or password." };
     }
 
     if (!response.ok) {
@@ -86,9 +99,9 @@ export async function action({ request }) {
     const expiration = new Date();
     expiration.setHours(expiration.getHours() + 1);
     localStorage.setItem("expiration", expiration.toISOString());
-    return redirect("/events");
+    return redirect("/admin");
   } catch (error) {
     console.error("Error during login:", error);
-    throw error; // Let React Router handle the error
+    return { message: "An error occurred. Please try again later." };
   }
 }

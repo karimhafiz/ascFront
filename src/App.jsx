@@ -17,6 +17,8 @@ import { logoutAction, combinedLoader } from "./auth/auth";
 import { action as eventAction } from "./components/EventForm";
 import CancelPage from "./pages/CancelPage";
 import SuccessPage from "./pages/SuccessPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const router = createBrowserRouter([
   {
@@ -48,7 +50,22 @@ const router = createBrowserRouter([
           { path: "new", element: <NewEvent />, action: eventAction },
         ],
       },
-      { path: "admin", element: <Admin />, action: loginAction },
+      {
+        path: "admin",
+        element: <ProtectedRoute />,
+        children: [
+          {
+            index: true,
+            element: <AdminDashboard />,
+          },
+        ],
+        action: loginAction,
+      },
+      {
+        path: "admin/login",
+        element: <Admin />,
+        action: loginAction,
+      },
       {
         path: "logout",
         action: logoutAction,
