@@ -63,7 +63,12 @@ const EventForm = ({ method, event = {} }) => {
         </div>
       )}
 
-      <Form method={method} className="space-y-6" encType="multipart/form-data">
+      <Form
+        method={method}
+        className="space-y-6"
+        encType="multipart/form-data"
+        data-testid="event-form"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Title */}
           <div className="form-control">
