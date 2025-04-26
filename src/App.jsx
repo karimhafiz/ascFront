@@ -11,6 +11,7 @@ import EventDetails, { eventDetailLoader } from "./pages/EventDetails";
 import NewEvent from "./pages/NewEvent";
 import EditEvent from "./pages/EditEvent";
 import EventRoot from "./pages/EventRoot";
+import ErrorPage from "./pages/Errorpage";
 
 import Admin, { action as loginAction } from "./pages/Admin";
 import { logoutAction, combinedLoader } from "./auth/auth";
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
     element: <Main />,
     id: "root",
     loader: combinedLoader,
+    errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Home /> },
       { path: "cancel", element: <CancelPage /> },
@@ -53,6 +55,7 @@ const router = createBrowserRouter([
       {
         path: "admin",
         element: <ProtectedRoute />,
+        errorElement: <ErrorPage />,
         children: [
           {
             index: true,

@@ -19,7 +19,7 @@ export default function SuccessPage() {
     queryFn: async () => {
       const response = await fetch(
         `${
-          process.env.DEV_URI
+          import.meta.env.VITE_DEV_URI
         }payments/success?paymentId=${paymentId}&eventId=${eventId}&email=${encodeURIComponent(
           email
         )}`

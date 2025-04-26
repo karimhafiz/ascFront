@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 
 async function loadEvents(eventId) {
-  const response = await fetch(`${process.env.DEV_URI}events/${eventId}`);
+  const response = await fetch(
+    `${import.meta.env.VITE_DEV_URI}events/${eventId}`
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch event details");
   }
@@ -34,7 +36,9 @@ export default function EventDetails() {
   } = useQuery({
     queryKey: ["event", eventId],
     queryFn: async () => {
-      const response = await fetch(`${process.env.DEV_URI}events/${eventId}`);
+      const response = await fetch(
+        `${import.meta.env.VITE_DEV_URI}events/${eventId}`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch event details");
       }
@@ -48,18 +52,21 @@ export default function EventDetails() {
       return;
     }
 
-    const response = await fetch(`${process.env.DEV_URI}payments/pay`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        amount: event.ticketPrice * quantity, // Calculate total price
-        eventId: eventId,
-        email: email, // Include user's email
-        quantity: quantity, // Include ticket quantity
-      }),
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_DEV_URI}payments/pay`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: event.ticketPrice * quantity, // Calculate total price
+          eventId: eventId,
+          email: email, // Include user's email
+          quantity: quantity, // Include ticket quantity
+        }),
+      }
+    );
 
     const data = await response.json();
     if (data.link) {

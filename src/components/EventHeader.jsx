@@ -19,7 +19,7 @@ const EventHeader = () => {
           Create New Event
         </NavLink>
         <Form method="post" action="/logout" className="flex items-center">
-          <button className="btn btn-secondary">Logout</button>
+          <button className="btn btn-primary">Logout</button>
         </Form>
       </div>
     </nav>

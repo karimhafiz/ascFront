@@ -30,7 +30,7 @@ const AdminDashboard = () => {
     const fetchTicketData = async () => {
       try {
         console.log("Fetching ticket data..."); // Debug log
-        const response = await fetch(`${process.env.DEV_URI}tickets`, {
+        const response = await fetch(`${import.meta.env.VITE_DEV_URI}tickets`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { getAuthToken } from "../auth/auth";
+import { formatDate } from "../util/util";
 import {
   Form,
   useNavigate,
@@ -10,9 +11,14 @@ import {
 
 const EventForm = ({ method, event = {} }) => {
   const [base64Image, setBase64Image] = useState(event.image || null); // Pre-fill with existing image if editing
+  const [isReoccurring, setIsReoccurring] = useState(
+    event.isReoccurring || false
+  ); // Manage isReoccurring state dynamically
+
   const data = useActionData();
   const navigate = useNavigate();
   const navigation = useNavigation();
+  console.log("Event object:", event);
 
   const isSubmitting = navigation.state === "submitting";
 
@@ -59,6 +65,7 @@ const EventForm = ({ method, event = {} }) => {
 
       <Form method={method} className="space-y-6" encType="multipart/form-data">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Title */}
           <div className="form-control">
             <label htmlFor="title" className="label font-medium">
               Title
@@ -73,6 +80,7 @@ const EventForm = ({ method, event = {} }) => {
             />
           </div>
 
+          {/* Short Description */}
           <div className="form-control">
             <label htmlFor="shortDescription" className="label font-medium">
               Short Description
@@ -87,6 +95,7 @@ const EventForm = ({ method, event = {} }) => {
             />
           </div>
 
+          {/* Long Description */}
           <div className="form-control md:col-span-2">
             <label htmlFor="description" className="label font-medium">
               Long Description
@@ -100,6 +109,7 @@ const EventForm = ({ method, event = {} }) => {
             />
           </div>
 
+          {/* Date */}
           <div className="form-control">
             <label htmlFor="date" className="label font-medium">
               Date
@@ -114,6 +124,7 @@ const EventForm = ({ method, event = {} }) => {
             />
           </div>
 
+          {/* Opening Time */}
           <div className="form-control">
             <label htmlFor="openingTime" className="label font-medium">
               Opening Time
@@ -127,6 +138,7 @@ const EventForm = ({ method, event = {} }) => {
             />
           </div>
 
+          {/* Street */}
           <div className="form-control">
             <label htmlFor="street" className="label font-medium">
               Street
@@ -141,6 +153,7 @@ const EventForm = ({ method, event = {} }) => {
             />
           </div>
 
+          {/* Post Code */}
           <div className="form-control">
             <label htmlFor="postCode" className="label font-medium">
               Post Code
@@ -154,6 +167,7 @@ const EventForm = ({ method, event = {} }) => {
             />
           </div>
 
+          {/* City */}
           <div className="form-control">
             <label htmlFor="city" className="label font-medium">
               City
@@ -168,6 +182,7 @@ const EventForm = ({ method, event = {} }) => {
             />
           </div>
 
+          {/* Age Restriction */}
           <div className="form-control">
             <label htmlFor="ageRestriction" className="label font-medium">
               Age Restriction
@@ -181,6 +196,7 @@ const EventForm = ({ method, event = {} }) => {
             />
           </div>
 
+          {/* Accessibility Info */}
           <div className="form-control md:col-span-2">
             <label htmlFor="accessibilityInfo" className="label font-medium">
               Accessibility Info
@@ -193,6 +209,7 @@ const EventForm = ({ method, event = {} }) => {
             />
           </div>
 
+          {/* Ticket Price */}
           <div className="form-control">
             <label htmlFor="ticketPrice" className="label font-medium">
               Ticket Price
@@ -207,7 +224,128 @@ const EventForm = ({ method, event = {} }) => {
               defaultValue={event.ticketPrice || ""}
             />
           </div>
+          {/* Featured */}
+          <div className="form-control">
+            <label htmlFor="featured" className="label font-medium">
+              Featured
+            </label>
+            <select
+              id="featured"
+              name="featured"
+              className="select select-bordered w-full"
+              defaultValue={event.featured ? "true" : "false"}
+            >
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
 
+          {/* Is Reoccurring */}
+          <div className="form-control">
+            <label htmlFor="isReoccurring" className="label font-medium">
+              Is Reoccurring
+            </label>
+            <select
+              id="isReoccurring"
+              name="isReoccurring"
+              className="select select-bordered w-full"
+              value={isReoccurring ? "true" : "false"}
+              onChange={(e) => setIsReoccurring(e.target.value === "true")}
+            >
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+
+          {/* Reoccurring Start Date */}
+          {isReoccurring && (
+            <div className="form-control">
+              <label
+                htmlFor="reoccurringStartDate"
+                className="label font-medium"
+              >
+                Reoccurring Start Date
+              </label>
+              <input
+                id="reoccurringStartDate"
+                type="date"
+                name="reoccurringStartDate"
+                className="input input-bordered w-full"
+                defaultValue={
+                  event.reoccurringStartDate
+                    ? formatDate(event.reoccurringStartDate)
+                    : ""
+                }
+              />
+            </div>
+          )}
+
+          {/* Reoccurring End Date */}
+          {isReoccurring && (
+            <div className="form-control">
+              <label htmlFor="reoccurringEndDate" className="label font-medium">
+                Reoccurring End Date
+              </label>
+              <input
+                id="reoccurringEndDate"
+                type="date"
+                name="reoccurringEndDate"
+                className="input input-bordered w-full"
+                defaultValue={
+                  event.reoccurringEndDate
+                    ? formatDate(event.reoccurringEndDate)
+                    : ""
+                }
+              />
+            </div>
+          )}
+
+          {/* Reoccurring Frequency */}
+          {isReoccurring && (
+            <div className="form-control">
+              <label
+                htmlFor="reoccurringFrequency"
+                className="label font-medium"
+              >
+                Reoccurring Frequency
+              </label>
+              <select
+                id="reoccurringFrequency"
+                name="reoccurringFrequency"
+                className="select select-bordered w-full"
+                defaultValue={event.reoccurringFrequency || ""}
+              >
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+          )}
+
+          {/* Day of the Week */}
+          {isReoccurring && (
+            <div className="form-control">
+              <label htmlFor="dayOfWeek" className="label font-medium">
+                Day of the Week
+              </label>
+              <select
+                id="dayOfWeek"
+                name="dayOfWeek"
+                className="select select-bordered w-full"
+                defaultValue={event.dayOfWeek || ""}
+              >
+                <option value="monday">Monday</option>
+                <option value="tuesday">Tuesday</option>
+                <option value="wednesday">Wednesday</option>
+                <option value="thursday">Thursday</option>
+                <option value="friday">Friday</option>
+                <option value="saturday">Saturday</option>
+                <option value="sunday">Sunday</option>
+              </select>
+            </div>
+          )}
+
+          {/* Image Upload */}
           <div className="form-control md:col-span-2">
             <label htmlFor="image" className="label font-medium">
               Image
@@ -246,6 +384,7 @@ const EventForm = ({ method, event = {} }) => {
           </div>
         </div>
 
+        {/* Form Actions */}
         <div className="form-actions flex justify-end space-x-4 mt-6">
           <button
             type="button"
@@ -285,28 +424,33 @@ export async function action({ request, params }) {
     city: data.get("city"),
     ageRestriction: data.get("ageRestriction"),
     accessibilityInfo: data.get("accessibilityInfo"),
-    ticketPrice: data.get("ticketPrice"),
+    ticketPrice: parseFloat(data.get("ticketPrice")), // Ensure ticket price is a number
+    featured: data.get("featured") === "true", // Convert to boolean
+    isReoccurring: data.get("isReoccurring") === "true", // Convert to boolean
+    reoccurringStartDate: data.get("reoccurringStartDate") || null,
+    reoccurringEndDate: data.get("reoccurringEndDate") || null,
+    reoccurringFrequency: data.get("reoccurringFrequency") || null,
+    dayOfWeek: data.get("dayOfWeek") || null, // Include dayOfWeek
   };
+
+  // Log the eventData object to the console
 
   const formData = new FormData();
   formData.append("eventData", JSON.stringify(eventData));
   formData.append("image", data.get("image"));
 
   let url = "http://localhost:5000/api/events";
-  if (method === "PUT" || method === "PATCH" || method === "put") {
+  if (method === "PUT" || method === "PATCH") {
     const eventId = params.eventId;
-
     url = `http://localhost:5000/api/events/${eventId}`;
   }
 
   const token = getAuthToken();
   try {
-    console.log("Token:", token); // Debugging: Ensure the token is being retrieved correctly
-
     const response = await fetch(url, {
       method: method,
       headers: {
-        Authorization: `Bearer ${token}`, // Add the "Bearer" prefix
+        Authorization: `Bearer ${token}`,
       },
       body: formData,
     });

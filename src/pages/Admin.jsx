@@ -76,13 +76,16 @@ export async function action({ request }) {
   const email = data.get("email");
   const password = data.get("password");
   try {
-    const response = await fetch("http://localhost:5000/api/admins/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_DEV_URI}admins/login`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      }
+    );
 
     if (response.status === 422 || response.status === 401) {
       return { message: "Invalid email or password." };
