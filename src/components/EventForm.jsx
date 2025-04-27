@@ -18,7 +18,6 @@ const EventForm = ({ method, event = {} }) => {
   const data = useActionData();
   const navigate = useNavigate();
   const navigation = useNavigation();
-  console.log("Event object:", event);
 
   const isSubmitting = navigation.state === "submitting";
 
@@ -429,28 +428,31 @@ export async function action({ request, params }) {
     city: data.get("city"),
     ageRestriction: data.get("ageRestriction"),
     accessibilityInfo: data.get("accessibilityInfo"),
-    ticketPrice: parseFloat(data.get("ticketPrice")), // Ensure ticket price is a number
-    featured: data.get("featured") === "true", // Convert to boolean
-    isReoccurring: data.get("isReoccurring") === "true", // Convert to boolean
+    ticketPrice: parseFloat(data.get("ticketPrice")),
+    featured: data.get("featured") === "true",
+    isReoccurring: data.get("isReoccurring") === "true",
     reoccurringStartDate: data.get("reoccurringStartDate") || null,
     reoccurringEndDate: data.get("reoccurringEndDate") || null,
     reoccurringFrequency: data.get("reoccurringFrequency") || null,
-    dayOfWeek: data.get("dayOfWeek") || null, // Include dayOfWeek
+    dayOfWeek: data.get("dayOfWeek") || null,
   };
 
-  // Log the eventData object to the console
+  // Define token before using it
+  const token = getAuthToken();
 
   const formData = new FormData();
   formData.append("eventData", JSON.stringify(eventData));
-  formData.append("image", data.get("image"));
-
-  let url = "http://localhost:5000/api/events";
-  if (method === "PUT" || method === "PATCH") {
-    const eventId = params.eventId;
-    url = `http://localhost:5000/api/events/${eventId}`;
+  const imageFile = data.get("image");
+  if (imageFile && imageFile instanceof File && imageFile.size > 0) {
+    formData.append("image", imageFile);
   }
 
-  const token = getAuthToken();
+  let url = `${import.meta.env.VITE_DEV_URI}events`;
+  if (method === "PUT" || method === "PATCH") {
+    const eventId = params.eventId;
+    url = `${import.meta.env.VITE_DEV_URI}events/${eventId}`;
+  }
+
   try {
     const response = await fetch(url, {
       method: method,
@@ -460,14 +462,30 @@ export async function action({ request, params }) {
       body: formData,
     });
 
+    // Log response status
+
+    // Get response as text and try to parse as JSON
+    const responseText = await response.text();
+
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (e) {
+      responseData = { error: "Invalid JSON response" };
+    }
+
     if (!response.ok) {
-      const errorResponse = await response.json();
-      throw new Error(errorResponse.message);
+      return {
+        errors: {
+          message:
+            responseData.error || responseData.message || "Unknown error",
+        },
+      };
     }
 
     return redirect("/events");
   } catch (error) {
     console.error("Error during form submission:", error);
-    throw error;
+    return { errors: { message: error.message } };
   }
 }

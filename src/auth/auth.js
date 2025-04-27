@@ -53,7 +53,6 @@ export async function fetchWithAuth(url, options = {}) {
 
   // Validate the token
   if (!isTokenValid(token)) {
-    console.log("Token is invalid or expired. Redirecting to login.");
     throw new Error("Session expired. Please log in again.");
   }
 
@@ -66,7 +65,6 @@ export async function fetchWithAuth(url, options = {}) {
 
   // Handle unauthorized responses
   if (response.status === 401) {
-    console.log("Unauthorized response. Redirecting to login.");
     throw new Error("Unauthorized. Please log in again.");
   }
 

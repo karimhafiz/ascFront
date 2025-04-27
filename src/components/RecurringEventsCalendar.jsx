@@ -18,14 +18,15 @@ const localizer = momentLocalizer(moment);
 export default function RecurringEventsCalendar({ events }) {
   const navigate = useNavigate();
 
-  // Generate all occurrences for recurring events
-  const allRecurringEvents = events.flatMap((event) =>
+  // Only generate occurrences for recurring events
+  const recurringEvents = events.filter((event) => event.isReoccurring);
+  const allRecurringEvents = recurringEvents.flatMap((event) =>
     generateRecurringEvents(event)
   );
 
   // Map events to the format required by react-big-calendar
   const calendarEvents = allRecurringEvents.map((event) => ({
-    title: event.title,
+    title: event.street ? `${event.title} (${event.street})` : event.title,
     start: new Date(event.date), // Start date of the event
     end: new Date(event.date), // End date of the event (same as start for single-day events)
     allDay: true, // Set to true for all-day events
@@ -39,7 +40,7 @@ export default function RecurringEventsCalendar({ events }) {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">Recurring Events</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">Recurring Eventss</h1>
       <Calendar
         localizer={localizer}
         events={calendarEvents}

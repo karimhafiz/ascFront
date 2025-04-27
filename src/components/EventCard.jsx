@@ -63,10 +63,10 @@ export default function EventCard({ event }) {
   };
 
   return (
-    <div className="card border border-base-300 shadow-md rounded-md overflow-hidden">
+    <div className="card border-2 border-primary shadow-md overflow-hidden rounded-none">
       <div className="flex flex-col md:flex-row">
         {/* Left side - Image */}
-        <div className="md:w-1/4 w-full">
+        <div className="md:w-1/4 w-full pl-4 py-4">
           {event.images && event.images.length > 0 ? (
             <img
               src={event.images[0]}
@@ -198,7 +198,7 @@ export default function EventCard({ event }) {
       {/* Footer - Tags */}
       <div className="bg-base-200 p-2 flex justify-between items-center">
         {event.featured && (
-          <span className="badge badge-primary">Featured</span>
+          <span className="badge badge-primary rounded-none">Featured</span>
         )}
         {renderTags()}
       </div>

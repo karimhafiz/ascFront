@@ -74,6 +74,14 @@ export default function EventDetails() {
     }
   };
 
+  const handleShare = (platform) => {
+    // Since we only have Facebook now, we can simplify this function
+    window.open(
+      `https://www.facebook.com/profile.php?id=100081705505202`,
+      "_blank"
+    );
+  };
+
   if (isLoading) return <p className="text-center text-gray-500">Loading...</p>;
   if (error)
     return <p className="text-center text-red-500">Error: {error.message}</p>;
@@ -82,97 +90,248 @@ export default function EventDetails() {
   const isEventInPast = new Date(event.date) < new Date();
 
   return (
-    <div className="container mx-auto p-6">
-      {/* Hero Section */}
-      <div className="relative w-full h-96 bg-gray-800">
-        <img
-          src={event.images?.[0] || "https://dummyimage.com/1280x720/fff/aaa"}
-          alt={event.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-75"></div>
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white">
-          <h1 className="text-5xl font-bold">{event.title}</h1>
-          <p className="text-lg mt-4">{event.shortDescription}</p>
+    <div>
+      {/* Header Banner */}
+      <div className="bg-primary text-white p-6 md:p-12">
+        <div className="container mx-auto">
+          <h1 className="text-3xl md:text-5xl font-bold text-center mb-2">
+            {event.title}
+          </h1>
+          {event.organizer && (
+            <p className="text-center text-lg">
+              <span className="flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  />
+                </svg>
+                {event.organizer}
+              </span>
+            </p>
+          )}
         </div>
       </div>
 
-      {/* Event Details Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-        <div className="bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4">Event Details</h2>
-          <p className="text-gray-700 mb-4">{event.longDescription}</p>
-          <div className="space-y-2">
-            <p className="text-lg">
-              <span className="font-semibold">Date:</span>{" "}
-              {new Date(event.date).toLocaleDateString()}
-            </p>
-            <p className="text-lg">
-              <span className="font-semibold">Time:</span> {event.openingTime}
-            </p>
-            <p className="text-lg">
-              <span className="font-semibold">Location:</span> {event.street},{" "}
-              {event.city}, {event.postCode}
-            </p>
-            <p className="text-lg">
-              <span className="font-semibold">Ticket Price:</span> $
-              {event.ticketPrice}
-            </p>
+      <div className="container mx-auto p-4">
+        {/* Social Sharing Button - Facebook and URL Copy */}
+        <div className="flex justify-end gap-2 mb-6">
+          <button
+            onClick={() => handleShare("facebook")}
+            className="btn btn-circle btn-primary"
+            aria-label="Share on Facebook"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Left column: Event Details */}
+          <div className="md:col-span-2 space-y-6">
+            {/* Event Image */}
+            {event.images && event.images.length > 0 && (
+              <img
+                src={event.images[0]}
+                alt={event.title}
+                className="w-full h-auto object-cover rounded-lg shadow-md"
+              />
+            )}
+
+            {/* Event Details */}
+            <div className="card bg-base-100 shadow-md border border-base-200">
+              <div className="card-body">
+                <h2 className="card-title text-xl">Event Details:</h2>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <div className="bg-primary text-white p-3 rounded-lg mr-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Date & Time</h3>
+                      <p>
+                        {new Date(event.date).toLocaleDateString()},{" "}
+                        {event.openingTime}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="bg-primary text-white p-3 rounded-lg mr-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Location</h3>
+                      <p>
+                        {event.street}, {event.city}, {event.postCode}
+                      </p>
+                    </div>
+                  </div>
+
+                  {event.ticketPrice > 0 && (
+                    <div className="flex items-start">
+                      <div className="bg-primary text-white p-3 rounded-lg mr-4">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">Ticket Price</h3>
+                        <p>${event.ticketPrice}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Event Description */}
+            <div className="card bg-base-100 shadow-md border border-base-200">
+              <div className="card-body">
+                <h2 className="card-title text-xl">About This Event</h2>
+                <div className="prose max-w-none">
+                  <p>{event.longDescription}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right column: Ticket Purchase */}
+          <div className="md:col-span-1">
+            {!isEventInPast ? (
+              <div className="card bg-base-100 shadow-md border border-base-200 sticky top-4">
+                <div className="card-body">
+                  <h2 className="card-title text-xl">Purchase Tickets</h2>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-md font-medium mb-2">
+                        Ticket Quantity:
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={quantity}
+                        onChange={(e) => setQuantity(Number(e.target.value))}
+                        className="input input-bordered w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-md font-medium mb-2">
+                        Your Email:
+                      </label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="input input-bordered w-full"
+                        placeholder="Enter your email"
+                      />
+                    </div>
+                    <div className="pt-2">
+                      <button
+                        className="btn btn-primary w-full"
+                        onClick={handleBuyTickets}
+                      >
+                        Buy Tickets
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="card bg-error bg-opacity-10 shadow-md border border-error">
+                <div className="card-body">
+                  <h2 className="card-title text-xl text-error">
+                    Event Has Ended
+                  </h2>
+                  <p>
+                    This event has already occurred. Ticket purchases are no
+                    longer available.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Ticket Purchase Section */}
-        {!isEventInPast ? (
-          <div className="bg-white shadow-lg rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-4">Purchase Tickets</h2>
-            <div className="mt-4">
-              <label className="block text-lg font-semibold mb-2">
-                Ticket Quantity:
-              </label>
-              <input
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={(e) => setQuantity(Number(e.target.value))}
-                className="input input-bordered w-full max-w-xs"
+        {/* Back Button */}
+        <div className="mt-8 mb-4">
+          <button className="btn btn-outline" onClick={handleBack}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
-            </div>
-            <div className="mt-4">
-              <label className="block text-lg font-semibold mb-2">
-                Your Email:
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input input-bordered w-full max-w-xs"
-                placeholder="Enter your email"
-              />
-            </div>
-            <div className="card-actions justify-end mt-6">
-              <button
-                className="btn btn-primary w-full"
-                onClick={handleBuyTickets}
-              >
-                Buy Tickets
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-red-100 border border-red-400 text-red-700 p-4 rounded-lg">
-            <p className="text-lg font-semibold">
-              This event has already occurred. Ticket purchases are no longer
-              available.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Back Button */}
-      <div className="mt-8 text-center">
-        <button className="btn btn-secondary" onClick={handleBack}>
-          Back to Events
-        </button>
+            </svg>
+            Back to Events
+          </button>
+        </div>
       </div>
     </div>
   );

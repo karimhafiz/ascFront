@@ -29,7 +29,6 @@ const AdminDashboard = () => {
     // Fetch ticket data from the backend
     const fetchTicketData = async () => {
       try {
-        console.log("Fetching ticket data..."); // Debug log
         const response = await fetch(`${import.meta.env.VITE_DEV_URI}tickets`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -41,7 +40,6 @@ const AdminDashboard = () => {
         }
 
         const data = await response.json();
-        console.log("Raw ticket data:", data); // Debug log
 
         // Use the data directly from the backend
         setTicketData(data);

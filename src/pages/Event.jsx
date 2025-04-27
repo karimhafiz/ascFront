@@ -12,6 +12,7 @@ export default function EventPage() {
     (event) => new Date(event.date) >= currentDate
   );
   const recurringEvents = events.filter((event) => event.isReoccurring);
+
   // past events
   const pastEvents = events.filter(
     (event) => new Date(event.date) < currentDate

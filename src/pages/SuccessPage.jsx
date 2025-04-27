@@ -47,6 +47,54 @@ export default function SuccessPage() {
     window.print(); // Trigger the browser's print functionality
   };
 
+  // Helper to generate ICS file content
+  const generateICS = () => {
+    if (!receipt) return "";
+    // Use event date if available, otherwise fallback to receipt.createdAt
+    const eventDate = receipt.date || receipt.createdAt || Date.now();
+    const dtStart =
+      new Date(eventDate).toISOString().replace(/[-:]/g, "").split(".")[0] +
+      "Z";
+    // For a single-day event, end = start + 2 hours (or same as start)
+    const dtEnd =
+      new Date(new Date(eventDate).getTime() + 2 * 60 * 60 * 1000)
+        .toISOString()
+        .replace(/[-:]/g, "")
+        .split(".")[0] + "Z";
+    const summary = receipt.description || "Event";
+    const uid = receipt.paymentId || Date.now();
+    const location = receipt.location || receipt.city || "";
+    const description = `Payment ID: ${receipt.paymentId}\n${summary}`;
+    return [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//YourApp//EN",
+      "BEGIN:VEVENT",
+      `UID:${uid}`,
+      `DTSTAMP:${dtStart}`,
+      `DTSTART:${dtStart}`,
+      `DTEND:${dtEnd}`,
+      `SUMMARY:${summary}`,
+      `DESCRIPTION:${description}`,
+      `LOCATION:${location}`,
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\r\n");
+  };
+
+  const handleAddToCalendar = () => {
+    const icsContent = generateICS();
+    const blob = new Blob([icsContent], { type: "text/calendar" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "event.ics";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // Display a loading message while fetching data
   if (isLoading) {
     return <p className="text-center text-gray-500">Loading receipt...</p>;
@@ -112,6 +160,9 @@ export default function SuccessPage() {
           </button>
           <button className="btn btn-secondary" onClick={handleGoBack}>
             Back to Event
+          </button>
+          <button className="btn btn-accent" onClick={handleAddToCalendar}>
+            Add to Calendar
           </button>
         </div>
       </div>
