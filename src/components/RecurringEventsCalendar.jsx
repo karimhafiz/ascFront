@@ -18,6 +18,21 @@ const localizer = momentLocalizer(moment);
 export default function RecurringEventsCalendar({ events }) {
   const navigate = useNavigate();
 
+  const dayPropGetter = (date) => {
+    const hasEvent = calendarEvents.some((event) =>
+      moment(event.start).isSame(date, "day")
+    );
+    if (!hasEvent) {
+      return {
+        style: {
+          backgroundColor: "#f3f4f6", // faded gray
+          opacity: 0.7,
+        },
+      };
+    }
+    return {};
+  };
+
   // Only generate occurrences for recurring events
   const recurringEvents = events.filter((event) => event.isReoccurring);
   const allRecurringEvents = recurringEvents.flatMap((event) =>
@@ -26,11 +41,14 @@ export default function RecurringEventsCalendar({ events }) {
 
   // Map events to the format required by react-big-calendar
   const calendarEvents = allRecurringEvents.map((event) => ({
-    title: event.street ? `${event.title} (${event.street})` : event.title,
+    ...event,
+    title: event.street
+      ? `${event.title} - ${event.street} ${event.openingTime}`
+      : event.title, // Title of the event
     start: new Date(event.date), // Start date of the event
     end: new Date(event.date), // End date of the event (same as start for single-day events)
     allDay: true, // Set to true for all-day events
-    ...event, // Include the rest of the event data for use in the event handler
+    // Include the rest of the event data for use in the event handler
   }));
 
   const handleSelectEvent = (event) => {
@@ -39,18 +57,19 @@ export default function RecurringEventsCalendar({ events }) {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto px-0 py-6">
       <h1 className="text-3xl font-bold text-center mb-6">Recurring Eventss</h1>
       <Calendar
         localizer={localizer}
         events={calendarEvents}
         startAccessor="start"
         endAccessor="end"
-        style={{ height: 500 }}
+        style={{ height: 600, width: "100%" }}
         onSelectEvent={handleSelectEvent} // Navigate to event details on click
         views={["month"]} // Show only the month view
         popup // Show a popup when clicking on a day with multiple events
         dayLayoutAlgorithm="no-overlap"
+        dayPropGetter={dayPropGetter}
       />
     </div>
   );

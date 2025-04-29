@@ -10,6 +10,7 @@ export default function EventCard({ event }) {
   const handleViewDetails = () => {
     navigate(`/events/${event._id}`);
   };
+  console.log(event);
 
   const handleEditEvent = () => {
     navigate(`/events/${event._id}/edit`, {
