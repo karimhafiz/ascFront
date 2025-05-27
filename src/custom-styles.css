@@ -1,0 +1,232 @@
+/* Custom styles for the application */
+
+/* Global glassmorphic pastel theme */
+body {
+  background: linear-gradient(135deg, #fce7f3 0%, #ede9fe 50%, #c7d2fe 100%);
+  min-height: 100vh;
+}
+
+/* Glassmorphic components */
+.glass-card,
+.card,
+.modal,
+.navbar,
+.sidebar,
+.glass-bg {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  box-shadow: 0 4px 32px 0 rgba(80, 80, 120, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Button styling */
+.btn,
+button {
+  background: rgba(255, 255, 255, 0.4);
+  color: #be185d;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px 0 rgba(80, 80, 120, 0.08);
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn:hover,
+button:hover {
+  background: #fbcfe8;
+  color: #a21caf;
+  transform: scale(1.05);
+}
+
+.btn-primary {
+  background: #f9a8d4;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #f472b6;
+}
+
+/* Calendar glassmorphism */
+.glass-calendar .rbc-calendar {
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(8px) !important;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 4px 32px 0 rgba(80, 80, 120, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  overflow: hidden !important;
+  padding: 10px !important;
+}
+
+.glass-calendar .rbc-month-view {
+  background: transparent !important;
+  border: none !important;
+  overflow: hidden !important;
+}
+
+.glass-calendar .rbc-header {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(8px) !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+  padding: 10px !important;
+  font-weight: 600 !important;
+  color: #be185d !important;
+}
+
+.glass-calendar .rbc-date-cell {
+  padding: 8px !important;
+  text-align: center !important;
+  font-weight: 500 !important;
+  color: #6b21a8 !important;
+}
+
+.glass-calendar .rbc-off-range-bg {
+  background: rgba(244, 244, 245, 0.3) !important;
+}
+
+.glass-calendar .rbc-off-range {
+  color: #a1a1aa !important;
+}
+
+.glass-calendar .rbc-row {
+  min-height: 80px !important;
+}
+
+.glass-calendar .rbc-month-row {
+  overflow: visible !important;
+}
+
+.glass-calendar .rbc-row-segment {
+  padding: 2px 4px !important;
+}
+
+.glass-calendar .rbc-day-bg + .rbc-day-bg {
+  border-left: 1px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+.glass-calendar .rbc-month-row + .rbc-month-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+.glass-calendar .rbc-event {
+  background: linear-gradient(90deg, #ec4899 0%, #8b5cf6 100%) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 2px 10px 0 rgba(80, 80, 120, 0.2) !important;
+  color: white !important;
+  font-weight: 500 !important;
+  padding: 4px 10px !important;
+  transition: all 0.3s ease !important;
+  margin-bottom: 2px !important;
+  overflow: hidden !important;
+  font-size: 0.85rem !important;
+}
+
+.glass-calendar .rbc-event:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px 0 rgba(80, 80, 120, 0.25) !important;
+}
+
+.glass-calendar .rbc-today {
+  background-color: rgba(249, 168, 212, 0.2) !important;
+  position: relative !important;
+}
+
+.glass-calendar .rbc-btn-group {
+  gap: 8px !important;
+}
+
+.glass-calendar .rbc-btn-group button {
+  color: #be185d !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(249, 168, 212, 0.3) !important;
+  transition: all 0.2s !important;
+  border-radius: 0.5rem !important;
+  padding: 6px 12px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+}
+
+.glass-calendar .rbc-btn-group button.rbc-active {
+  background: linear-gradient(90deg, #ec4899 0%, #8b5cf6 100%) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.glass-calendar .rbc-btn-group button:hover {
+  background: rgba(249, 168, 212, 0.2) !important;
+  transform: translateY(-1px) !important;
+}
+
+.glass-calendar .rbc-toolbar-label {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #9333ea !important;
+}
+
+/* Event tooltip styling */
+.glass-calendar .tooltip-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.glass-calendar .tooltip-content {
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 20px rgba(80, 80, 120, 0.2);
+  padding: 10px 14px;
+  min-width: 200px;
+  top: 110%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-5px);
+  z-index: 10;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(249, 168, 212, 0.3);
+  color: #9333ea;
+  pointer-events: none;
+}
+
+.glass-calendar .tooltip-container:hover .tooltip-content {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.glass-calendar .tooltip-content:after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent rgba(255, 255, 255, 0.95) transparent;
+}
+
+/* Additional responsive adjustments */
+@media (max-width: 768px) {
+  .glass-calendar .rbc-calendar {
+    padding: 5px !important;
+  }
+
+  .glass-calendar .rbc-header {
+    padding: 5px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .glass-calendar .rbc-date-cell {
+    padding: 4px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .glass-calendar .rbc-event {
+    padding: 2px 6px !important;
+    font-size: 0.75rem !important;
+  }
+}

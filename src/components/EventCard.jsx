@@ -10,7 +10,6 @@ export default function EventCard({ event }) {
   const handleViewDetails = () => {
     navigate(`/events/${event._id}`);
   };
-  console.log(event);
 
   const handleEditEvent = () => {
     navigate(`/events/${event._id}/edit`, {
@@ -55,7 +54,10 @@ export default function EventCard({ event }) {
     return (
       <div className="flex flex-wrap gap-2">
         {event.categories.map((category, index) => (
-          <span key={index} className="badge badge-outline">
+          <span
+            key={index}
+            className="badge bg-purple-200/50 text-purple-700 border-purple-300"
+          >
             {category}
           </span>
         ))}
@@ -64,34 +66,34 @@ export default function EventCard({ event }) {
   };
 
   return (
-    <div className="card border-2 border-primary shadow-md overflow-hidden rounded-none">
+    <div className="glass-card shadow-xl overflow-hidden rounded-xl border border-white/30 backdrop-blur-md hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
       <div className="flex flex-col md:flex-row">
         {/* Left side - Image */}
-        <div className="md:w-1/4 w-full pl-4 py-4">
+        <div className="md:w-1/3 w-full p-4">
           {event.images && event.images.length > 0 ? (
             <img
               src={event.images[0]}
               alt={event.title}
-              className="w-full h-35 md:h-full object-cover"
+              className="w-full h-48 md:h-full object-cover rounded-lg shadow-md"
             />
           ) : (
-            <div className="bg-base-200 w-full h-40 md:h-full flex items-center justify-center">
-              <span className="text-base-content/50">No Image</span>
+            <div className="bg-white/20 w-full h-48 md:h-full flex items-center justify-center rounded-lg backdrop-blur-sm">
+              <span className="text-purple-600/70">No Image</span>
             </div>
           )}
         </div>
 
         {/* Right side - Content */}
-        <div className="md:w-3/4 w-full bg-base-100 p-4">
+        <div className="md:w-2/3 w-full p-4">
           {/* Title */}
-          <h2 className="text-xl font-bold text-base-content">{event.title}</h2>
+          <h2 className="text-xl font-bold text-purple-700">{event.title}</h2>
 
           {/* Date and Location */}
-          <div className="flex flex-wrap mt-2 text-sm text-base-content/70">
-            <div className="mr-6 flex items-center">
+          <div className="flex flex-wrap mt-2 text-sm text-indigo-700">
+            <div className="mr-6 flex items-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 mr-1"
+                className="h-4 w-4 mr-1 text-pink-600"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -109,7 +111,7 @@ export default function EventCard({ event }) {
             <div className="flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 mr-1"
+                className="h-4 w-4 mr-1 text-pink-600"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -127,28 +129,54 @@ export default function EventCard({ event }) {
                   d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
-              {event.city}
-              {event.street ? `: ${event.street}` : ""}
+              <span className="text-indigo-700">
+                {event.city}
+                {event.street ? `: ${event.street}` : ""}
+              </span>
             </div>
           </div>
 
           {/* Short Description */}
-          <p className="mt-2 text-base-content">{event.shortDescription}</p>
+          <p className="mt-3 text-purple-800">{event.shortDescription}</p>
+
+          {/* Tags */}
+          <div className="mt-3 mb-4">{renderTags()}</div>
 
           {/* Action Button */}
           <div className="mt-4">
             <button
               onClick={handleViewDetails}
-              className="btn btn-primary w-full"
+              className="btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none hover:scale-105 transition-all duration-300 shadow-md w-full"
             >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
               Event Details
             </button>
+
             {token && (
               <div className="flex space-x-2 mt-2">
                 {/* Edit Button */}
                 <button
                   onClick={handleEditEvent}
-                  className="btn btn-sm btn-outline flex items-center space-x-2"
+                  className="btn btn-sm glass border-purple-300 text-purple-700 hover:bg-purple-100/30 hover:scale-105 transition-all duration-300 flex items-center space-x-2"
                   title="Edit Event"
                 >
                   <svg
@@ -162,7 +190,7 @@ export default function EventCard({ event }) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M11 17l-4 4m0 0l4-4m-4 4V3m13 13l-4 4m0 0l4-4m-4 4V3"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                     />
                   </svg>
                   <span>Edit</span>
@@ -171,7 +199,7 @@ export default function EventCard({ event }) {
                 {/* Remove Button */}
                 <button
                   onClick={handleRemoveEvent}
-                  className="btn btn-sm btn-error flex items-center space-x-2"
+                  className="btn btn-sm bg-red-100/50 border-red-300 text-red-700 hover:bg-red-200/50 hover:scale-105 transition-all duration-300 flex items-center space-x-2"
                   title="Remove Event"
                 >
                   <svg
@@ -185,7 +213,7 @@ export default function EventCard({ event }) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                     />
                   </svg>
                   <span>Remove</span>
@@ -197,12 +225,13 @@ export default function EventCard({ event }) {
       </div>
 
       {/* Footer - Tags */}
-      <div className="bg-base-200 p-2 flex justify-between items-center">
-        {event.featured && (
-          <span className="badge badge-primary rounded-none">Featured</span>
-        )}
-        {renderTags()}
-      </div>
+      {event.featured && (
+        <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 p-2 backdrop-blur-sm">
+          <span className="badge bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none">
+            Featured Event
+          </span>
+        </div>
+      )}
     </div>
   );
 }

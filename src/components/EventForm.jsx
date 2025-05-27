@@ -349,6 +349,39 @@ const EventForm = ({ method, event = {} }) => {
             </div>
           )}
 
+          {/* Type of Event */}
+          <div className="form-control">
+            <label htmlFor="typeOfEvent" className="label font-medium">
+              Type of Event
+            </label>
+            <select
+              id="typeOfEvent"
+              name="typeOfEvent"
+              className="select select-bordered w-full"
+              defaultValue={event.typeOfEvent || "ASC"}
+              required
+            >
+              <option value="Sports">Sports</option>
+              <option value="ASC">ASC</option>
+            </select>
+          </div>
+
+          {/* is tournament */}
+          <div className="form-control">
+            <label htmlFor="isTournament" className="label font-medium">
+              Is Tournament
+            </label>
+            <select
+              id="isTournament"
+              name="isTournament"
+              className="select select-bordered w-full"
+              defaultValue={event.isTournament ? "true" : "false"}
+            >
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+
           {/* Image Upload */}
           <div className="form-control md:col-span-2">
             <label htmlFor="image" className="label font-medium">
@@ -435,6 +468,8 @@ export async function action({ request, params }) {
     reoccurringEndDate: data.get("reoccurringEndDate") || null,
     reoccurringFrequency: data.get("reoccurringFrequency") || null,
     dayOfWeek: data.get("dayOfWeek") || null,
+    typeOfEvent: data.get("typeOfEvent") || "ASC",
+    isTournament: data.get("isTournament") === "true",
   };
 
   // Define token before using it

@@ -1,3 +1,4 @@
+import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 
@@ -18,8 +19,10 @@ import { logoutAction, combinedLoader } from "./auth/auth";
 import { action as eventAction } from "./components/EventForm";
 import CancelPage from "./pages/CancelPage";
 import SuccessPage from "./pages/SuccessPage";
+import TeamConfirmationPage from "./pages/TeamConfirmationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminDashboard from "./pages/AdminDashboard";
+import SportsPage from "./pages/Sports";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +35,7 @@ const router = createBrowserRouter([
       { index: true, element: <Home /> },
       { path: "cancel", element: <CancelPage /> },
       { path: "success", element: <SuccessPage /> },
+      { path: "team-confirmation", element: <TeamConfirmationPage /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
       {
@@ -40,6 +44,8 @@ const router = createBrowserRouter([
 
         children: [
           { index: true, element: <EventPage /> },
+          { path: "asc", element: <EventPage /> },
+          { path: "sports", element: <SportsPage /> },
           {
             path: ":eventId",
             id: "event-detail",

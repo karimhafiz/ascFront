@@ -1,4 +1,6 @@
-@import "tailwindcss";
-@plugin "daisyui" {
-  themes: nord --default;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import DaisyUI after Tailwind */
+@import "daisyui/dist/full.css";

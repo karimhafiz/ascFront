@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
+import TeamSignupForm from "../components/TeamSignupForm";
 
 async function loadEvents(eventId) {
   const response = await fetch(
@@ -23,6 +24,7 @@ export default function EventDetails() {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1); // Default ticket quantity
   const [email, setEmail] = useState(""); // User's email
+  const [showTeamSignup, setShowTeamSignup] = useState(false);
 
   const handleBack = () => {
     navigate(-1); // Navigate back to the previous page
@@ -45,8 +47,20 @@ export default function EventDetails() {
       return response.json();
     },
   });
+  // Check if the event is a tournament
+  const isTournament = event && event.isTournament;
 
+  // Handle buying tickets
   const handleBuyTickets = async () => {
+    // If this is a tournament, open the team signup modal instead of default flow
+    if (isTournament) {
+      if (!email) {
+        alert("Please enter your email to proceed.");
+        return;
+      }
+      setShowTeamSignup(true);
+      return;
+    }
     if (!email) {
       alert("Please enter your email to proceed.");
       return;
@@ -88,11 +102,10 @@ export default function EventDetails() {
 
   // Check if the event date is in the past
   const isEventInPast = new Date(event.date) < new Date();
-
   return (
-    <div>
+    <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen">
       {/* Header Banner */}
-      <div className="bg-primary text-white p-6 md:p-12">
+      <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white p-6 md:p-12 shadow-lg backdrop-blur-sm">
         <div className="container mx-auto">
           <h1 className="text-3xl md:text-5xl font-bold text-center mb-2">
             {event.title}
@@ -119,14 +132,13 @@ export default function EventDetails() {
             </p>
           )}
         </div>
-      </div>
-
+      </div>{" "}
       <div className="container mx-auto p-4">
         {/* Social Sharing Button - Facebook and URL Copy */}
         <div className="flex justify-end gap-2 mb-6">
           <button
             onClick={() => handleShare("facebook")}
-            className="btn btn-circle btn-primary"
+            className="btn btn-circle glass bg-gradient-to-br from-pink-400 to-purple-500 text-white hover:scale-110 transition-all duration-300 border-none shadow-md"
             aria-label="Share on Facebook"
           >
             <svg
@@ -139,8 +151,7 @@ export default function EventDetails() {
               <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
             </svg>
           </button>
-        </div>
-
+        </div>{" "}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left column: Event Details */}
           <div className="md:col-span-2 space-y-6">
@@ -149,17 +160,20 @@ export default function EventDetails() {
               <img
                 src={event.images[0]}
                 alt={event.title}
-                className="w-full h-auto object-cover rounded-lg shadow-md"
+                className="w-full h-auto object-cover rounded-2xl shadow-xl"
               />
             )}
-
             {/* Event Details */}
-            <div className="card bg-base-100 shadow-md border border-base-200">
+            <div className="glass-card rounded-2xl shadow-xl border border-white/30 backdrop-blur-md">
+              {" "}
               <div className="card-body">
-                <h2 className="card-title text-xl">Event Details:</h2>
+                <h2 className="card-title text-xl text-pink-700">
+                  Event Details:
+                </h2>
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <div className="bg-primary text-white p-3 rounded-lg mr-4">
+                    {" "}
+                    <div className="bg-gradient-to-br from-pink-500 to-purple-600 text-white p-3 rounded-xl mr-4 shadow-md">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-6 w-6"
@@ -176,8 +190,10 @@ export default function EventDetails() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg">Date & Time</h3>
-                      <p>
+                      <h3 className="font-bold text-lg text-purple-900">
+                        Date & Time
+                      </h3>
+                      <p className="text-purple-800">
                         {new Date(event.date).toLocaleDateString()},{" "}
                         {event.openingTime}
                       </p>
@@ -185,7 +201,8 @@ export default function EventDetails() {
                   </div>
 
                   <div className="flex items-start">
-                    <div className="bg-primary text-white p-3 rounded-lg mr-4">
+                    {" "}
+                    <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-3 rounded-xl mr-4 shadow-md">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-6 w-6"
@@ -208,8 +225,10 @@ export default function EventDetails() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg">Location</h3>
-                      <p>
+                      <h3 className="font-bold text-lg text-purple-900">
+                        Location
+                      </h3>
+                      <p className="text-purple-800">
                         {event.street}, {event.city}, {event.postCode}
                       </p>
                     </div>
@@ -217,7 +236,8 @@ export default function EventDetails() {
 
                   {event.ticketPrice > 0 && (
                     <div className="flex items-start">
-                      <div className="bg-primary text-white p-3 rounded-lg mr-4">
+                      {" "}
+                      <div className="bg-gradient-to-br from-purple-500 to-pink-600 text-white p-3 rounded-xl mr-4 shadow-md">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-6 w-6"
@@ -234,87 +254,117 @@ export default function EventDetails() {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg">Ticket Price</h3>
-                        <p>${event.ticketPrice}</p>
+                        <h3 className="font-bold text-lg text-purple-900">
+                          Ticket Price
+                        </h3>
+                        <p className="text-purple-800">${event.ticketPrice}</p>
                       </div>
                     </div>
                   )}
                 </div>
               </div>
-            </div>
-
+            </div>{" "}
             {/* Event Description */}
-            <div className="card bg-base-100 shadow-md border border-base-200">
+            <div className="glass-card rounded-2xl shadow-xl border border-white/30 backdrop-blur-md">
               <div className="card-body">
-                <h2 className="card-title text-xl">About This Event</h2>
-                <div className="prose max-w-none">
+                <h2 className="card-title text-xl text-indigo-700">
+                  About This Event
+                </h2>
+                <div className="prose max-w-none text-purple-900">
                   <p>{event.longDescription}</p>
                 </div>
               </div>
             </div>
           </div>
-
           {/* Right column: Ticket Purchase */}
           <div className="md:col-span-1">
             {!isEventInPast ? (
-              <div className="card bg-base-100 shadow-md border border-base-200 sticky top-4">
+              <div className="glass-card shadow-xl border border-white/30 backdrop-blur-md rounded-2xl sticky top-4 hover:shadow-2xl transition-all duration-300">
                 <div className="card-body">
-                  <h2 className="card-title text-xl">Purchase Tickets</h2>
+                  {" "}
+                  <h2 className="card-title text-xl text-pink-700">
+                    {event.isTournament
+                      ? "Team Registration"
+                      : "Purchase Tickets"}
+                  </h2>
                   <div className="space-y-4">
+                    {/* Always show email field for both regular and tournament events */}
                     <div>
-                      <label className="block text-md font-medium mb-2">
-                        Ticket Quantity:
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={quantity}
-                        onChange={(e) => setQuantity(Number(e.target.value))}
-                        className="input input-bordered w-full"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-md font-medium mb-2">
+                      <label className="block text-md font-medium mb-2 text-purple-700">
                         Your Email:
-                      </label>
+                      </label>{" "}
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="input input-bordered w-full"
+                        className="input bg-white/60 border-white/30 focus:border-purple-400 w-full backdrop-blur-sm rounded-xl text-purple-900"
                         placeholder="Enter your email"
+                        required
                       />
                     </div>
+                    {/* Show quantity field only for regular events */}
+                    {!event.isTournament && (
+                      <div>
+                        {" "}
+                        <label className="block text-md font-medium mb-2 text-purple-700">
+                          Ticket Quantity:
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={quantity}
+                          onChange={(e) => setQuantity(Number(e.target.value))}
+                          className="input bg-white/60 border-white/30 focus:border-purple-400 w-full backdrop-blur-sm rounded-xl text-purple-900"
+                        />
+                      </div>
+                    )}{" "}
                     <div className="pt-2">
                       <button
-                        className="btn btn-primary w-full"
+                        className="btn bg-gradient-to-r from-pink-500 to-purple-600 w-full border-none text-white hover:scale-105 transition-all duration-300 shadow-md rounded-xl"
                         onClick={handleBuyTickets}
                       >
-                        Buy Tickets
+                        {event.isTournament
+                          ? "Register & Pay for Team"
+                          : "Buy Tickets"}
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="card bg-error bg-opacity-10 shadow-md border border-error">
+              <div className="glass-card bg-red-100/30 shadow-xl border border-red-300/50 rounded-2xl">
                 <div className="card-body">
-                  <h2 className="card-title text-xl text-error">
+                  <h2 className="card-title text-xl text-red-600">
                     Event Has Ended
                   </h2>
-                  <p>
+                  <p className="text-red-500">
                     This event has already occurred. Ticket purchases are no
                     longer available.
                   </p>
                 </div>
               </div>
             )}
-          </div>
+          </div>{" "}
         </div>
-
+        {/* TeamSignupForm Modal */}
+        {showTeamSignup && (
+          <TeamSignupForm
+            eventId={eventId}
+            managerId={email} // Pass manager email from the input field
+            onSuccess={() => {
+              setShowTeamSignup(false);
+              // Optionally trigger team list refresh here
+              // setTeamListRefresh((v) => v + 1);
+            }}
+            onClose={() => setShowTeamSignup(false)}
+          />
+        )}
         {/* Back Button */}
         <div className="mt-8 mb-4">
-          <button className="btn btn-outline" onClick={handleBack}>
+          <button
+            className="btn glass border border-purple-300 text-purple-700 hover:bg-purple-100/30 hover:scale-105 transition-all duration-300"
+            onClick={handleBack}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 mr-2"

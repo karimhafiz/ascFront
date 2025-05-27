@@ -1,3 +1,4 @@
+import React from "react";
 export default function About() {
   return (
     <div className="container mx-auto p-6">
@@ -20,7 +21,7 @@ export default function About() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Community Events */}
-          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="glass-card overflow-hidden transition-all">
             <div className="relative w-full h-64">
               <img
                 src="/images/community-events.jpg"
@@ -40,7 +41,7 @@ export default function About() {
           </div>
 
           {/* Workshops */}
-          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="glass-card overflow-hidden transition-all">
             <div className="relative w-full h-64">
               <img
                 src="/images/workshops.jpg"
@@ -60,7 +61,7 @@ export default function About() {
           </div>
 
           {/* Social Gatherings */}
-          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="glass-card overflow-hidden transition-all">
             <div className="relative w-full h-64">
               <img
                 src="/images/social-gatherings.jpg"
@@ -80,7 +81,7 @@ export default function About() {
           </div>
 
           {/* Youth Programs */}
-          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="glass-card overflow-hidden transition-all">
             <div className="relative w-full h-64">
               <img
                 src="/images/youth-programs.jpg"
@@ -102,7 +103,7 @@ export default function About() {
       </div>
 
       {/* Mission Section */}
-      <div className="mb-12 text-center">
+      <div className="mb-12 text-center glass-card max-w-3xl mx-auto p-8 transition-all">
         <h2 className="text-3xl font-bold text-secondary mb-6">Our Mission</h2>
         <p className="text-lg text-gray-700 mx-auto max-w-3xl">
           At Ayendah Sazan, our mission is to create a vibrant and inclusive
@@ -113,7 +114,7 @@ export default function About() {
       </div>
 
       {/* Get Involved Section */}
-      <div className="text-center">
+      <div className="text-center glass-card max-w-2xl mx-auto p-8 transition-all">
         <h2 className="text-3xl font-bold text-secondary mb-6">Get Involved</h2>
         <p className="text-lg text-gray-700 mb-6">
           Join us in making a difference! Whether you want to volunteer, attend
@@ -122,7 +123,7 @@ export default function About() {
         </p>
         <a
           href="/contact"
-          className="btn btn-primary px-6 py-3 text-white rounded-lg shadow-md hover:bg-primary-dark"
+          className="btn btn-primary px-6 py-3 text-white rounded-xl shadow-md hover:scale-105 hover:bg-pink-400 transition-all"
         >
           Contact Us
         </a>

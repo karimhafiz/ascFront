@@ -87,37 +87,67 @@ const AdminDashboard = () => {
       },
     },
   };
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">
+        <div className="glass-card p-8 rounded-xl flex flex-col items-center">
+          <div className="w-16 h-16 border-4 border-t-purple-500 border-purple-200 rounded-full animate-spin mb-4"></div>
+          <p className="text-purple-700 font-medium">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">
       <EventHeader />
-      <div className="p-6 bg-gray-100 min-h-screen">
-        <h1 className="text-3xl font-bold text-center mb-6">Admin Dashboard</h1>
+      <div className="p-6 min-h-screen">
+        <h1 className="text-3xl font-bold text-center mb-6 text-purple-700">
+          Admin Dashboard
+        </h1>
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Ticket Sales Overview</h2>
-          <div className="h-96">
-            <Bar data={chartData} options={chartOptions} />
+        <div className="glass-card p-6 rounded-2xl shadow-xl backdrop-blur-md">
+          <h2 className="text-xl font-semibold mb-4 text-pink-700">
+            Ticket Sales Overview
+          </h2>
+          <div className="h-96 bg-white/50 rounded-xl p-4">
+            <Bar
+              data={{
+                ...chartData,
+                datasets: [
+                  {
+                    ...chartData.datasets[0],
+                    backgroundColor: "rgba(147, 51, 234, 0.6)",
+                    borderColor: "rgba(147, 51, 234, 1)",
+                  },
+                  {
+                    ...chartData.datasets[1],
+                    backgroundColor: "rgba(236, 72, 153, 0.6)",
+                    borderColor: "rgba(236, 72, 153, 1)",
+                  },
+                ],
+              }}
+              options={chartOptions}
+            />
           </div>
         </div>
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {ticketData.map((event, index) => (
-            <div key={index} className="bg-white p-4 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold">{event.title}</h3>
-              <p className="text-gray-600">Tickets Sold: {event.ticketsSold}</p>
-              <p className="text-gray-600">
+            <div
+              key={index}
+              className="glass-card p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+            >
+              <h3 className="text-lg font-semibold text-indigo-700">
+                {event.title}
+              </h3>
+              <p className="text-purple-600">
+                Tickets Sold: {event.ticketsSold}
+              </p>
+              <p className="text-purple-600">
                 Tickets Canceled: {event.ticketsCanceled}
               </p>
-              <p className="text-gray-600">
+              <p className="text-purple-600">
                 Total Revenue: £{(event.totalRevenue || 0).toFixed(2)}
               </p>
             </div>
