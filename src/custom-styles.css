@@ -4,6 +4,40 @@
 body {
   background: linear-gradient(135deg, #fce7f3 0%, #ede9fe 50%, #c7d2fe 100%);
   min-height: 100vh;
+  padding-top: 80px; /* Add padding for the fixed navbar */
+}
+
+/* Navbar animations */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Navbar styling */
+.drop-shadow-glow {
+  filter: drop-shadow(0 0 8px rgba(219, 39, 119, 0.3));
+}
+
+/* Active link indicator animation */
+@keyframes navIndicator {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 50%;
+    opacity: 1;
+  }
 }
 
 /* Glassmorphic components */
@@ -211,6 +245,7 @@ button:hover {
 
 /* Additional responsive adjustments */
 @media (max-width: 768px) {
+  /* Calendar adjustments */
   .glass-calendar .rbc-calendar {
     padding: 5px !important;
   }
@@ -228,5 +263,72 @@ button:hover {
   .glass-calendar .rbc-event {
     padding: 2px 6px !important;
     font-size: 0.75rem !important;
+  }
+  /* Mobile menu enhancements */
+  nav ul {
+    background-color: rgba(
+      255,
+      255,
+      255,
+      0.95
+    ) !important; /* Increasing opacity for better readability */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  nav ul li a {
+    font-weight: 500 !important;
+    padding: 10px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    border-radius: 12px !important;
+  }
+
+  nav ul li + li {
+    margin-top: 8px !important;
+  }
+  /* Mobile menu dropdown adjustments */
+  nav ul li.group ul {
+    position: relative !important;
+    left: 0 !important;
+    width: 100% !important;
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+    background-color: rgba(249, 250, 251, 0.9) !important;
+    border: 1px solid rgba(236, 72, 153, 0.2) !important;
+  }
+
+  /* Hide dropdown completely when not active on mobile */
+  @media (max-width: 768px) {
+    nav ul li:not(.active-mobile-dropdown) ul {
+      display: none !important;
+      margin: 0 !important;
+      height: 0 !important;
+      padding: 0 !important;
+    }
+  }
+  /* Show dropdown on mobile when parent is clicked */
+  @media (max-width: 768px) {
+    nav ul li.active-mobile-dropdown ul {
+      display: block !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      transform: translateY(0) !important;
+      margin-top: 10px !important;
+      margin-bottom: 10px !important;
+      animation: fadeDown 0.3s ease-out;
+    }
+  }
+
+  @keyframes fadeDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 200px;
+    }
   }
 }
