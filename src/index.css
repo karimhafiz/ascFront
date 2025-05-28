@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* Import DaisyUI after Tailwind */
-@import "daisyui/dist/full.css";
+@plugin "daisyui";
