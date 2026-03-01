@@ -44,17 +44,25 @@ const EventForm = ({ method, event = {} }) => {
     navigate("..");
   };
 
+  const labelClass = "label font-semibold text-slate-700";
+  const fieldClass =
+    "w-full rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:border-sky-700 focus:ring-2 focus:ring-sky-100 focus:outline-none";
+  const selectClass = `${fieldClass} pr-10`;
+  const textareaClass = `${fieldClass} min-h-28`;
+  const fileClass =
+    "file-input w-full rounded-lg border border-slate-300 bg-white text-slate-700 file:mr-4 file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-slate-700 hover:file:bg-slate-200 focus:border-sky-700 focus:ring-2 focus:ring-sky-100 focus:outline-none";
+
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-lg">
-      <h1 className="text-3xl font-bold mb-6 text-center">
+    <div className="max-w-4xl mx-auto rounded-xl border border-slate-200 bg-slate-50/95 p-8 shadow-card">
+      <h1 className="mb-6 text-center text-3xl font-bold tracking-tight text-slate-900">
         {method === "PATCH" ? "Edit Event" : "Create New Event"}
       </h1>
 
       {data && data.errors && (
-        <div className="alert alert-error mb-4">
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-800">
           <ul>
             {Object.values(data.errors).map((err, index) => (
-              <li key={index} className="text-red-500">
+              <li key={index} className="text-sm">
                 {err}
               </li>
             ))}
@@ -71,14 +79,14 @@ const EventForm = ({ method, event = {} }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Title */}
           <div className="form-control">
-            <label htmlFor="title" className="label font-medium">
+            <label htmlFor="title" className={labelClass}>
               Title
             </label>
             <input
               id="title"
               type="text"
               name="title"
-              className="input input-bordered w-full"
+              className={fieldClass}
               required
               defaultValue={event.title || ""}
             />
@@ -86,14 +94,14 @@ const EventForm = ({ method, event = {} }) => {
 
           {/* Short Description */}
           <div className="form-control">
-            <label htmlFor="shortDescription" className="label font-medium">
+            <label htmlFor="shortDescription" className={labelClass}>
               Short Description
             </label>
             <input
               id="shortDescription"
               type="text"
               name="shortDescription"
-              className="input input-bordered w-full"
+              className={fieldClass}
               required
               defaultValue={event.shortDescription || ""}
             />
@@ -101,13 +109,13 @@ const EventForm = ({ method, event = {} }) => {
 
           {/* Long Description */}
           <div className="form-control md:col-span-2">
-            <label htmlFor="description" className="label font-medium">
+            <label htmlFor="description" className={labelClass}>
               Long Description
             </label>
             <textarea
               id="description"
               name="description"
-              className="textarea textarea-bordered w-full"
+              className={textareaClass}
               required
               defaultValue={event.longDescription || ""}
             />
@@ -115,14 +123,14 @@ const EventForm = ({ method, event = {} }) => {
 
           {/* Date */}
           <div className="form-control">
-            <label htmlFor="date" className="label font-medium">
+            <label htmlFor="date" className={labelClass}>
               Date
             </label>
             <input
               id="date"
               type="date"
               name="date"
-              className="input input-bordered w-full"
+              className={fieldClass}
               required
               defaultValue={event.date ? formatDate(event.date) : ""}
             />
@@ -130,28 +138,28 @@ const EventForm = ({ method, event = {} }) => {
 
           {/* Opening Time */}
           <div className="form-control">
-            <label htmlFor="openingTime" className="label font-medium">
+            <label htmlFor="openingTime" className={labelClass}>
               Opening Time
             </label>
             <input
               id="openingTime"
               type="time"
               name="openingTime"
-              className="input input-bordered w-full"
+              className={fieldClass}
               defaultValue={event.openingTime || ""}
             />
           </div>
 
           {/* Street */}
           <div className="form-control">
-            <label htmlFor="street" className="label font-medium">
+            <label htmlFor="street" className={labelClass}>
               Street
             </label>
             <input
               id="street"
               type="text"
               name="street"
-              className="input input-bordered w-full"
+              className={fieldClass}
               required
               defaultValue={event.street || ""}
             />
@@ -159,28 +167,28 @@ const EventForm = ({ method, event = {} }) => {
 
           {/* Post Code */}
           <div className="form-control">
-            <label htmlFor="postCode" className="label font-medium">
+            <label htmlFor="postCode" className={labelClass}>
               Post Code
             </label>
             <input
               id="postCode"
               type="text"
               name="postCode"
-              className="input input-bordered w-full"
+              className={fieldClass}
               defaultValue={event.postCode || ""}
             />
           </div>
 
           {/* City */}
           <div className="form-control">
-            <label htmlFor="city" className="label font-medium">
+            <label htmlFor="city" className={labelClass}>
               City
             </label>
             <input
               id="city"
               type="text"
               name="city"
-              className="input input-bordered w-full"
+              className={fieldClass}
               required
               defaultValue={event.city || ""}
             />
@@ -188,34 +196,34 @@ const EventForm = ({ method, event = {} }) => {
 
           {/* Age Restriction */}
           <div className="form-control">
-            <label htmlFor="ageRestriction" className="label font-medium">
+            <label htmlFor="ageRestriction" className={labelClass}>
               Age Restriction
             </label>
             <input
               id="ageRestriction"
               type="text"
               name="ageRestriction"
-              className="input input-bordered w-full"
+              className={fieldClass}
               defaultValue={event.ageRestriction || ""}
             />
           </div>
 
           {/* Accessibility Info */}
           <div className="form-control md:col-span-2">
-            <label htmlFor="accessibilityInfo" className="label font-medium">
+            <label htmlFor="accessibilityInfo" className={labelClass}>
               Accessibility Info
             </label>
             <textarea
               id="accessibilityInfo"
               name="accessibilityInfo"
-              className="textarea textarea-bordered w-full"
+              className={textareaClass}
               defaultValue={event.accessibilityInfo || ""}
             />
           </div>
 
           {/* Ticket Price */}
           <div className="form-control">
-            <label htmlFor="ticketPrice" className="label font-medium">
+            <label htmlFor="ticketPrice" className={labelClass}>
               Ticket Price
             </label>
             <input
@@ -223,20 +231,20 @@ const EventForm = ({ method, event = {} }) => {
               type="number"
               step="0.01"
               name="ticketPrice"
-              className="input input-bordered w-full"
+              className={fieldClass}
               required
               defaultValue={event.ticketPrice || ""}
             />
           </div>
           {/* Featured */}
           <div className="form-control">
-            <label htmlFor="featured" className="label font-medium">
+            <label htmlFor="featured" className={labelClass}>
               Featured
             </label>
             <select
               id="featured"
               name="featured"
-              className="select select-bordered w-full"
+              className={selectClass}
               defaultValue={event.featured ? "true" : "false"}
             >
               <option value="true">Yes</option>
@@ -246,13 +254,13 @@ const EventForm = ({ method, event = {} }) => {
 
           {/* Is Reoccurring */}
           <div className="form-control">
-            <label htmlFor="isReoccurring" className="label font-medium">
+            <label htmlFor="isReoccurring" className={labelClass}>
               Is Reoccurring
             </label>
             <select
               id="isReoccurring"
               name="isReoccurring"
-              className="select select-bordered w-full"
+              className={selectClass}
               value={isReoccurring ? "true" : "false"}
               onChange={(e) => setIsReoccurring(e.target.value === "true")}
             >
@@ -266,7 +274,7 @@ const EventForm = ({ method, event = {} }) => {
             <div className="form-control">
               <label
                 htmlFor="reoccurringStartDate"
-                className="label font-medium"
+                className={labelClass}
               >
                 Reoccurring Start Date
               </label>
@@ -274,7 +282,7 @@ const EventForm = ({ method, event = {} }) => {
                 id="reoccurringStartDate"
                 type="date"
                 name="reoccurringStartDate"
-                className="input input-bordered w-full"
+                className={fieldClass}
                 defaultValue={
                   event.reoccurringStartDate
                     ? formatDate(event.reoccurringStartDate)
@@ -287,14 +295,14 @@ const EventForm = ({ method, event = {} }) => {
           {/* Reoccurring End Date */}
           {isReoccurring && (
             <div className="form-control">
-              <label htmlFor="reoccurringEndDate" className="label font-medium">
+              <label htmlFor="reoccurringEndDate" className={labelClass}>
                 Reoccurring End Date
               </label>
               <input
                 id="reoccurringEndDate"
                 type="date"
                 name="reoccurringEndDate"
-                className="input input-bordered w-full"
+                className={fieldClass}
                 defaultValue={
                   event.reoccurringEndDate
                     ? formatDate(event.reoccurringEndDate)
@@ -309,14 +317,14 @@ const EventForm = ({ method, event = {} }) => {
             <div className="form-control">
               <label
                 htmlFor="reoccurringFrequency"
-                className="label font-medium"
+                className={labelClass}
               >
                 Reoccurring Frequency
               </label>
               <select
                 id="reoccurringFrequency"
                 name="reoccurringFrequency"
-                className="select select-bordered w-full"
+                className={selectClass}
                 defaultValue={event.reoccurringFrequency || ""}
               >
                 <option value="weekly">Weekly</option>
@@ -329,13 +337,13 @@ const EventForm = ({ method, event = {} }) => {
           {/* Day of the Week */}
           {isReoccurring && (
             <div className="form-control">
-              <label htmlFor="dayOfWeek" className="label font-medium">
+              <label htmlFor="dayOfWeek" className={labelClass}>
                 Day of the Week
               </label>
               <select
                 id="dayOfWeek"
                 name="dayOfWeek"
-                className="select select-bordered w-full"
+                className={selectClass}
                 defaultValue={event.dayOfWeek || ""}
               >
                 <option value="monday">Monday</option>
@@ -351,13 +359,13 @@ const EventForm = ({ method, event = {} }) => {
 
           {/* Type of Event */}
           <div className="form-control">
-            <label htmlFor="typeOfEvent" className="label font-medium">
+            <label htmlFor="typeOfEvent" className={labelClass}>
               Type of Event
             </label>
             <select
               id="typeOfEvent"
               name="typeOfEvent"
-              className="select select-bordered w-full"
+              className={selectClass}
               defaultValue={event.typeOfEvent || "ASC"}
               required
             >
@@ -368,13 +376,13 @@ const EventForm = ({ method, event = {} }) => {
 
           {/* is tournament */}
           <div className="form-control">
-            <label htmlFor="isTournament" className="label font-medium">
+            <label htmlFor="isTournament" className={labelClass}>
               Is Tournament
             </label>
             <select
               id="isTournament"
               name="isTournament"
-              className="select select-bordered w-full"
+              className={selectClass}
               defaultValue={event.isTournament ? "true" : "false"}
             >
               <option value="true">Yes</option>
@@ -384,14 +392,14 @@ const EventForm = ({ method, event = {} }) => {
 
           {/* Image Upload */}
           <div className="form-control md:col-span-2">
-            <label htmlFor="image" className="label font-medium">
+            <label htmlFor="image" className={labelClass}>
               Image
             </label>
             <input
               id="image"
               type="file"
               name="image"
-              className="file-input file-input-bordered w-full"
+              className={fileClass}
               accept="image/*"
               onChange={handleImageChange}
             />
@@ -405,7 +413,9 @@ const EventForm = ({ method, event = {} }) => {
             {/* Display existing images */}
             {event.images && event.images.length > 0 && (
               <div className="mt-4">
-                <h3 className="text-sm font-medium mb-2">Existing Images:</h3>
+                <h3 className="mb-2 text-sm font-semibold text-slate-700">
+                  Existing Images:
+                </h3>
                 <div className="flex space-x-4">
                   {event.images.map((image, index) => (
                     <img
@@ -425,7 +435,7 @@ const EventForm = ({ method, event = {} }) => {
         <div className="form-actions flex justify-end space-x-4 mt-6">
           <button
             type="button"
-            className="btn btn-secondary"
+            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
             onClick={cancelHandler}
             disabled={isSubmitting}
           >
@@ -433,7 +443,9 @@ const EventForm = ({ method, event = {} }) => {
           </button>
           <button
             type="submit"
-            className={`btn btn-primary ${isSubmitting ? "loading" : ""}`}
+            className={`rounded-lg border border-sky-900 bg-sky-900 px-5 py-2.5 font-medium text-white transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-60 ${
+              isSubmitting ? "loading" : ""
+            }`}
             disabled={isSubmitting}
           >
             {isSubmitting ? "Submitting..." : "Save"}
