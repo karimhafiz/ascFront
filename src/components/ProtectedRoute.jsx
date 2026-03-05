@@ -7,9 +7,18 @@ export default function ProtectedRoute({ isAuthenticated }) {
 
   // Check if the token is valid and not expired
   if (!token || new Date(expiration) <= new Date()) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
-  // Render the protected content if authenticated
+  // also verify the role from token payload
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (payload.role !== "admin") {
+      // non-admins should not access admin routes
+      return <Navigate to="/" replace />;
+    }
+  } catch {}
+
+  // Render the protected content if authenticated and authorized
   return <Outlet />;
 }
