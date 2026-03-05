@@ -1,11 +1,12 @@
 import React from "react";
 import { useRouteLoaderData, Form, NavLink } from "react-router-dom";
+import { isAdmin } from "../auth/auth";
 
 const EventHeader = () => {
   const { token } = useRouteLoaderData("root");
 
-  // Only render the header if the token exists
-  if (!token) {
+  // Only render the header if the token exists and user is admin
+  if (!token || !isAdmin()) {
     return null;
   }
 
@@ -18,9 +19,7 @@ const EventHeader = () => {
         >
           Create New Event
         </NavLink>
-        <Form method="post" action="/logout" className="flex items-center">
-          <button className="btn btn-primary">Logout</button>
-        </Form>
+        {/* logout moved to navbar; avoid duplicate button here */}
       </div>
     </nav>
   );

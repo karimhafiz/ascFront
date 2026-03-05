@@ -45,7 +45,7 @@ const Login = () => {
                 type="email"
                 name="email"
                 placeholder="Enter your email"
-                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
+                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 hover:border-pink-300 hover:bg-white/60 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
                 required
               />
             </div>
@@ -61,7 +61,7 @@ const Login = () => {
                 type="password"
                 name="password"
                 placeholder="Enter your password"
-                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
+                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 hover:border-pink-300 hover:bg-white/60 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
                 required
               />
             </div>
@@ -69,7 +69,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className={`btn w-full text-base font-medium py-3 mt-6 rounded-xl bg-gradient-to-r from-pink-400 to-purple-400 text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all ${
+            className={`btn w-full text-base font-medium py-3 mt-6 rounded-xl bg-gradient-to-r from-pink-400 to-purple-400 text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] hover:border-2 hover:border-white transition-all ${
               isSubmitting ? "opacity-70" : ""
             }`}
             disabled={isSubmitting}
@@ -118,13 +118,13 @@ const Login = () => {
 
 export default Login;
 
-export export async function action({ request }) {
+export async function action({ request }) {
   const data = await request.formData();
   const email = data.get("email");
   const password = data.get("password");
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_DEV_URI}admins/login`,
+      `${import.meta.env.VITE_DEV_URI}users/login`,
       {
         method: "POST",
         headers: {
@@ -149,7 +149,14 @@ export export async function action({ request }) {
     const expiration = new Date();
     expiration.setHours(expiration.getHours() + 1);
     localStorage.setItem("expiration", expiration.toISOString());
-    return redirect("/admin");
+    // determine role from token payload and redirect accordingly
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (payload.role === "admin") {
+        return redirect("/admin");
+      }
+    } catch {}
+    return redirect("/");
   } catch (error) {
     console.error("Error during login:", error);
     return { message: "An error occurred. Please try again later." };

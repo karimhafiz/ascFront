@@ -7,7 +7,7 @@ import {
   redirect,
 } from "react-router-dom";
 
-const Login = () => {
+const Signup = () => {
   const data = useActionData();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
@@ -15,10 +15,11 @@ const Login = () => {
   const token = localStorage.getItem("token");
   const expiration = localStorage.getItem("expiration");
 
-  // if already authenticated redirect to admin dashboard
+  // if user already has a valid token, take them away from signup
   if (token && new Date(expiration) > new Date()) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/" replace />;
   }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">
       <div
@@ -30,10 +31,26 @@ const Login = () => {
         <div className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full bg-purple-300/30 blur-3xl"></div>
 
         <h1 className="text-3xl font-bold text-center text-pink-700 mb-8 relative z-10">
-          Login
+          Create Account
         </h1>
 
-        <Form method="post" action="/login" className="space-y-7 relative z-10">
+        <Form method="post" action="/signup" className="space-y-7 relative z-10">
+          <div className="form-control">
+            <label className="label mb-1">
+              <span className="label-text text-purple-700 font-medium text-lg">
+                Name
+              </span>
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                name="name"
+                placeholder="Your full name"
+                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 hover:border-pink-300 hover:bg-white/60 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
+                required
+              />
+            </div>
+          </div>
           <div className="form-control">
             <label className="label mb-1">
               <span className="label-text text-purple-700 font-medium text-lg">
@@ -45,7 +62,7 @@ const Login = () => {
                 type="email"
                 name="email"
                 placeholder="Enter your email"
-                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
+                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 hover:border-pink-300 hover:bg-white/60 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
                 required
               />
             </div>
@@ -61,7 +78,7 @@ const Login = () => {
                 type="password"
                 name="password"
                 placeholder="Enter your password"
-                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
+                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 hover:border-pink-300 hover:bg-white/60 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
                 required
               />
             </div>
@@ -69,7 +86,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className={`btn w-full text-base font-medium py-3 mt-6 rounded-xl bg-gradient-to-r from-pink-400 to-purple-400 text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all ${
+            className={`btn w-full text-base font-medium py-3 mt-6 rounded-xl bg-gradient-to-r from-pink-400 to-purple-400 text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] hover:border-2 hover:border-white transition-all ${
               isSubmitting ? "opacity-70" : ""
             }`}
             disabled={isSubmitting}
@@ -96,10 +113,10 @@ const Login = () => {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Logging in...
+                Creating...
               </span>
             ) : (
-              "Login"
+              "Sign Up"
             )}
           </button>
         </Form>
@@ -116,42 +133,39 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
 
-export export async function action({ request }) {
+export async function action({ request }) {
   const data = await request.formData();
+  const name = data.get("name");
   const email = data.get("email");
   const password = data.get("password");
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_DEV_URI}admins/login`,
+      `${import.meta.env.VITE_DEV_URI}users/register`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       }
     );
 
-    if (response.status === 422 || response.status === 401) {
-      return { message: "Invalid email or password." };
+    if (response.status === 400) {
+      // could be email already in use
+      const resp = await response.json();
+      return { message: resp.message || "Invalid data." };
     }
 
     if (!response.ok) {
-      throw new Error("Could not authenticate user.");
+      throw new Error("Could not sign up user.");
     }
 
-    // Use .json() to parse the response body
-    const resData = await response.json();
-    const token = resData.token;
-    localStorage.setItem("token", token);
-    const expiration = new Date();
-    expiration.setHours(expiration.getHours() + 1);
-    localStorage.setItem("expiration", expiration.toISOString());
-    return redirect("/admin");
+    // on success, redirect to login page
+    return redirect("/login");
   } catch (error) {
-    console.error("Error during login:", error);
+    console.error("Error during signup:\n", error);
     return { message: "An error occurred. Please try again later." };
   }
 }

@@ -14,7 +14,8 @@ import EditEvent from "./pages/EditEvent";
 import EventRoot from "./pages/EventRoot";
 import ErrorPage from "./pages/Errorpage";
 
-import Admin, { action as loginAction } from "./pages/Admin";
+import Login, { action as loginAction } from "./pages/Login";
+import Signup, { action as signupAction } from "./pages/Signup";
 import { logoutAction, combinedLoader } from "./auth/auth";
 import { action as eventAction } from "./components/EventForm";
 import CancelPage from "./pages/CancelPage";
@@ -68,12 +69,16 @@ const router = createBrowserRouter([
             element: <AdminDashboard />,
           },
         ],
+      },
+      {
+        path: "login",
+        element: <Login />,
         action: loginAction,
       },
       {
-        path: "admin/login",
-        element: <Admin />,
-        action: loginAction,
+        path: "signup",
+        element: <Signup />,
+        action: signupAction,
       },
       {
         path: "logout",
