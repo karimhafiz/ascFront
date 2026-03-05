@@ -14,8 +14,9 @@ import EditEvent from "./pages/EditEvent";
 import EventRoot from "./pages/EventRoot";
 import ErrorPage from "./pages/Errorpage";
 
-import Login, { action as loginAction } from "./pages/Login";
-import Signup, { action as signupAction } from "./pages/Signup";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import { loginAction, signupAction } from "./auth/authActions";
 import { logoutAction, combinedLoader } from "./auth/auth";
 import { action as eventAction } from "./components/EventForm";
 import CancelPage from "./pages/CancelPage";

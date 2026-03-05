@@ -315,6 +315,7 @@ export default function Navbar() {
                   {isActive("/login") && (
                     <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></span>
                   )}
+                  <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
                 </Link>
               </li>
               <li>
@@ -331,6 +332,7 @@ export default function Navbar() {
                   {isActive("/signup") && (
                     <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></span>
                   )}
+                  <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
                 </Link>
               </li>
             </>

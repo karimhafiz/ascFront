@@ -5,7 +5,6 @@ import {
     useNavigation,
     Navigate,
 } from "react-router-dom";
-import { signupAction } from "../auth/authActions";
 
 const Signup = () => {
     const data = useActionData();
@@ -131,5 +130,4 @@ const Signup = () => {
 };
 
 export default Signup;
-
-export { signupAction as action };
+// eslint-disable-next-line react-refresh/only-export-components

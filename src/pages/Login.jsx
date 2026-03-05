@@ -5,7 +5,6 @@ import {
   useNavigation,
   Navigate,
 } from "react-router-dom";
-import { loginAction } from "../auth/authActions";
 
 const Login = () => {
   const data = useActionData();
@@ -117,5 +116,3 @@ const Login = () => {
 };
 
 export default Login;
-
-export { loginAction as action };
