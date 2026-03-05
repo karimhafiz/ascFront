@@ -274,6 +274,31 @@ export default function Navbar() {
           </li>
           <li>
             <Link
+              to="/about"
+              className={`relative group flex items-center px-3 py-2 rounded-full ${
+                isActive("/about")
+                  ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-700 font-medium"
+                  : "text-green-600 hover:bg-green-100/40"
+              } transition-all duration-300`}
+              onClick={closeMenu}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 mr-1.5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M10 2a6 6 0 100 12 6 6 0 000-12zm0 14a8 8 0 110-16 8 8 0 010 16z" />
+              </svg>
+              About
+              {isActive("/about") && (
+                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></span>
+              )}
+              <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+            </Link>
+          </li>
+          <li>
+            <Link
               to="/contact"
               className={`relative group flex items-center px-3 py-2 rounded-full ${
                 isActive("/contact")
@@ -315,7 +340,6 @@ export default function Navbar() {
                   {isActive("/login") && (
                     <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></span>
                   )}
-                  <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
                 </Link>
               </li>
               <li>
@@ -332,7 +356,6 @@ export default function Navbar() {
                   {isActive("/signup") && (
                     <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></span>
                   )}
-                  <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
                 </Link>
               </li>
             </>

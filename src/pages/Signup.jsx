@@ -5,6 +5,7 @@ import {
     useNavigation,
     Navigate,
 } from "react-router-dom";
+import GoogleLogin from "../components/GoogleLogin";
 
 const Signup = () => {
     const data = useActionData();
@@ -124,10 +125,15 @@ const Signup = () => {
                         </p>
                     </div>
                 )}
+
+                <div className="relative z-10">
+                    <p className="text-center text-gray-600 mt-4">or</p>
+                    <GoogleLogin />
+                </div>
             </div>
         </div>
     );
 };
 
 export default Signup;
-// eslint-disable-next-line react-refresh/only-export-components
+

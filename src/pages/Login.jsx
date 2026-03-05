@@ -5,6 +5,7 @@ import {
   useNavigation,
   Navigate,
 } from "react-router-dom";
+import GoogleLogin from "../components/GoogleLogin";
 
 const Login = () => {
   const data = useActionData();
@@ -110,6 +111,11 @@ const Login = () => {
             </p>
           </div>
         )}
+
+        <div className="relative z-10">
+          <p className="text-center text-gray-600 mt-4">or</p>
+          <GoogleLogin />
+        </div>
       </div>
     </div>
   );
