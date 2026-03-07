@@ -3,14 +3,12 @@ import React, { useState } from "react";
 export default function TeamSignupForm({
   eventId,
   managerId,
-  onSuccess,
   onClose,
 }) {
   const [name, setName] = useState("");
   const [members, setMembers] = useState([{ name: "", email: "" }]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [team, setTeam] = useState(null);
   const [managerName, setManagerName] = useState("");
   const [managerEmail, setManagerEmail] = useState(managerId || "");
 
@@ -47,38 +45,19 @@ export default function TeamSignupForm({
         }
       );
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to register team");
-      }
-
-      setTeam(data.team);
+      if (!res.ok) throw new Error(data.error || "Failed to register team");
 
       // Immediately proceed to payment after successful registration
-      if (data.team && data.team._id) {
-        try {
-          const paymentRes = await fetch(
-            `${import.meta.env.VITE_DEV_URI}teams/${data.team._id}/pay`,
-            { method: "POST" }
-          );
-          const paymentData = await paymentRes.json();
+      const paymentRes = await fetch(
+        `${import.meta.env.VITE_DEV_URI}teams/${data.team._id}/pay`,
+        { method: "POST" }
+      );
+      const paymentData = await paymentRes.json();
+      if (!paymentRes.ok || !paymentData.url)
+        throw new Error(paymentData.error || "Payment initialization failed");
 
-          if (!paymentRes.ok || !paymentData.link) {
-            throw new Error(
-              paymentData.error || "Payment initialization failed"
-            );
-          }
+      window.location.href = paymentData.url;
 
-          // Redirect to payment page
-          window.location.href = paymentData.link;
-        } catch (payErr) {
-          throw new Error(
-            `Team registered but payment failed: ${payErr.message}`
-          );
-        }
-      }
-
-      if (onSuccess) onSuccess();
     } catch (err) {
       setError(err.message || "An error occurred during registration");
     }

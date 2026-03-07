@@ -8,7 +8,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import EventPage from "./pages/Event";
-import EventDetails, { eventDetailLoader } from "./pages/EventDetails";
+import EventDetails from "./pages/EventDetails";
 import NewEvent from "./pages/NewEvent";
 import EditEvent from "./pages/EditEvent";
 import EventRoot from "./pages/EventRoot";
@@ -25,6 +25,7 @@ import TeamConfirmationPage from "./pages/TeamConfirmationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminDashboard from "./pages/AdminDashboard";
 import SportsPage from "./pages/Sports";
+import { eventDetailLoader } from "./util/util";
 
 const router = createBrowserRouter([
   {

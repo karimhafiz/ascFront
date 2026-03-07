@@ -4,21 +4,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import TeamSignupForm from "../components/TeamSignupForm";
 import { parseJwt, getAuthToken } from "../auth/auth";
 
-async function loadEvents(eventId) {
-  const response = await fetch(
-    `${import.meta.env.VITE_DEV_URI}events/${eventId}`
-  );
-  if (!response.ok) {
-    throw new Error("Failed to fetch event details");
-  }
-  const resData = await response.json();
-  return resData || [];
-}
-
-export async function eventDetailLoader({ params }) {
-  const { eventId } = params;
-  return loadEvents(eventId);
-}
 
 export default function EventDetails() {
   const { eventId } = useParams();
@@ -372,9 +357,6 @@ export default function EventDetails() {
           <TeamSignupForm
             eventId={eventId}
             managerId={email}
-            onSuccess={() => {
-              setShowTeamSignup(false);
-            }}
             onClose={() => setShowTeamSignup(false)}
           />
         )}
