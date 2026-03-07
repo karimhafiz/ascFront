@@ -25,6 +25,7 @@ import TeamConfirmationPage from "./pages/TeamConfirmationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminDashboard from "./pages/AdminDashboard";
 import SportsPage from "./pages/Sports";
+import ProfilePage from "./pages/ProfilePage";
 import { eventDetailLoader } from "./util/util";
 
 const router = createBrowserRouter([
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
       { path: "order-confirmation", element: <OrderConfirmation /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
+      { path: "profile", element: <ProfilePage /> },
       {
         path: "events",
         element: <EventRoot />,
