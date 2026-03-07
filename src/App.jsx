@@ -13,7 +13,7 @@ import NewEvent from "./pages/NewEvent";
 import EditEvent from "./pages/EditEvent";
 import EventRoot from "./pages/EventRoot";
 import ErrorPage from "./pages/Errorpage";
-
+import OrderConfirmation from "./pages/OrderConfirmation";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { loginAction, signupAction } from "./auth/authActions";
@@ -38,6 +38,7 @@ const router = createBrowserRouter([
       { path: "cancel", element: <CancelPage /> },
       { path: "success", element: <SuccessPage /> },
       { path: "team-confirmation", element: <TeamConfirmationPage /> },
+      { path: "order-confirmation", element: <OrderConfirmation /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
       {
