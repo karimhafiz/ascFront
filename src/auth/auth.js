@@ -10,16 +10,19 @@ export function getAuthToken() {
 }
 
 export async function combinedLoader() {
+  console.log("combinedLoader running");
   const token = await getAuthToken();
 
-  // Fetch the events
+  console.log("fetching:", `${import.meta.env.VITE_DEV_URI}events`);
   const response = await fetch(`${import.meta.env.VITE_DEV_URI}events`);
+  console.log("response status:", response.status);
+  
   if (!response.ok) {
     throw new Error("Failed to fetch events");
   }
   const events = await response.json();
+  console.log("events loaded:", events.length);
 
-  // Return both token and events
   return { token, events };
 }
 
@@ -76,9 +79,8 @@ export function isAuthenticated() {
 }
 
 export function isAdmin() {
-  return getUserRole() === "admin";
+  return isAuthenticated() && getUserRole() === "admin";
 }
-
 export async function fetchWithAuth(url, options = {}) {
   const token = getAuthToken();
 
