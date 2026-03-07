@@ -10,7 +10,7 @@ import GoogleLogin from "../components/GoogleLogin";
 const Signup = () => {
     const data = useActionData();
     const navigation = useNavigation();
-    const isSubmitting = navigation.state === "submitting";    const token = localStorage.getItem("token");
+    const isSubmitting = navigation.state === "submitting"; const token = localStorage.getItem("token");
     const expiration = localStorage.getItem("expiration");
 
     // if user already has a valid token, take them away from signup
@@ -119,10 +119,19 @@ const Signup = () => {
                 </Form>
 
                 {data && data.message && (
-                    <div className="mt-6 bg-red-50/70 backdrop-blur-sm border border-red-200 rounded-xl p-4 animate-pulse relative z-10">
-                        <p className="text-center text-red-500 font-medium">
+                    <div className={`mt-6 backdrop-blur-sm border rounded-xl p-4 relative z-10 ${data.message.includes("Google")
+                            ? "bg-blue-50/70 border-blue-200"
+                            : "bg-red-50/70 border-red-200 animate-pulse"
+                        }`}>
+                        <p className={`text-center font-medium ${data.message.includes("Google") ? "text-blue-600" : "text-red-500"
+                            }`}>
                             {data.message}
                         </p>
+                        {data.message.includes("Google") && (
+                            <p className="text-center text-sm text-blue-400 mt-1">
+                                Use the button below ↓
+                            </p>
+                        )}
                     </div>
                 )}
 

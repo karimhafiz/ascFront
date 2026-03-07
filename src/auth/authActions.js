@@ -16,12 +16,9 @@ export async function loginAction({ request }) {
       }
     );
 
-    if (response.status === 422 || response.status === 401) {
-      return { message: "Invalid email or password." };
-    }
-
     if (!response.ok) {
-      throw new Error("Could not authenticate user.");
+      const resData = await response.json();
+      return { message: resData.message || "An error occurred. Please try again later." };
     }
 
     const resData = await response.json();
@@ -114,7 +111,8 @@ export async function signupAction({ request }) {
     }
 
     if (!response.ok) {
-      throw new Error("Could not sign up user.");
+      const resData = await response.json();
+      return { message: resData.message || "An error occurred. Please try again later." };
     }
 
     return redirect("/login");
