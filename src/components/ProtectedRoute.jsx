@@ -1,24 +1,24 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
-export default function ProtectedRoute({ isAuthenticated }) {
+export default function ProtectedRoute() {
   const token = localStorage.getItem("token");
   const expiration = localStorage.getItem("expiration");
 
-  // Check if the token is valid and not expired
   if (!token || new Date(expiration) <= new Date()) {
     return <Navigate to="/login" replace />;
   }
 
-  // also verify the role from token payload
+  let role = null;
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    if (payload.role !== "admin") {
-      // non-admins should not access admin routes
-      return <Navigate to="/" replace />;
-    }
-  } catch {}
+    role = JSON.parse(atob(token.split(".")[1])).role;
+  } catch {
+    return <Navigate to="/login" replace />;
+  }
 
-  // Render the protected content if authenticated and authorized
+  if (role !== "admin" && role !== "moderator") {
+    return <Navigate to="/" replace />;
+  }
+
   return <Outlet />;
 }

@@ -9,9 +9,7 @@ export async function loginAction({ request }) {
       `${import.meta.env.VITE_DEV_URI}users/login`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       }
     );
@@ -27,10 +25,10 @@ export async function loginAction({ request }) {
     const expiration = new Date();
     expiration.setHours(expiration.getHours() + 1);
     localStorage.setItem("expiration", expiration.toISOString());
-    // determine role from token payload and redirect accordingly
+
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
-      if (payload.role === "admin") {
+      if (payload.role === "admin" || payload.role === "moderator") {
         return redirect("/admin");
       }
     } catch (err) {
@@ -62,13 +60,11 @@ export async function googleLogin(tokenId) {
 
     const resData = await response.json();
     const token = resData.token;
-    const user = resData.user || null; // backend includes user info
-    // store token/expiration just like regular login
+    const user = resData.user || null;
     localStorage.setItem("token", token);
     const expiration = new Date();
     expiration.setHours(expiration.getHours() + 1);
     localStorage.setItem("expiration", expiration.toISOString());
-    // optionally keep a copy of the user object for quick access
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
     }
@@ -98,17 +94,10 @@ export async function signupAction({ request }) {
       `${import.meta.env.VITE_DEV_URI}users/register`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       }
     );
-
-    if (response.status === 400) {
-      const resp = await response.json();
-      return { message: resp.message || "Invalid data." };
-    }
 
     if (!response.ok) {
       const resData = await response.json();
