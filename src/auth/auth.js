@@ -81,6 +81,11 @@ export function isAuthenticated() {
 export function isAdmin() {
   return isAuthenticated() && getUserRole() === "admin";
 }
+
+export function isModerator() {
+  return isAuthenticated() && getUserRole() === "moderator";
+}
+
 export async function fetchWithAuth(url, options = {}) {
   const token = getAuthToken();
 
