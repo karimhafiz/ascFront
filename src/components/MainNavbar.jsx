@@ -1,17 +1,30 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { isAuthenticated, isAdmin, isModerator } from "../auth/auth";
+import { isAuthenticated, isAdmin, isModerator, parseJwt, getAuthToken } from "../auth/auth";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  // track whether the "Events" dropdown is open; works for all screen sizes
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const menuRef = useRef(null); // Reference for the whole menu (used for outside clicks)
-  const dropdownRef = useRef(null); // Reference for the events dropdown container
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const menuRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const userDropdownRef = useRef(null);
+  const userCloseTimer = useRef(null);
   const location = useLocation();
 
+  const authenticated = isAuthenticated();
+  const admin = isAdmin();
+  const moderator = isModerator();
+
+  // Get user email from JWT for the dropdown label
+  const userEmail = (() => {
+    try {
+      const payload = parseJwt(getAuthToken());
+      return payload?.email ?? null;
+    } catch { return null; }
+  })();
   
 
   const toggleDropdown = (e) => {
@@ -21,18 +34,13 @@ export default function Navbar() {
   };
 
   const closeMenu = () => {
-    setIsMenuOpen(false); // Close the menu when a link is clicked
-    setDropdownOpen(false); // Also close any open dropdown
+    setIsMenuOpen(false);
+    setDropdownOpen(false);
+    setUserDropdownOpen(false);
   };
 
-  // Check if link is active
-  const isActive = (path) => {
-    return location.pathname === path;
-  };
+  const isActive = (path) => location.pathname === path;
 
-  const authenticated = isAuthenticated();
-  const admin = isAdmin();
-  const moderator = isModerator();
   const navigate = useNavigate();
 
   const handleLogout = (e) => {
@@ -60,32 +68,20 @@ export default function Navbar() {
   // Close the menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Ignore clicks on the menu toggle button
-      const isMenuToggleButton = event.target.closest(
-        'button[aria-label="Toggle menu"]'
-      );
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target) &&
-        !isMenuToggleButton
-      ) {
+      const isMenuToggleButton = event.target.closest('button[aria-label="Toggle menu"]');
+      if (menuRef.current && !menuRef.current.contains(event.target) && !isMenuToggleButton) {
         setIsMenuOpen(false);
         setDropdownOpen(false);
       }
-
-      // if dropdown is open and click occurred outside of it, close it too
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
+      }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   const menuClasses = isMenuOpen ? "block" : "hidden";
 
@@ -376,19 +372,73 @@ export default function Navbar() {
               </Link>
             </li>
           )}
+          {/* ── User dropdown ── */}
           {authenticated && (
-            <li>
-              <Link
-                to="#"
-                onClick={(e) => {
-                  handleLogout(e);
-                  closeMenu();
-                }}
-                className="relative group flex items-center px-3 py-2 rounded-full text-red-600 bg-transparent border-0 shadow-none transition-all duration-300 hover:bg-gradient-to-r !important hover:from-red-100/40 hover:to-pink-100/40"
+            <li
+              ref={userDropdownRef}
+              className="relative"
+              onMouseEnter={() => {
+                clearTimeout(userCloseTimer.current);
+                setUserDropdownOpen(true);
+              }}
+              onMouseLeave={() => {
+                userCloseTimer.current = setTimeout(() => setUserDropdownOpen(false), 150);
+              }}
+            >
+              <div
+                onClick={() => setUserDropdownOpen(true)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-full cursor-pointer transition-all duration-300 ${
+                  userDropdownOpen
+                    ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20"
+                    : "hover:bg-pink-100/40"
+                }`}
               >
-                Logout
-                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
-              </Link>
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm shadow-pink-200">
+                  {userEmail ? userEmail[0].toUpperCase() : "?"}
+                </div>
+                <span className="text-sm font-medium max-w-[120px] truncate hidden sm:block text-pink-700">
+                  {userEmail}
+                </span>
+                <svg
+                  className={`w-3.5 h-3.5 text-pink-500 transition-transform duration-200 ${userDropdownOpen ? "rotate-180" : ""}`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.085l3.71-3.855a.75.75 0 1 1 1.08 1.04l-4.24 4.4a.75.75 0 0 1-1.08 0l-4.24-4.4a.75.75 0 0 1 .02-1.06z" />
+                </svg>
+              </div>
+
+              <div className={`absolute right-1/2 translate-x-1/2 mt-1 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 overflow-hidden z-50 transition-all duration-200 ${
+                userDropdownOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+              }`}>
+                <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-pink-50/60 to-purple-50/60">
+                  <p className="text-xs font-medium text-pink-600 truncate">{userEmail}</p>
+                </div>
+
+                <Link
+                  to="/profile"
+                  onClick={closeMenu}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-pink-50/60 hover:to-purple-50/60 hover:text-pink-700 transition-all duration-200"
+                >
+                  <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  My Profile
+                </Link>
+
+
+                <div className="h-px bg-gradient-to-r from-transparent via-pink-100 to-transparent mx-3" />
+
+                <Link
+                  onClick={(e) => { handleLogout(e); closeMenu(); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50/60 hover:text-red-600 transition-all duration-200"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Log out
+                </Link>
+              </div>
             </li>
           )}
         </ul>
