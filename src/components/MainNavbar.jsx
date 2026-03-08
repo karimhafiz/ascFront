@@ -1,38 +1,45 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
+import { isAuthenticated, isAdmin, isModerator } from "../auth/auth";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
-  const menuRef = useRef(null); // Reference for the menu
+  // track whether the "Events" dropdown is open; works for all screen sizes
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const menuRef = useRef(null); // Reference for the whole menu (used for outside clicks)
+  const dropdownRef = useRef(null); // Reference for the events dropdown container
   const location = useLocation();
-  const toggleMenu = () => {
-    // Directly set the value rather than toggling to avoid race conditions
-    const newMenuState = !isMenuOpen;
-    setIsMenuOpen(newMenuState);
-    // Close dropdown when closing the menu
-    if (!newMenuState) setMobileDropdownOpen(false);
-  };
 
-  const toggleMobileDropdown = (e) => {
-    // Only for mobile view
-    if (window.innerWidth < 768) {
-      e.preventDefault();
-      e.stopPropagation();
-      setMobileDropdownOpen(!mobileDropdownOpen);
-    }
+  
+
+  const toggleDropdown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropdownOpen(!dropdownOpen);
   };
 
   const closeMenu = () => {
     setIsMenuOpen(false); // Close the menu when a link is clicked
-    setMobileDropdownOpen(false); // Also close any open dropdown
+    setDropdownOpen(false); // Also close any open dropdown
   };
 
   // Check if link is active
   const isActive = (path) => {
     return location.pathname === path;
+  };
+
+  const authenticated = isAuthenticated();
+  const admin = isAdmin();
+  const moderator = isModerator();
+  const navigate = useNavigate();
+
+  const handleLogout = (e) => {
+    e.preventDefault();
+    localStorage.removeItem("token");
+    localStorage.removeItem("expiration");
+    navigate("/");
   };
 
   // Add scroll effect for the navbar
@@ -63,6 +70,15 @@ export default function Navbar() {
         !isMenuToggleButton
       ) {
         setIsMenuOpen(false);
+        setDropdownOpen(false);
+      }
+
+      // if dropdown is open and click occurred outside of it, close it too
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setDropdownOpen(false);
       }
     };
 
@@ -100,7 +116,7 @@ export default function Navbar() {
             if (isMenuOpen) {
               // If menu is open, explicitly close it
               setIsMenuOpen(false);
-              setMobileDropdownOpen(false);
+              setDropdownOpen(false);
             } else {
               // If menu is closed, open it
               setIsMenuOpen(true);
@@ -170,43 +186,13 @@ export default function Navbar() {
               <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
             </Link>
           </li>
-          <li>
-            <Link
-              to="/about"
-              className={`relative group flex items-center px-3 py-2 rounded-full ${
-                isActive("/about")
-                  ? "bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-700 font-medium"
-                  : "text-purple-600 hover:bg-purple-100/40"
-              } transition-all duration-300`}
-              onClick={closeMenu}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 mr-1.5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2h2a1 1 0 100-2H9z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              About
-              {isActive("/about") && (
-                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></span>
-              )}
-              <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
-            </Link>
-          </li>{" "}
           <li
-            className={`relative group ${
-              mobileDropdownOpen ? "active-mobile-dropdown" : ""
-            }`}
+            ref={dropdownRef}
+            className="relative"
             tabIndex={0}
           >
             <div
-              onClick={toggleMobileDropdown}
+              onClick={toggleDropdown}
               className={`relative flex items-center px-3 py-2 rounded-full cursor-pointer ${
                 location.pathname.includes("/events")
                   ? "bg-gradient-to-r from-indigo-500/20 to-blue-500/20 text-indigo-700 font-medium"
@@ -225,10 +211,10 @@ export default function Navbar() {
                   clipRule="evenodd"
                 />
               </svg>
-              Events{" "}
+              Events
               <svg
                 className={`ml-1 w-3.5 h-3.5 transition-transform duration-300 ${
-                  mobileDropdownOpen ? "rotate-180" : "group-hover:rotate-180"
+                  dropdownOpen ? "rotate-180" : ""
                 }`}
                 fill="currentColor"
                 viewBox="0 0 20 20"
@@ -238,12 +224,13 @@ export default function Navbar() {
               {location.pathname.includes("/events") && (
                 <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full"></span>
               )}
-            </div>{" "}
+            </div>
             <ul
-              className="absolute left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl opacity-0 transform -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto transition-all duration-300 z-50 border border-white/30 overflow-hidden md:left-1/2 md:-translate-x-1/2"
-              onMouseLeave={() => {
-                if (window.innerWidth >= 768) closeMenu();
-              }}
+              className={`absolute left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl z-50 border border-white/30 overflow-hidden md:left-1/2 md:-translate-x-1/2 transition-all duration-300 ${
+                dropdownOpen
+                  ? "opacity-100 translate-y-0 pointer-events-auto"
+                  : "opacity-0 -translate-y-2 pointer-events-none"
+              }`}
             >
               <li>
                 <Link
@@ -288,6 +275,31 @@ export default function Navbar() {
           </li>
           <li>
             <Link
+              to="/about"
+              className={`relative group flex items-center px-3 py-2 rounded-full ${
+                isActive("/about")
+                  ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-700 font-medium"
+                  : "text-green-600 hover:bg-green-100/40"
+              } transition-all duration-300`}
+              onClick={closeMenu}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 mr-1.5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M10 2a6 6 0 100 12 6 6 0 000-12zm0 14a8 8 0 110-16 8 8 0 010 16z" />
+              </svg>
+              About
+              {isActive("/about") && (
+                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></span>
+              )}
+              <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+            </Link>
+          </li>
+          <li>
+            <Link
               to="/contact"
               className={`relative group flex items-center px-3 py-2 rounded-full ${
                 isActive("/contact")
@@ -312,6 +324,73 @@ export default function Navbar() {
               <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
             </Link>
           </li>
+          {/* authentication links */}
+          {!authenticated && (
+            <>
+              <li>
+                <Link
+                  to="/login"
+                  className={`relative group flex items-center px-3 py-2 rounded-full ${
+                    isActive("/login")
+                      ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-700 font-medium"
+                      : "text-pink-600 hover:bg-pink-100/40"
+                  } transition-all duration-300`}
+                  onClick={closeMenu}
+                >
+                  Login
+                  {isActive("/login") && (
+                    <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></span>
+                  )}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/signup"
+                  className={`relative group flex items-center px-3 py-2 rounded-full ${
+                    isActive("/signup")
+                      ? "bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-700 font-medium"
+                      : "text-purple-600 hover:bg-purple-100/40"
+                  } transition-all duration-300`}
+                  onClick={closeMenu}
+                >
+                  Sign Up
+                  {isActive("/signup") && (
+                    <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></span>
+                  )}
+                </Link>
+              </li>
+            </>
+          )}
+          {(admin || moderator) && (
+            <li>
+              <Link
+                to="/admin"
+                className={`relative group flex items-center px-3 py-2 rounded-full ${
+                  isActive("/admin")
+                    ? "bg-gradient-to-r from-yellow-400/20 to-yellow-600/20 text-yellow-700 font-medium"
+                    : "text-yellow-600 hover:bg-yellow-100/40"
+                } transition-all duration-300`}
+                onClick={closeMenu}
+              >
+                Dashboard
+              </Link>
+            </li>
+          )}
+          {authenticated && (
+            <li>
+              <Link
+                to="#"
+                onClick={(e) => {
+                  handleLogout(e);
+                  closeMenu();
+                }}
+                className="relative group flex items-center px-3 py-2 rounded-full text-red-600 bg-transparent border-0 shadow-none transition-all duration-300 hover:bg-gradient-to-r !important hover:from-red-100/40 hover:to-pink-100/40"
+              >
+                Logout
+                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
     </nav>

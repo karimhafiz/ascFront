@@ -1,15 +1,24 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
-export default function ProtectedRoute({ isAuthenticated }) {
+export default function ProtectedRoute() {
   const token = localStorage.getItem("token");
   const expiration = localStorage.getItem("expiration");
 
-  // Check if the token is valid and not expired
   if (!token || new Date(expiration) <= new Date()) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
-  // Render the protected content if authenticated
+  let role = null;
+  try {
+    role = JSON.parse(atob(token.split(".")[1])).role;
+  } catch {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (role !== "admin" && role !== "moderator") {
+    return <Navigate to="/" replace />;
+  }
+
   return <Outlet />;
 }

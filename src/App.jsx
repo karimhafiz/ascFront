@@ -8,13 +8,15 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import EventPage from "./pages/Event";
-import EventDetails, { eventDetailLoader } from "./pages/EventDetails";
+import EventDetails from "./pages/EventDetails";
 import NewEvent from "./pages/NewEvent";
 import EditEvent from "./pages/EditEvent";
 import EventRoot from "./pages/EventRoot";
 import ErrorPage from "./pages/Errorpage";
-
-import Admin, { action as loginAction } from "./pages/Admin";
+import OrderConfirmation from "./pages/OrderConfirmation";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import { loginAction, signupAction } from "./auth/authActions";
 import { logoutAction, combinedLoader } from "./auth/auth";
 import { action as eventAction } from "./components/EventForm";
 import CancelPage from "./pages/CancelPage";
@@ -23,6 +25,8 @@ import TeamConfirmationPage from "./pages/TeamConfirmationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminDashboard from "./pages/AdminDashboard";
 import SportsPage from "./pages/Sports";
+import ProfilePage from "./pages/ProfilePage";
+import { eventDetailLoader } from "./util/util";
 
 const router = createBrowserRouter([
   {
@@ -36,8 +40,10 @@ const router = createBrowserRouter([
       { path: "cancel", element: <CancelPage /> },
       { path: "success", element: <SuccessPage /> },
       { path: "team-confirmation", element: <TeamConfirmationPage /> },
+      { path: "order-confirmation", element: <OrderConfirmation /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
+      { path: "profile", element: <ProfilePage /> },
       {
         path: "events",
         element: <EventRoot />,
@@ -68,12 +74,16 @@ const router = createBrowserRouter([
             element: <AdminDashboard />,
           },
         ],
+      },
+      {
+        path: "login",
+        element: <Login />,
         action: loginAction,
       },
       {
-        path: "admin/login",
-        element: <Admin />,
-        action: loginAction,
+        path: "signup",
+        element: <Signup />,
+        action: signupAction,
       },
       {
         path: "logout",
