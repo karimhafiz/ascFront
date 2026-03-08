@@ -22,8 +22,8 @@ export async function loginAction({ request }) {
     const resData = await response.json();
     const token = resData.token;
     localStorage.setItem("token", token);
-    const expiration = new Date();
-    expiration.setHours(expiration.getHours() + 1);
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const expiration = new Date(payload.exp * 1000); // exp is in seconds, JS needs ms
     localStorage.setItem("expiration", expiration.toISOString());
 
     try {
