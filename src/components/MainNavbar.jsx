@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { isAuthenticated, isAdmin, isModerator, parseJwt, getAuthToken } from "../auth/auth";
+import { isAuthenticated, isAdmin, parseJwt, getAuthToken } from "../auth/auth";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,7 +16,6 @@ export default function Navbar() {
 
   const authenticated = isAuthenticated();
   const admin = isAdmin();
-  const moderator = isModerator();
 
   // Get user email from JWT for the dropdown label
   const userEmail = (() => {
@@ -357,7 +356,7 @@ export default function Navbar() {
               </li>
             </>
           )}
-          {(admin || moderator) && (
+          {admin && (
             <li>
               <Link
                 to="/admin"
@@ -426,10 +425,9 @@ export default function Navbar() {
                   My Profile
                 </Link>
 
-
                 <div className="h-px bg-gradient-to-r from-transparent via-pink-100 to-transparent mx-3" />
 
-                <Link
+                <button
                   onClick={(e) => { handleLogout(e); closeMenu(); }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50/60 hover:text-red-600 transition-all duration-200"
                 >
@@ -437,7 +435,7 @@ export default function Navbar() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
                   Log out
-                </Link>
+                </button>
               </div>
             </li>
           )}

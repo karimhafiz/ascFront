@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { getAuthToken } from "../auth/auth";
-import { formatDate } from "../util/util";
 import {
   Form,
   useNavigate,
@@ -517,8 +516,8 @@ export async function action({ request, params }) {
     let responseData;
     try {
       responseData = JSON.parse(responseText);
-    } catch (e) {
-      responseData = { error: "Invalid JSON response" };
+    } catch  {
+      responseData = { message: responseText };
     }
 
     if (!response.ok) {

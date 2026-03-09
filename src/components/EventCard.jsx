@@ -1,10 +1,12 @@
 import React from "react";
 import { useNavigate, useRouteLoaderData } from "react-router-dom";
+import { isAdmin, isModerator } from "../auth/auth";
 
 import { formatDateRange } from "../util/util";
 
 export default function EventCard({ event }) {
-  const { token } = useRouteLoaderData("root"); // Retrieve token from the loader
+  const { token } = useRouteLoaderData("root");
+  const canManage = isAdmin() || isModerator();
   const navigate = useNavigate();
 
   const handleViewDetails = () => {
@@ -171,7 +173,7 @@ export default function EventCard({ event }) {
               Event Details
             </button>
 
-            {token && (
+            {canManage && (
               <div className="flex space-x-2 mt-2">
                 {/* Edit Button */}
                 <button

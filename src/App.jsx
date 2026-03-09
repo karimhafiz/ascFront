@@ -23,6 +23,7 @@ import CancelPage from "./pages/CancelPage";
 import SuccessPage from "./pages/SuccessPage";
 import TeamConfirmationPage from "./pages/TeamConfirmationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ModeratorRoute from "./components/ModeratorRoute";
 import AdminDashboard from "./pages/AdminDashboard";
 import SportsPage from "./pages/Sports";
 import ProfilePage from "./pages/ProfilePage";
@@ -47,7 +48,6 @@ const router = createBrowserRouter([
       {
         path: "events",
         element: <EventRoot />,
-
         children: [
           { index: true, element: <EventPage /> },
           { path: "asc", element: <EventPage /> },
@@ -58,37 +58,31 @@ const router = createBrowserRouter([
             loader: eventDetailLoader,
             children: [
               { index: true, element: <EventDetails /> },
-              { path: "edit", element: <EditEvent />, action: eventAction },
+              {
+                element: <ModeratorRoute />,
+                children: [
+                  { path: "edit", element: <EditEvent />, action: eventAction },
+                ],
+              },
             ],
           },
-          { path: "new", element: <NewEvent />, action: eventAction },
+          {
+            element: <ModeratorRoute />,
+            children: [
+              { path: "new", element: <NewEvent />, action: eventAction },
+            ],
+          },
         ],
       },
       {
         path: "admin",
         element: <ProtectedRoute />,
         errorElement: <ErrorPage />,
-        children: [
-          {
-            index: true,
-            element: <AdminDashboard />,
-          },
-        ],
+        children: [{ index: true, element: <AdminDashboard /> }],
       },
-      {
-        path: "login",
-        element: <Login />,
-        action: loginAction,
-      },
-      {
-        path: "signup",
-        element: <Signup />,
-        action: signupAction,
-      },
-      {
-        path: "logout",
-        action: logoutAction,
-      },
+      { path: "login", element: <Login />, action: loginAction },
+      { path: "signup", element: <Signup />, action: signupAction },
+      { path: "logout", action: logoutAction },
     ],
   },
 ]);
