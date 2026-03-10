@@ -1,34 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import TeamSignupForm from "../components/TeamSignupForm";
-
-
+import { parseJwt, getAuthToken } from "../auth/auth";
 
 export default function EventDetails() {
   const { eventId } = useParams();
   const navigate = useNavigate();
-  const [quantity, setQuantity] = useState(1);
-  const [email, setEmail] = useState("");
+  const [quantity, setQuantity] = useState("1");
+  const [email, setEmail] = useState(() => {
+    const token = getAuthToken();
+    if (!token) return "";
+    const payload = parseJwt(token);
+    return payload?.email || "";
+  });
   const [showTeamSignup, setShowTeamSignup] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [buyError, setBuyError] = useState("");
-  const [showConfirmation, setShowConfirmation] = useState(false);
-
-  // Auto-fill email from logged-in user
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        if (payload.email) {
-          setEmail(payload.email);
-        }
-      } catch (error) {
-        console.error("Error decoding token:", error);
-      }
-    }
-  }, []);
+  const [awaitingConfirm, setAwaitingConfirm] = useState(false);
 
   const handleBack = () => {
     navigate(-1);
@@ -60,7 +49,34 @@ export default function EventDetails() {
   // After payment, Stripe redirects to our backend /payments/success which
   // creates the ticket and redirects to /order-confirmation.
   // ─────────────────────────────────────────────────────────────────────────
-  const proceedToPayment = async () => {
+  const handleBuyTickets = async () => {
+    setBuyError("");
+    setAwaitingConfirm(false);
+
+    if (isTournament) {
+      if (!email) {
+        setBuyError("Please enter your email to proceed.");
+        return;
+      }
+      setShowTeamSignup(true);
+      return;
+    }
+
+    if (parseInt(quantity) > 5 && !awaitingConfirm) {
+      setAwaitingConfirm(true);
+      return;
+    }
+
+    if (!email) {
+      setBuyError("Please enter your email to proceed.");
+      return;
+    }
+
+    if (!quantity || parseInt(quantity) < 1) {
+      setBuyError("Please select at least 1 ticket.");
+      return;
+    }
+
     try {
       setIsProcessing(true);
       const response = await fetch(
@@ -71,7 +87,7 @@ export default function EventDetails() {
           body: JSON.stringify({
             eventId,
             email,
-            quantity,
+            quantity: parseInt(quantity) || 1,
           }),
         }
       );
@@ -89,37 +105,6 @@ export default function EventDetails() {
       setBuyError(err.message || "Something went wrong. Please try again.");
       setIsProcessing(false);
     }
-  };
-
-  const handleBuyTickets = async () => {
-    setBuyError("");
-
-    if (isTournament) {
-      if (!email) {
-        setBuyError("Please enter your email to proceed.");
-        return;
-      }
-      setShowTeamSignup(true);
-      return;
-    }
-
-    if (!email) {
-      setBuyError("Please enter your email to proceed.");
-      return;
-    }
-
-    if (quantity < 1) {
-      setBuyError("Please select at least 1 ticket.");
-      return;
-    }
-
-    // Show confirmation if quantity > 5
-    if (quantity > 5) {
-      setShowConfirmation(true);
-      return;
-    }
-
-    proceedToPayment();
   };
 
   const handleShare = () => {
@@ -240,8 +225,13 @@ export default function EventDetails() {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg text-purple-900">Ticket Price</h3>
+                        <h3 className="font-bold text-lg text-purple-900">
+                          {event.isTournament ? "Tournament Fee" : "Ticket Price"}
+                        </h3>
                         <p className="text-purple-800">£{event.ticketPrice}</p>
+                        {event.isTournament && (
+                          <p className="text-xs text-purple-500 mt-0.5">Per player — spectators enter free</p>
+                        )}
                       </div>
                     </div>
                   )}
@@ -256,9 +246,9 @@ export default function EventDetails() {
                       <div>
                         <h3 className="font-bold text-lg text-purple-900">Availability</h3>
                         <p className="text-purple-800">
-                          {(event.ticketsAvailable > 0)
+                          {event.ticketsAvailable > 0
                             ? `${event.ticketsAvailable} tickets remaining`
-                            : (event.ticketPrice > 0 ? "Sold Out" : "Free Event")}
+                            : "Sold out"}
                         </p>
                       </div>
                     </div>
@@ -298,6 +288,11 @@ export default function EventDetails() {
                     {event.isTournament ? "Team Registration" : "Purchase Tickets"}
                   </h2>
                   <div className="space-y-4">
+                    {event.isTournament && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
+                        💡 The tournament fee is charged <strong>per player</strong>. Spectators and supporters are welcome to attend for free.
+                      </div>
+                    )}
                     <div>
                       <label className="block text-md font-medium mb-2 text-purple-700">
                         Your Email:
@@ -322,13 +317,41 @@ export default function EventDetails() {
                           min="1"
                           max={event.ticketsAvailable || 99}
                           value={quantity}
-                          onChange={(e) => setQuantity(Number(e.target.value))}
+                          onChange={(e) => {
+                            setQuantity(e.target.value);
+                            setAwaitingConfirm(false);
+                          }}
+                          onBlur={(e) => {
+                            const val = parseInt(e.target.value, 10);
+                            setQuantity(String(isNaN(val) || val < 1 ? 1 : val));
+                          }}
                           className="input bg-white/60 border-white/30 focus:border-purple-400 w-full backdrop-blur-sm rounded-xl text-purple-900"
                         />
                         {event.ticketPrice > 0 && (
                           <p className="text-sm text-purple-600 mt-1">
-                            Total: £{(event.ticketPrice * quantity).toFixed(2)}
+                            Total: £{(event.ticketPrice * (parseInt(quantity) || 1)).toFixed(2)}
                           </p>
+                        )}
+                        {awaitingConfirm && (
+                          <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                            <p className="text-sm font-medium text-amber-700 mb-2">
+                              ⚠️ You're buying {quantity} tickets — are you sure?
+                            </p>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => { setAwaitingConfirm(false); setQuantity(1); }}
+                                className="flex-1 text-xs py-1.5 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-100 transition-all"
+                              >
+                                Change
+                              </button>
+                              <button
+                                onClick={handleBuyTickets}
+                                className="flex-1 text-xs py-1.5 rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-all font-medium"
+                              >
+                                Yes, continue
+                              </button>
+                            </div>
+                          </div>
                         )}
                       </div>
                     )}
@@ -395,45 +418,6 @@ export default function EventDetails() {
             }}
             onClose={() => setShowTeamSignup(false)}
           />
-        )}
-
-        {/* Confirmation Modal for >5 Tickets */}
-        {showConfirmation && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-scale-in">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-yellow-100 rounded-full">
-                <svg className="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold text-center text-gray-900 mb-2">
-                Large Order Confirmation
-              </h3>
-              <p className="text-center text-gray-600 mb-6">
-                You are about to purchase <span className="font-bold text-lg text-purple-700">{quantity} tickets</span> for a total of <span className="font-bold text-lg text-purple-700">£{(event.ticketPrice * quantity).toFixed(2)}</span>.
-              </p>
-              <p className="text-center text-sm text-gray-500 mb-6">
-                Confirm that you want to proceed to payment.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  className="flex-1 btn border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 rounded-xl"
-                  onClick={() => setShowConfirmation(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="flex-1 btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none hover:scale-105 transition-all duration-300 rounded-xl"
-                  onClick={() => {
-                    setShowConfirmation(false);
-                    proceedToPayment();
-                  }}
-                >
-                  Confirm & Pay
-                </button>
-              </div>
-            </div>
-          </div>
         )}
 
         {/* Back Button */}
