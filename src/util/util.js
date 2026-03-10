@@ -72,3 +72,4 @@ export async function eventDetailLoader({ params }) {
   if (!response.ok) throw new Error("Failed to fetch event details");
   return response.json();
 }
+

@@ -133,8 +133,8 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {tickets.map(ticket => (
-                  <TicketRow key={ticket._id} ticket={ticket} />
+                {groupTicketsByPaymentId(tickets).map(order => (
+                  <PaymentOrderRow key={order.paymentId} order={order} />
                 ))}
               </div>
             )
@@ -169,7 +169,10 @@ function TicketRow({ ticket }) {
   const paid = (event?.ticketPrice ?? 0) * (ticket.quantity || 1);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex">
+    <Link
+      to={`/tickets/${ticket._id}`}
+      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200 overflow-hidden flex group"
+    >
       {/* Date block */}
       <div className="w-16 flex-shrink-0 bg-gradient-to-b from-pink-500 to-purple-600 flex flex-col items-center justify-center text-white py-4">
         <span className="text-xs font-semibold uppercase opacity-80">
@@ -182,7 +185,7 @@ function TicketRow({ ticket }) {
 
       {/* Event image */}
       {event?.images?.[0] ? (
-        <img src={event.images[0]} alt={event.title} className="w-28 h-full object-cover flex-shrink-0" />
+        <img src={event.images[0]} alt={event.title} className="w-28 h-full object-fill flex-shrink-0" />
       ) : (
         <div className="w-28 bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center flex-shrink-0">
           <svg className="w-8 h-8 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -193,26 +196,29 @@ function TicketRow({ ticket }) {
 
       {/* Info */}
       <div className="flex-1 px-5 py-4 flex flex-col justify-center min-w-0">
-        <p className="font-semibold text-gray-900 truncate text-base">
+        <p className="font-semibold text-gray-900 truncate text-base group-hover:text-purple-700 transition-colors">
           {event?.title ?? "Unknown Event"}
         </p>
         <p className="text-sm text-gray-500 mt-0.5">
           {formatDate(event?.date)}
           {event?.city && <span> · {event.city}</span>}
         </p>
-        <p className="text-xs text-gray-400 mt-1">
-          Order no. {ticket.paymentId ? ticket.paymentId.slice(-10) : "—"} · {ticket.quantity || 1} ticket{(ticket.quantity || 1) !== 1 ? "s" : ""}
+        <p className="text-xs text-gray-400 mt-1 font-mono">
+          {ticket.ticketCode ?? "—"} · {ticket.quantity || 1} ticket{(ticket.quantity || 1) !== 1 ? "s" : ""}
         </p>
       </div>
 
-      {/* Price + status */}
+      {/* Price + status + arrow */}
       <div className="flex flex-col items-end justify-center px-5 gap-2 flex-shrink-0">
         <span className="text-sm font-semibold text-gray-800">{formatCurrency(paid)}</span>
         <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
           ✓ Paid
         </span>
+        <svg className="w-4 h-4 text-gray-300 group-hover:text-purple-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -283,6 +289,197 @@ function TeamRow({ team }) {
             </div>
           )}
         </>
+      )}
+    </div>
+  );
+}
+
+// Helper function to group tickets by paymentId
+function groupTicketsByPaymentId(tickets) {
+  const grouped = {};
+  tickets.forEach(ticket => {
+    const paymentId = ticket.paymentId || ticket._id; // fallback to ticket ID if no paymentId
+    if (!grouped[paymentId]) {
+      grouped[paymentId] = {
+        paymentId,
+        tickets: [],
+        totalQuantity: 0,
+        totalAmount: 0,
+        createdAt: null,
+      };
+    }
+    grouped[paymentId].tickets.push(ticket);
+    grouped[paymentId].totalQuantity += (ticket.quantity || 1);
+    grouped[paymentId].createdAt = ticket.createdAt || grouped[paymentId].createdAt;
+    
+    // Calculate total amount
+    const event = ticket.eventId;
+    const ticketPrice = event?.ticketPrice ?? 0;
+    grouped[paymentId].totalAmount += ticketPrice * (ticket.quantity || 1);
+  });
+
+  return Object.values(grouped).sort((a, b) => {
+    const dateA = new Date(a.createdAt).getTime();
+    const dateB = new Date(b.createdAt).getTime();
+    return dateB - dateA; // newest first
+  });
+}
+
+// Component to display a payment order (grouped tickets)
+function PaymentOrderRow({ order }) {
+  const [expanded, setExpanded] = useState(false);
+  const firstTicket = order.tickets[0];
+  const event = firstTicket?.eventId;
+  const isSingleTicket = order.totalQuantity === 1;
+
+  // For single tickets, render as a direct link
+  if (isSingleTicket) {
+    return (
+      <Link
+        to={`/tickets/${firstTicket._id}`}
+        className="block bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200 overflow-hidden text-left"
+      >
+        <div className="flex items-center">
+          {/* Date block */}
+          <div className="w-16 flex-shrink-0 bg-gradient-to-b from-pink-500 to-purple-600 flex flex-col items-center justify-center text-white py-4">
+            <span className="text-xs font-semibold uppercase opacity-80">
+              {event?.date ? new Date(event.date).toLocaleString("en-GB", { month: "short" }) : "—"}
+            </span>
+            <span className="text-2xl font-bold leading-tight">
+              {event?.date ? new Date(event.date).getDate() : "—"}
+            </span>
+          </div>
+
+          {/* Event image */}
+          {event?.images?.[0] ? (
+            <img src={event.images[0]} alt={event.title} className="w-28 h-full object-fill flex-shrink-0" />
+          ) : (
+            <div className="w-28 bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+              <svg className="w-8 h-8 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          )}
+
+          {/* Info */}
+          <div className="flex-1 px-5 py-4 flex flex-col justify-center min-w-0">
+            <p className="font-semibold text-gray-900 truncate text-base group-hover:text-purple-700 transition-colors">
+              {event?.title ?? "Unknown Event"}
+            </p>
+            <p className="text-sm text-gray-500 mt-0.5">
+              {formatDate(event?.date)}
+              {event?.city && <span> · {event.city}</span>}
+            </p>
+            <p className="text-xs text-gray-400 mt-1 font-mono">
+              {firstTicket.ticketCode || "—"}
+            </p>
+          </div>
+
+          {/* Price + status */}
+          <div className="flex flex-col items-end justify-center px-5 gap-2 flex-shrink-0">
+            <span className="text-sm font-semibold text-gray-800">£{order.totalAmount.toFixed(2)}</span>
+            <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+              ✓ Paid
+            </span>
+            <svg className="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  // For multiple tickets, render as expandable
+  return (
+    <div>
+      {/* Order Summary */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200 overflow-hidden text-left"
+      >
+        <div className="flex items-center">
+          {/* Date block */}
+          <div className="w-16 flex-shrink-0 bg-gradient-to-b from-pink-500 to-purple-600 flex flex-col items-center justify-center text-white py-4">
+            <span className="text-xs font-semibold uppercase opacity-80">
+              {event?.date ? new Date(event.date).toLocaleString("en-GB", { month: "short" }) : "—"}
+            </span>
+            <span className="text-2xl font-bold leading-tight">
+              {event?.date ? new Date(event.date).getDate() : "—"}
+            </span>
+          </div>
+
+          {/* Event image */}
+          {event?.images?.[0] ? (
+            <img src={event.images[0]} alt={event.title} className="w-28 h-full object-fill flex-shrink-0" />
+          ) : (
+            <div className="w-28 bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+              <svg className="w-8 h-8 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          )}
+
+          {/* Info */}
+          <div className="flex-1 px-5 py-4 flex flex-col justify-center min-w-0">
+            <p className="font-semibold text-gray-900 truncate text-base">
+              {event?.title ?? "Unknown Event"}
+            </p>
+            <p className="text-sm text-gray-500 mt-0.5">
+              {formatDate(event?.date)}
+              {event?.city && <span> · {event.city}</span>}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              {order.totalQuantity} tickets · Payment ID: {order.paymentId.slice(-8)}
+            </p>
+          </div>
+
+          {/* Price + status + arrow */}
+          <div className="flex flex-col items-end justify-center px-5 gap-2 flex-shrink-0">
+            <span className="text-sm font-semibold text-gray-800">£{order.totalAmount.toFixed(2)}</span>
+            <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+              ✓ Paid
+            </span>
+            <svg className={`w-4 h-4 text-gray-300 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </div>
+        </div>
+      </button>
+
+      {/* Expanded: Show all tickets in this order */}
+      {expanded && (
+        <div className="mt-2 space-y-2 ml-2">
+          {order.tickets.map((ticket, idx) => (
+            <Link
+              key={ticket._id}
+              to={`/tickets/${ticket._id}`}
+              className="block bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200 overflow-hidden p-4"
+            >
+              <div className="flex items-center gap-4">
+                {/* Ticket number */}
+                <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0 text-sm font-bold text-purple-600">
+                  #{idx + 1}
+                </div>
+
+                {/* Ticket info */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">
+                    Ticket {idx + 1} of {order.tickets.length}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1 font-mono">
+                    ID: {ticket.ticketCode || ticket._id.slice(-8)}
+                  </p>
+                </div>
+
+                {/* Arrow */}
+                <svg className="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </Link>
+          ))}
+        </div>
       )}
     </div>
   );

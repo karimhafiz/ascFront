@@ -1,23 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import TeamSignupForm from "../components/TeamSignupForm";
-import { parseJwt, getAuthToken } from "../auth/auth";
+
 
 
 export default function EventDetails() {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
-  const [email, setEmail] = useState(() => {
-  const token = getAuthToken();
-  if (!token) return "";
-  const payload = parseJwt(token);
-  return payload?.email || "";
-});
+  const [email, setEmail] = useState("");
   const [showTeamSignup, setShowTeamSignup] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [buyError, setBuyError] = useState("");
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // Auto-fill email from logged-in user
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (payload.email) {
+          setEmail(payload.email);
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, []);
 
   const handleBack = () => {
     navigate(-1);
@@ -49,28 +60,7 @@ export default function EventDetails() {
   // After payment, Stripe redirects to our backend /payments/success which
   // creates the ticket and redirects to /order-confirmation.
   // ─────────────────────────────────────────────────────────────────────────
-  const handleBuyTickets = async () => {
-    setBuyError("");
-
-    if (isTournament) {
-      if (!email) {
-        setBuyError("Please enter your email to proceed.");
-        return;
-      }
-      setShowTeamSignup(true);
-      return;
-    }
-
-    if (!email) {
-      setBuyError("Please enter your email to proceed.");
-      return;
-    }
-
-    if (quantity < 1) {
-      setBuyError("Please select at least 1 ticket.");
-      return;
-    }
-
+  const proceedToPayment = async () => {
     try {
       setIsProcessing(true);
       const response = await fetch(
@@ -99,6 +89,37 @@ export default function EventDetails() {
       setBuyError(err.message || "Something went wrong. Please try again.");
       setIsProcessing(false);
     }
+  };
+
+  const handleBuyTickets = async () => {
+    setBuyError("");
+
+    if (isTournament) {
+      if (!email) {
+        setBuyError("Please enter your email to proceed.");
+        return;
+      }
+      setShowTeamSignup(true);
+      return;
+    }
+
+    if (!email) {
+      setBuyError("Please enter your email to proceed.");
+      return;
+    }
+
+    if (quantity < 1) {
+      setBuyError("Please select at least 1 ticket.");
+      return;
+    }
+
+    // Show confirmation if quantity > 5
+    if (quantity > 5) {
+      setShowConfirmation(true);
+      return;
+    }
+
+    proceedToPayment();
   };
 
   const handleShare = () => {
@@ -235,9 +256,9 @@ export default function EventDetails() {
                       <div>
                         <h3 className="font-bold text-lg text-purple-900">Availability</h3>
                         <p className="text-purple-800">
-                          {event.ticketsAvailable > 0
+                          {(event.ticketsAvailable > 0)
                             ? `${event.ticketsAvailable} tickets remaining`
-                            : "Sold out"}
+                            : (event.ticketPrice > 0 ? "Sold Out" : "Free Event")}
                         </p>
                       </div>
                     </div>
@@ -258,7 +279,19 @@ export default function EventDetails() {
 
           {/* Right column: Ticket Purchase */}
           <div className="md:col-span-1">
-            {!isEventInPast ? (
+            {!isEventInPast && event.ticketPrice === 0 && !event.isTournament ? (
+              <div className="glass-card shadow-xl border border-white/30 backdrop-blur-md rounded-2xl">
+                <div className="card-body text-center">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h2 className="card-title text-xl text-green-700 justify-center">Free Entry</h2>
+                  <p className="text-gray-500 text-sm">This event is free to attend. Just show up!</p>
+                </div>
+              </div>
+            ) : !isEventInPast ? (
               <div className="glass-card shadow-xl border border-white/30 backdrop-blur-md rounded-2xl sticky top-4 hover:shadow-2xl transition-all duration-300">
                 <div className="card-body">
                   <h2 className="card-title text-xl text-pink-700">
@@ -357,8 +390,50 @@ export default function EventDetails() {
           <TeamSignupForm
             eventId={eventId}
             managerId={email}
+            onSuccess={() => {
+              setShowTeamSignup(false);
+            }}
             onClose={() => setShowTeamSignup(false)}
           />
+        )}
+
+        {/* Confirmation Modal for >5 Tickets */}
+        {showConfirmation && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-scale-in">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-yellow-100 rounded-full">
+                <svg className="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-center text-gray-900 mb-2">
+                Large Order Confirmation
+              </h3>
+              <p className="text-center text-gray-600 mb-6">
+                You are about to purchase <span className="font-bold text-lg text-purple-700">{quantity} tickets</span> for a total of <span className="font-bold text-lg text-purple-700">£{(event.ticketPrice * quantity).toFixed(2)}</span>.
+              </p>
+              <p className="text-center text-sm text-gray-500 mb-6">
+                Confirm that you want to proceed to payment.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  className="flex-1 btn border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 rounded-xl"
+                  onClick={() => setShowConfirmation(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="flex-1 btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none hover:scale-105 transition-all duration-300 rounded-xl"
+                  onClick={() => {
+                    setShowConfirmation(false);
+                    proceedToPayment();
+                  }}
+                >
+                  Confirm & Pay
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Back Button */}

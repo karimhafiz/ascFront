@@ -1,174 +1,150 @@
-import React, { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import React from "react";
+import { useSearchParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getAuthToken } from "../auth/auth";
+import TicketCard from "../components/TicketCard";
 
-// ─── OrderConfirmation ────────────────────────────────────────────────────────
-// This page is where the user lands after a successful Stripe payment.
-// The flow is:
-//   1. User pays on Stripe's hosted page
-//   2. Stripe redirects to our backend GET /payments/success?session_id=...
-//   3. Backend verifies payment, creates Ticket in DB, updates event revenue
-//   4. Backend redirects here: /order-confirmation?session_id=...
-//   5. This page calls GET /payments/session/:sessionId to fetch order details
-//      and displays a confirmation summary to the user.
-//
-// Stripe has already emailed the receipt to the customer automatically.
-// ─────────────────────────────────────────────────────────────────────────────
 export default function OrderConfirmation() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const sessionId = searchParams.get("session_id");
+  const ticketId = searchParams.get("ticket_id");
 
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { data: ticket, error: ticketError, isLoading: ticketLoading } = useQuery({
+    queryKey: ["ticket", ticketId],
+    queryFn: async () => {
+      const token = getAuthToken();
+      const res = await fetch(`${import.meta.env.VITE_DEV_URI}tickets/${ticketId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error("Failed to fetch ticket details");
+      return res.json();
+    },
+    enabled: !!ticketId,
+    retry: 1,
+  });
 
-  useEffect(() => {
-    if (!sessionId) {
-      setError("No session ID found.");
-      setLoading(false);
-      return;
-    }
-
-    async function fetchSession() {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_DEV_URI}payments/session/${sessionId}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to retrieve order details.");
-        }
-        const data = await response.json();
-        setOrder(data);
-      } catch (err) {
-        setError(err.message || "Something went wrong.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchSession();
-  }, [sessionId]);
+  // Fallback receipt if no ticket_id
+  const { data: receipt } = useQuery({
+    queryKey: ["receipt", sessionId],
+    queryFn: async () => {
+      const res = await fetch(`${import.meta.env.VITE_DEV_URI}payments/session/${sessionId}`);
+      if (!res.ok) throw new Error("Failed to fetch receipt");
+      return res.json();
+    },
+    enabled: !!sessionId && !ticketId,
+    retry: 1,
+  });
 
   const handleAddToCalendar = () => {
-    if (!order) return;
-    const now = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    if (!ticket) return;
+    const event = ticket.eventId;
+    const eventDate = event?.date || new Date();
+    const dtStart = new Date(eventDate).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    const dtEnd = new Date(new Date(eventDate).getTime() + 2 * 60 * 60 * 1000).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
     const ics = [
-      "BEGIN:VCALENDAR",
-      "VERSION:2.0",
+      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ASC//EN",
       "BEGIN:VEVENT",
-      `UID:${sessionId}`,
-      `DTSTAMP:${now}`,
-      `DTSTART:${now}`,
-      `SUMMARY:Event Ticket`,
-      `DESCRIPTION:Payment confirmed. Session: ${sessionId}`,
-      "END:VEVENT",
-      "END:VCALENDAR",
+      `UID:${ticket._id}`,
+      `DTSTAMP:${dtStart}`, `DTSTART:${dtStart}`, `DTEND:${dtEnd}`,
+      `SUMMARY:${event?.title || "Event"}`,
+      `DESCRIPTION:Ticket ID: ${ticket.ticketCode || ticket._id}`,
+      `LOCATION:${event?.street ? `${event.street}, ${event.city}` : event?.city || ""}`,
+      "END:VEVENT", "END:VCALENDAR",
     ].join("\r\n");
     const blob = new Blob([ics], { type: "text/calendar" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "event.ics";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const a = document.createElement("a");
+    a.href = url; a.download = "event.ics";
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
   };
 
-  if (loading) {
-    return (
-      <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen flex items-center justify-center">
-        <div className="glass-card p-8 rounded-xl flex flex-col items-center shadow-xl border border-white/30 backdrop-blur-md">
-          <div className="w-16 h-16 border-4 border-t-purple-500 border-purple-200 rounded-full animate-spin mb-4"></div>
-          <p className="text-purple-700 font-medium">Loading your order...</p>
-        </div>
+  if (ticketLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-purple-50">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-10 h-10 rounded-full border-4 border-pink-200 border-t-purple-500 animate-spin" />
+        <p className="text-sm text-gray-400">Loading your ticket…</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (error) {
-    return (
-      <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen flex items-center justify-center p-6">
-        <div className="glass-card shadow-xl rounded-2xl p-10 text-center max-w-md border border-white/30 backdrop-blur-md">
-          <h1 className="text-3xl font-bold text-red-600 mb-4">Oops!</h1>
-          <p className="text-red-500 mb-6">{error}</p>
-          <button
-            className="btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none"
-            onClick={() => navigate("/")}
-          >
-            Return to Home
-          </button>
+  // Fallback — payment confirmed but ticket couldn't load
+  if (ticketError || !ticket) return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-purple-50 p-4">
+      <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-sm border border-green-100 text-center">
+        <div className="w-16 h-16 rounded-full bg-green-100/50 flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-green-600 mb-2">Payment Successful!</h2>
+        <p className="text-gray-500 text-sm mb-6">
+          Your payment was processed. Your ticket will appear in your profile shortly.
+        </p>
+        {receipt && (
+          <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left text-sm space-y-1">
+            <p className="text-gray-700"><span className="font-medium">Amount:</span> £{receipt.amountTotal}</p>
+            <p className="text-gray-700"><span className="font-medium">Quantity:</span> {receipt.quantity} ticket{receipt.quantity !== "1" ? "s" : ""}</p>
+            <p className="text-gray-700"><span className="font-medium">Email:</span> {receipt.customerEmail}</p>
+          </div>
+        )}
+        <div className="space-y-3">
+          <Link to="/profile" className="block w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:scale-105 transition-all font-medium">
+            View My Tickets
+          </Link>
+          <Link to="/events" className="block w-full px-6 py-3 glass border border-purple-300 text-purple-700 rounded-xl hover:bg-purple-100/30 transition-all font-medium">
+            Browse More Events
+          </Link>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
-    <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen py-8">
-      <div className="container mx-auto p-6 max-w-2xl">
-        <div className="glass-card shadow-xl rounded-2xl p-8 border border-white/30 backdrop-blur-md">
-          {/* Success icon */}
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-full bg-green-100/50 flex items-center justify-center mx-auto mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h1 className="text-3xl font-bold text-green-600 mb-2">Payment Confirmed!</h1>
-            <p className="text-purple-700">
-              A receipt has been sent to your email by Stripe.
-            </p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 py-10 px-4">
+      <div className="max-w-lg mx-auto">
 
-          {/* Order details */}
-          {order && (
-            <div className="bg-white/30 rounded-xl p-6 backdrop-blur-sm space-y-3 text-purple-800">
-              <h2 className="text-xl font-bold text-indigo-700 mb-4">Order Summary</h2>
-              <div className="flex justify-between">
-                <span className="font-medium text-pink-700">Email</span>
-                <span>{order.customerEmail}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium text-pink-700">Tickets</span>
-                <span>{order.quantity}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium text-pink-700">Amount Paid</span>
-                <span>£{Number(order.amountTotal).toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium text-pink-700">Status</span>
-                <span className="text-green-600 font-semibold capitalize">{order.paymentStatus}</span>
-              </div>
-              <div className="pt-2 border-t border-white/30">
-                <p className="text-xs text-gray-400 break-all">
-                  Reference: {sessionId}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-8 justify-center">
-            <button
-              className="btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none hover:scale-105 transition-all duration-300 shadow-md"
-              onClick={() => window.print()}
-            >
-              Print Confirmation
-            </button>
-            <button
-              className="btn glass border border-purple-300 text-purple-700 hover:bg-purple-100/30 hover:scale-105 transition-all duration-300"
-              onClick={handleAddToCalendar}
-            >
-              Add to Calendar
-            </button>
-            <button
-              className="btn glass border border-indigo-300 text-indigo-700 hover:bg-indigo-100/30 hover:scale-105 transition-all duration-300"
-              onClick={() => navigate("/")}
-            >
-              Back to Home
-            </button>
+        {/* Success banner */}
+        <div className="mb-6 bg-white rounded-2xl shadow-sm border border-green-100 p-6 text-center">
+          <div className="w-12 h-12 rounded-full bg-green-100/50 flex items-center justify-center mx-auto mb-3">
+            <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
           </div>
+          <h1 className="text-2xl font-bold text-green-600 mb-1">Payment Successful!</h1>
+          <p className="text-sm text-gray-500">Your ticket is confirmed. See details below.</p>
+        </div>
+
+        <div className="mb-6">
+          <TicketCard ticket={ticket} />
+        </div>
+
+        {/* Actions */}
+        <div className="space-y-3">
+          <button
+            onClick={() => window.print()}
+            className="w-full btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none hover:scale-105 transition-all duration-300 shadow-md"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            Print Ticket
+          </button>
+          <button
+            onClick={handleAddToCalendar}
+            className="w-full btn glass border border-purple-300 text-purple-700 hover:bg-purple-100/30 hover:scale-105 transition-all duration-300"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Add to Calendar
+          </button>
+          <Link
+            to="/profile"
+            className="block text-center w-full btn glass border border-gray-300 text-gray-700 hover:bg-gray-100/30 hover:scale-105 transition-all duration-300"
+          >
+            View All Tickets
+          </Link>
         </div>
       </div>
     </div>
