@@ -1,97 +1,65 @@
-import React from "react";
+import React, { useState } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useNavigate } from "react-router-dom";
-
 import { generateRecurringEvents } from "../util/util";
 
-// Custom toolbar component for better styling
 const CustomToolbar = (toolbar) => {
   const goToBack = () => {
-    toolbar.date.setMonth(toolbar.date.getMonth() - 1);
-    toolbar.onNavigate("prev");
+    const d = new Date(toolbar.date);
+    if (toolbar.view === "day") d.setDate(d.getDate() - 1);
+    else if (toolbar.view === "week") d.setDate(d.getDate() - 7);
+    else d.setMonth(d.getMonth() - 1);
+    toolbar.onNavigate("prev", d);
   };
-
   const goToNext = () => {
-    toolbar.date.setMonth(toolbar.date.getMonth() + 1);
-    toolbar.onNavigate("next");
+    const d = new Date(toolbar.date);
+    if (toolbar.view === "day") d.setDate(d.getDate() + 1);
+    else if (toolbar.view === "week") d.setDate(d.getDate() + 7);
+    else d.setMonth(d.getMonth() + 1);
+    toolbar.onNavigate("next", d);
   };
-
-  const goToCurrent = () => {
-    const now = new Date();
-    toolbar.date.setMonth(now.getMonth());
-    toolbar.date.setYear(now.getFullYear());
-    toolbar.onNavigate("current");
-  };
-
-  const label = () => {
-    const date = moment(toolbar.date);
-    return (
-      <span className="font-semibold text-purple-800 text-lg">
-        {date.format("MMMM")}{" "}
-        <span className="font-normal">{date.format("YYYY")}</span>
-      </span>
-    );
-  };
+  const goToCurrent = () => toolbar.onNavigate("TODAY");
 
   return (
-    <div className="flex flex-wrap items-center justify-between mb-6">
-      <div className="flex items-center space-x-2">
-        <button
-          onClick={goToBack}
-          className="btn btn-sm bg-white/60 hover:bg-pink-100/80 border-pink-200/50 text-pink-600 hover:text-pink-700 rounded-xl px-4 hover:scale-105 transition-all duration-300"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
+    <div className="flex flex-wrap items-center justify-between mb-5 gap-3">
+      <div className="flex items-center gap-2">
+        <button onClick={goToBack} className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 hover:scale-105 transition-all shadow-sm" style={{ cursor: "pointer" }}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
-          Prev
         </button>
-        <button
-          onClick={goToCurrent}
-          className="btn btn-sm bg-purple-100/60 hover:bg-purple-200/60 border-purple-200/50 text-purple-600 hover:text-purple-700 rounded-xl px-4 hover:scale-105 transition-all duration-300"
-        >
+        <button onClick={goToCurrent} className="px-4 h-9 rounded-xl bg-white/60 hover:bg-purple-50 border border-purple-200/50 text-purple-600 text-sm font-medium hover:scale-105 transition-all shadow-sm" style={{ cursor: "pointer" }}>
           Today
         </button>
-        <button
-          onClick={goToNext}
-          className="btn btn-sm bg-white/60 hover:bg-pink-100/80 border-pink-200/50 text-pink-600 hover:text-pink-700 rounded-xl px-4 hover:scale-105 transition-all duration-300"
-        >
-          Next
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 ml-1"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-              clipRule="evenodd"
-            />
+        <button onClick={goToNext} className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 hover:scale-105 transition-all shadow-sm" style={{ cursor: "pointer" }}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
           </svg>
         </button>
       </div>
-      <div className="text-center px-4 py-1">{label()}</div>
-      <div className="flex items-center space-x-2">
+
+      <span className="font-bold text-purple-800 text-lg">
+        {toolbar.view === "day"
+          ? moment(toolbar.date).format("ddd, D MMMM YYYY")
+          : toolbar.view === "week"
+          ? `${moment(toolbar.date).startOf("isoWeek").format("D MMM")} – ${moment(toolbar.date).endOf("isoWeek").format("D MMM YYYY")}`
+          : <>{moment(toolbar.date).format("MMMM ")}<span className="font-normal text-purple-500">{moment(toolbar.date).format("YYYY")}</span></>
+        }
+      </span>
+
+      <div className="flex items-center gap-1.5 bg-white/40 rounded-xl p-1 border border-white/60">
         {toolbar.views.map((view) => (
           <button
             key={view}
             onClick={() => toolbar.onView(view)}
-            className={`btn btn-sm ${
+            style={{ cursor: "pointer" }}
+            className={`px-3 h-7 rounded-lg text-sm font-medium transition-all duration-200 ${
               view === toolbar.view
-                ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none"
-                : "bg-white/60 hover:bg-indigo-100/60 border-indigo-200/50 text-indigo-600"
-            } rounded-xl px-4 hover:scale-105 transition-all duration-300`}
+                ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-sm"
+                : "text-purple-600 hover:bg-white/60"
+            }`}
           >
             {view.charAt(0).toUpperCase() + view.slice(1)}
           </button>
@@ -101,199 +69,230 @@ const CustomToolbar = (toolbar) => {
   );
 };
 
-// Set the moment locale to start the week on Monday
-moment.updateLocale("en", {
-  week: {
-    dow: 1, // Set Monday as the first day of the week (0 = Sunday, 1 = Monday)
-  },
-});
-
+moment.updateLocale("en", { week: { dow: 1 } });
 const localizer = momentLocalizer(moment);
 
-export default function RecurringEventsCalendar({ events }) {
-  const navigate = useNavigate();
+const EVENT_COLORS = [
+  { bg: "#ec4899", light: "#fce7f3", shadow: "rgba(236,72,153,0.35)" },
+  { bg: "#9333ea", light: "#f3e8ff", shadow: "rgba(147,51,234,0.35)" },
+  { bg: "#4f46e5", light: "#e0e7ff", shadow: "rgba(79,70,229,0.35)" },
+  { bg: "#0ea5e9", light: "#e0f2fe", shadow: "rgba(14,165,233,0.35)" },
+  { bg: "#10b981", light: "#d1fae5", shadow: "rgba(16,185,129,0.35)" },
+  { bg: "#f59e0b", light: "#fef3c7", shadow: "rgba(245,158,11,0.35)" },
+];
 
-  // Only generate occurrences for recurring events
-  const recurringEvents = events.filter((event) => event.isReoccurring);
-  const allRecurringEvents = recurringEvents.flatMap((event) =>
-    generateRecurringEvents(event)
+function getEventColor(title) {
+  const hash = title.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return EVENT_COLORS[Math.abs(hash) % EVENT_COLORS.length];
+}
+
+export default function RecurringEventsCalendar({ events, title = "Events Calendar" }) {
+  const navigate = useNavigate();
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
+  const expandedEvents = events.flatMap((event) =>
+    event.isReoccurring ? generateRecurringEvents(event) : [event]
   );
 
-  // Map events to the format required by react-big-calendar
-  const calendarEvents = allRecurringEvents.map((event) => ({
+  const calendarEvents = expandedEvents.map((event) => ({
     ...event,
-    title: event.street
-      ? `${event.title} - ${event.street} ${event.openingTime}`
-      : event.title, // Title of the event
-    start: new Date(event.date), // Start date of the event
-    end: new Date(event.date), // End date of the event (same as start for single-day events)
-    allDay: true, // Set to true for all-day events
-    // Include the rest of the event data for use in the event handler
+    title: event.title,
+    start: new Date(event.date),
+    end: new Date(event.date),
+    allDay: true,
   }));
+
   const dayPropGetter = (date) => {
     const isToday = moment().isSame(date, "day");
     const isCurrentMonth = moment(date).month() === moment().month();
-    const hasEvent = calendarEvents.some((event) =>
-      moment(event.start).isSame(date, "day")
-    );
+    const hasEvent = calendarEvents.some((e) => moment(e.start).isSame(date, "day"));
 
-    // Base styles all days will have
-    const baseStyle = {
-      transition: "all 0.2s ease",
-      borderRadius: "0.75rem",
-      margin: "1px",
-      height: "calc(100% - 2px)",
-    };
-
-    if (isToday) {
-      return {
-        style: {
-          ...baseStyle,
-          backgroundColor: "rgba(243, 232, 255, 0.7)", // light lavender
-          border: "2px solid #f9a8d4", // pink border
-          boxShadow: "0 4px 12px rgba(249, 168, 212, 0.25)",
-        },
-        className: "today-cell",
-      };
-    }
-
-    if (hasEvent) {
-      return {
-        style: {
-          ...baseStyle,
-          backgroundColor: "rgba(233, 213, 255, 0.3)", // very light purple
-          border: "1px solid rgba(233, 213, 255, 0.5)",
-        },
-        className: "event-day-cell",
-      };
-    }
-
-    if (!isCurrentMonth) {
-      return {
-        style: {
-          ...baseStyle,
-          backgroundColor: "rgba(249, 250, 251, 0.2)", // very faint gray
-          color: "#a1a1aa", // muted text
-        },
-        className: "non-month-cell",
-      };
-    }
-
-    // Default style for current month days without events
-    return {
+    if (isToday) return {
       style: {
-        ...baseStyle,
-        backgroundColor: "rgba(255, 255, 255, 0.3)",
-        border: "1px solid rgba(255, 255, 255, 0.4)",
-        backdropFilter: "blur(4px)",
+        backgroundColor: "rgba(253, 220, 235, 0.85)",
+        boxShadow: "inset 0 0 0 2px rgba(236, 72, 153, 0.7)",
       },
-      className: "normal-cell",
     };
+    if (hasEvent) return {
+      style: {
+        backgroundColor: "rgba(196, 181, 253, 0.2)",
+        cursor: "pointer",
+      },
+    };
+    if (!isCurrentMonth) return {
+      style: { backgroundColor: "rgba(249, 250, 251, 0.4)", color: "#a1a1aa" },
+    };
+    return {};
   };
+
   const eventStyleGetter = (event) => {
-    // Generate a deterministic color based on the event title
-    const getEventColor = (title) => {
-      const colors = [
-        { bg: "rgba(236, 72, 153, 0.85)", shadow: "rgba(236, 72, 153, 0.3)" }, // pink
-        { bg: "rgba(147, 51, 234, 0.85)", shadow: "rgba(147, 51, 234, 0.3)" }, // purple
-        { bg: "rgba(79, 70, 229, 0.85)", shadow: "rgba(79, 70, 229, 0.3)" }, // indigo
-        { bg: "rgba(59, 130, 246, 0.85)", shadow: "rgba(59, 130, 246, 0.3)" }, // blue
-        { bg: "rgba(16, 185, 129, 0.85)", shadow: "rgba(16, 185, 129, 0.3)" }, // emerald
-      ];
-
-      // Simple hash function to get a consistent color for the same event
-      const hash = Math.abs(
-        title.split("").reduce((acc, char) => {
-          return acc + char.charCodeAt(0);
-        }, 0)
-      );
-
-      return colors[hash % colors.length];
-    };
-
     const color = getEventColor(event.title);
-
     return {
       style: {
-        background: `linear-gradient(45deg, ${color.bg}, ${color.bg.replace(
-          ", 0.85",
-          ", 0.7"
-        )})`,
-        borderRadius: "0.5rem",
+        background: color.bg,
+        borderRadius: "4px",
         border: "none",
+        borderLeft: `4px solid rgba(0,0,0,0.7)`,
         color: "white",
-        fontWeight: 500,
-        padding: "3px 10px",
-        transition: "all 0.2s ease",
-        boxShadow: `0 2px 8px ${color.shadow}`,
-        fontSize: "0.85rem",
+        padding: "1px 6px",
+        boxShadow: `0 1px 4px ${color.shadow}`,
+        cursor: "pointer",
+        overflow: "hidden",
       },
-      className: "calendar-event",
     };
   };
 
-  const handleSelectEvent = (event) => {
-    // Navigate to the event details page
-    navigate(`/events/${event._id}`);
+  const handleSelectEvent = (event) => setSelectedEvent(event);
+  const handleConfirmNavigate = () => {
+    if (selectedEvent) navigate(`/events/${selectedEvent._id}`);
+    setSelectedEvent(null);
   };
+
   return (
-    <div className="w-full px-0 py-6">
-      <div className="glass-card p-4 md:p-8 rounded-2xl border border-white/30 shadow-xl backdrop-blur-md">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-center text-purple-700 mb-2">
-            Sports Events Calendar
-          </h2>
-          <div className="h-1 w-32 bg-gradient-to-r from-pink-400 to-purple-500 mx-auto rounded-full"></div>
+    <div className="w-full py-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6 px-2">
+        <div>
+          <h2 className="text-2xl font-bold text-purple-800">{title}</h2>
+          <div className="h-1 w-16 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full mt-1.5"></div>
         </div>
+        <div className="flex items-center gap-4 text-xs text-purple-500">
+          <span className="flex items-center gap-1.5">
+            <span className="w-3.5 h-3.5 rounded-full bg-pink-200 border-2 border-pink-500 inline-block"></span>
+            Today
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3.5 h-3.5 rounded-full bg-purple-300 border border-purple-500 inline-block"></span>
+            Has event
+          </span>
+        </div>
+      </div>
+
+      {/* Calendar */}
+      <div className="rounded-2xl overflow-hidden border border-white/40 shadow-inner bg-white/20 backdrop-blur-sm">
         <Calendar
           localizer={localizer}
           events={calendarEvents}
           startAccessor="start"
           endAccessor="end"
-          style={{
-            height: 600,
-            width: "100%",
-            background: "rgba(255, 255, 255, 0.3)",
-            borderRadius: "1.25rem",
-          }}
+          style={{ height: 580, width: "100%", background: "transparent" }}
           onSelectEvent={handleSelectEvent}
           views={["month", "week", "day"]}
           popup
           dayLayoutAlgorithm="no-overlap"
           dayPropGetter={dayPropGetter}
           eventPropGetter={eventStyleGetter}
-          className="glass-calendar"
           formats={{
-            dayHeaderFormat: (date) => moment(date).format("dddd, MMMM D"),
-            dayFormat: (date) => moment(date).format("D"),
+            dayHeaderFormat: (date) => moment(date).format("dddd, D MMMM YYYY"),
+            dayFormat: (date) => moment(date).format("ddd DD"),
+            weekdayFormat: (date) => moment(date).format("ddd D"),
             monthHeaderFormat: (date) => moment(date).format("MMMM YYYY"),
           }}
           components={{
             toolbar: CustomToolbar,
             event: ({ event }) => (
-              <div className="tooltip-container">
-                <div className="event-content text-sm truncate">
-                  {event.title}
+              <div
+                style={{ cursor: "pointer", overflow: "hidden", lineHeight: 1.3 }}
+                title={[event.title, event.openingTime, event.city].filter(Boolean).join(" · ")}
+              >
+                <div style={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  fontSize: "0.72rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.01em",
+                  textShadow: "0 1px 2px rgba(0,0,0,0.15)",
+                }}>
+                  {event.isReoccurring ? "↻ " : ""}{event.title}
                 </div>
-                <div className="tooltip-content">
-                  <div className="font-bold mb-1">{event.title}</div>
-                  {event.street && (
-                    <div className="text-xs mb-1">
-                      📍 {event.street}, {event.city}
-                    </div>
-                  )}
-                  {event.openingTime && (
-                    <div className="text-xs">🕒 {event.openingTime}</div>
-                  )}
-                  <div className="text-xs mt-1 opacity-80">
-                    Click for details
+                {event.openingTime && (
+                  <div style={{
+                    fontSize: "0.62rem",
+                    opacity: 0.85,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    marginTop: 1,
+                  }}>
+                    {event.openingTime}
                   </div>
-                </div>
+                )}
               </div>
             ),
           }}
         />
       </div>
+
+      {/* Event detail popup */}
+      {selectedEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setSelectedEvent(null)}>
+          {/* overflow-hidden so the top bar sits flush with no padding gap */}
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/60 overflow-hidden max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            {/* Coloured top bar — flush because parent has overflow-hidden, no negative margins needed */}
+            <div style={{ background: getEventColor(selectedEvent.title).bg, height: 6 }} />
+
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-purple-900">{selectedEvent.title}</h3>
+                  {selectedEvent.isReoccurring && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-600 font-medium mt-1 inline-block">🔁 Recurring</span>
+                  )}
+                </div>
+                <button onClick={() => setSelectedEvent(null)} className="text-gray-400 hover:text-gray-600 ml-2 transition-colors" style={{ cursor: "pointer" }}>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-2.5 text-sm text-purple-700 mb-5">
+                <div className="flex items-center gap-2.5">
+                  <svg className="w-4 h-4 text-pink-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>{moment(selectedEvent.start).format("dddd, D MMMM YYYY")}</span>
+                </div>
+                {selectedEvent.openingTime && (
+                  <div className="flex items-center gap-2.5">
+                    <svg className="w-4 h-4 text-purple-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{selectedEvent.openingTime}</span>
+                  </div>
+                )}
+                {(selectedEvent.street || selectedEvent.city) && (
+                  <div className="flex items-center gap-2.5">
+                    <svg className="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>{[selectedEvent.street, selectedEvent.city].filter(Boolean).join(", ")}</span>
+                  </div>
+                )}
+                {selectedEvent.ticketPrice > 0 && (
+                  <div className="flex items-center gap-2.5">
+                    <svg className="w-4 h-4 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                    </svg>
+                    <span>£{selectedEvent.ticketPrice} {selectedEvent.isTournament ? "per player" : "per ticket"}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <button onClick={() => setSelectedEvent(null)} style={{ cursor: "pointer" }} className="flex-1 py-2 rounded-xl border border-purple-200 text-purple-600 text-sm hover:bg-purple-50 transition-all">
+                  Close
+                </button>
+                <button onClick={handleConfirmNavigate} style={{ cursor: "pointer" }} className="flex-1 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium hover:scale-105 transition-all shadow-sm">
+                  View Details →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
