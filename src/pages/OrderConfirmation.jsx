@@ -23,6 +23,23 @@ export default function OrderConfirmation() {
     retry: 1,
   });
 
+  // Fetch sibling tickets to get total count for this payment
+  const { data: groupTickets } = useQuery({
+    queryKey: ["tickets-by-payment", ticket?.paymentId],
+    queryFn: async () => {
+      const token = getAuthToken();
+      const res = await fetch(`${import.meta.env.VITE_DEV_URI}tickets/by-payment/${ticket.paymentId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) return [ticket];
+      return res.json();
+    },
+    enabled: !!ticket?.paymentId,
+    retry: 0,
+  });
+
+  const groupCount = groupTickets?.length ?? 1;
+
   // Fallback receipt if no ticket_id
   const { data: receipt } = useQuery({
     queryKey: ["receipt", sessionId],
@@ -117,6 +134,16 @@ export default function OrderConfirmation() {
 
         <div className="mb-6">
           <TicketCard ticket={ticket} />
+          {groupCount > 1 && (
+            <div className="mt-3 text-center">
+              <p className="text-sm text-gray-500">
+                This is <span className="font-semibold text-purple-600">ticket 1 of {groupCount}</span> from this order.{" "}
+                <Link to="/profile" className="text-purple-600 underline underline-offset-2 hover:text-purple-800">
+                  View all tickets →
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Actions */}

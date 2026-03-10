@@ -166,7 +166,7 @@ export default function ProfilePage() {
 
 function TicketRow({ ticket }) {
   const event = ticket.eventId;
-  const paid = (event?.ticketPrice ?? 0) * (ticket.quantity || 1);
+  const paid = event?.ticketPrice ?? 0;
 
   return (
     <Link
@@ -204,7 +204,7 @@ function TicketRow({ ticket }) {
           {event?.city && <span> · {event.city}</span>}
         </p>
         <p className="text-xs text-gray-400 mt-1 font-mono">
-          {ticket.ticketCode ?? "—"} · {ticket.quantity || 1} ticket{(ticket.quantity || 1) !== 1 ? "s" : ""}
+          {ticket.ticketCode ?? "—"} · 1 ticket
         </p>
       </div>
 
@@ -309,13 +309,13 @@ function groupTicketsByPaymentId(tickets) {
       };
     }
     grouped[paymentId].tickets.push(ticket);
-    grouped[paymentId].totalQuantity += (ticket.quantity || 1);
+    grouped[paymentId].totalQuantity += 1; // Each ticket is now a single document
     grouped[paymentId].createdAt = ticket.createdAt || grouped[paymentId].createdAt;
     
-    // Calculate total amount
+    // Calculate total amount (each ticket is priced at the event's ticket price)
     const event = ticket.eventId;
     const ticketPrice = event?.ticketPrice ?? 0;
-    grouped[paymentId].totalAmount += ticketPrice * (ticket.quantity || 1);
+    grouped[paymentId].totalAmount += ticketPrice;
   });
 
   return Object.values(grouped).sort((a, b) => {

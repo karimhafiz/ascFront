@@ -27,6 +27,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import SportsPage from "./pages/Sports";
 import ProfilePage from "./pages/ProfilePage";
 import TicketPage from "./pages/TicketPage";
+import TicketVerify from "./pages/TicketVerify";
 import { eventDetailLoader } from "./util/util";
 
 
@@ -47,6 +48,7 @@ const router = createBrowserRouter([
       { path: "contact", element: <Contact /> },
       { path: "profile", element: <ProfilePage /> },
       { path: "tickets/:ticketId", element: <TicketPage /> },
+      { path: "tickets/verify/:ticketCode", element: <TicketVerify /> },
       {
         path: "events",
         element: <EventRoot />,

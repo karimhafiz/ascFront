@@ -12,10 +12,11 @@ function formatDate(dateStr) {
  * Shared ticket card used by TicketPage and OrderConfirmation.
  * Props:
  *   ticket — full ticket object with populated eventId and user
+ *   ticketsInGroup — optional prop with number of tickets in the same payment group (for display on order confirmation)
  */
-export default function TicketCard({ ticket }) {
+export default function TicketCard({ ticket, ticketsInGroup }) {
   const event = ticket.eventId;
-  const amountPaid = ((event?.ticketPrice ?? 0) * (ticket.quantity || 1)).toFixed(2);
+  const amountPaid = (event?.ticketPrice ?? 0).toFixed(2);
   const qrValue = ticket.ticketCode
     ? `${import.meta.env.VITE_FRONT_END_URL}tickets/verify/${ticket.ticketCode}`
     : `${import.meta.env.VITE_FRONT_END_URL}tickets/verify/${ticket._id}`;
@@ -83,12 +84,6 @@ export default function TicketCard({ ticket }) {
           {event?.postCode && <p className="text-xs text-gray-400">{event.postCode}</p>}
         </div>
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Quantity</p>
-          <p className="text-sm font-semibold text-gray-800">
-            {ticket.quantity || 1} ticket{(ticket.quantity || 1) !== 1 ? "s" : ""}
-          </p>
-        </div>
-        <div>
           <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">
             {buyerName ? "Name" : "Email"}
           </p>
@@ -99,6 +94,12 @@ export default function TicketCard({ ticket }) {
           <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Amount Paid</p>
           <p className="text-sm font-bold text-purple-700">£{amountPaid}</p>
         </div>
+        {ticketsInGroup && (
+          <div>
+            <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Quantity</p>
+            <p className="text-sm font-semibold text-gray-800">{ticketsInGroup} ticket{ticketsInGroup !== 1 ? "s" : ""}</p>
+          </div>
+        )}
       </div>
 
       {/* Footer */}
