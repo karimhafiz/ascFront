@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { getAuthToken } from "../auth/auth";
+
 import {
   Form,
   useNavigate,
@@ -235,6 +236,21 @@ const EventForm = ({ method, event = {} }) => {
               defaultValue={event.ticketPrice || ""}
             />
           </div>
+          {/* Tickets Available */}
+          <div className="form-control">
+            <label htmlFor="ticketsAvailable" className={labelClass}>
+              Tickets Available
+            </label>
+            <input
+              id="ticketsAvailable"
+              type="number"
+              min="0"
+              name="ticketsAvailable"
+              className={fieldClass}
+              defaultValue={event.ticketsAvailable ?? ""}
+            />
+          </div>
+
           {/* Featured */}
           <div className="form-control">
             <label htmlFor="featured" className={labelClass}>
@@ -481,6 +497,7 @@ export async function action({ request, params }) {
     dayOfWeek: data.get("dayOfWeek") || null,
     typeOfEvent: data.get("typeOfEvent") || "ASC",
     isTournament: data.get("isTournament") === "true",
+    ticketsAvailable: data.get("ticketsAvailable") !== "" ? parseInt(data.get("ticketsAvailable"), 10) : undefined,
   };
 
   // Define token before using it
@@ -514,11 +531,8 @@ export async function action({ request, params }) {
     const responseText = await response.text();
 
     let responseData;
-    try {
       responseData = JSON.parse(responseText);
-    } catch  {
-      responseData = { message: responseText };
-    }
+
 
     if (!response.ok) {
       return {

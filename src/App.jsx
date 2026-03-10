@@ -20,14 +20,17 @@ import { loginAction, signupAction } from "./auth/authActions";
 import { logoutAction, combinedLoader } from "./auth/auth";
 import { action as eventAction } from "./components/EventForm";
 import CancelPage from "./pages/CancelPage";
-import SuccessPage from "./pages/SuccessPage";
 import TeamConfirmationPage from "./pages/TeamConfirmationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ModeratorRoute from "./components/ModeratorRoute";
 import AdminDashboard from "./pages/AdminDashboard";
 import SportsPage from "./pages/Sports";
 import ProfilePage from "./pages/ProfilePage";
+import TicketPage from "./pages/TicketPage";
+import TicketVerify from "./pages/TicketVerify";
 import { eventDetailLoader } from "./util/util";
+
+
 
 const router = createBrowserRouter([
   {
@@ -39,12 +42,13 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "cancel", element: <CancelPage /> },
-      { path: "success", element: <SuccessPage /> },
       { path: "team-confirmation", element: <TeamConfirmationPage /> },
       { path: "order-confirmation", element: <OrderConfirmation /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
       { path: "profile", element: <ProfilePage /> },
+      { path: "tickets/:ticketId", element: <TicketPage /> },
+      { path: "tickets/verify/:ticketCode", element: <TicketVerify /> },
       {
         path: "events",
         element: <EventRoot />,
