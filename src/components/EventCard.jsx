@@ -88,7 +88,14 @@ export default function EventCard({ event }) {
         {/* Right side - Content */}
         <div className="md:w-2/3 w-full p-4">
           {/* Title */}
-          <h2 className="text-xl font-bold text-purple-700">{event.title}</h2>
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="text-xl font-bold text-purple-700">{event.title}</h2>
+            {event.isReoccurring && (
+              <span className="flex-shrink-0 text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-600 font-medium border border-purple-200">
+                🔁 Recurring
+              </span>
+            )}
+          </div>
 
           {/* Date and Location */}
           <div className="flex flex-wrap mt-2 text-sm text-indigo-700">
