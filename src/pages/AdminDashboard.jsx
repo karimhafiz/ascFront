@@ -31,12 +31,12 @@ function formatDate(d) {
   return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-const TABS = ["Tickets", "Revenue", "Teams", "Users"];
+const TABS = ["Tickets", "Revenue", "Teams", "Courses", "Users"];
 
 const roleBadgeClass = {
-  admin:     "bg-yellow-100 text-yellow-800 border-yellow-300",
+  admin: "bg-yellow-100 text-yellow-800 border-yellow-300",
   moderator: "bg-blue-100 text-blue-700 border-blue-200",
-  user:      "bg-gray-100 text-gray-600 border-gray-200",
+  user: "bg-gray-100 text-gray-600 border-gray-200",
 };
 
 // ─── Tab: Tickets ─────────────────────────────────────────────────────────────
@@ -327,10 +327,122 @@ function UsersTab({ users, currentUserId, onRoleChange }) {
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
+// ─── Tab: Courses ─────────────────────────────────────────────────────────────
+
+function CoursesTab({ enrollments, courses }) {
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState("enrollments");
+
+  const filteredEnrollments = enrollments.filter(e =>
+    e.buyerEmail?.toLowerCase().includes(search.toLowerCase()) ||
+    e.courseId?.title?.toLowerCase().includes(search.toLowerCase())
+  );
+  const filteredCourses = courses.filter(c =>
+    c.title?.toLowerCase().includes(search.toLowerCase()) ||
+    c.instructor?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Search courses or emails…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="flex-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/60 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+        />
+        <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
+          {["enrollments", "courses"].map(v => (
+            <button key={v} onClick={() => setView(v)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${view === v ? "bg-white shadow-sm text-purple-700" : "text-gray-500 hover:text-gray-700"}`}>
+              {v}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {view === "enrollments" && (
+        <>
+          <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
+                  <th className="px-4 py-3 font-semibold text-purple-700">Course</th>
+                  <th className="px-4 py-3 font-semibold text-purple-700">Buyer Email</th>
+                  <th className="px-4 py-3 font-semibold text-purple-700">Participants</th>
+                  <th className="px-4 py-3 font-semibold text-purple-700">Status</th>
+                  <th className="px-4 py-3 font-semibold text-purple-700">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {filteredEnrollments.length === 0 ? (
+                  <tr><td colSpan={5} className="text-center py-10 text-gray-400">No enrollments found</td></tr>
+                ) : filteredEnrollments.map(e => (
+                  <tr key={e._id} className="bg-white hover:bg-pink-50/30 transition-colors">
+                    <td className="px-4 py-3 font-medium text-gray-800">{e.courseId?.title ?? "—"}</td>
+                    <td className="px-4 py-3 text-gray-600">{e.buyerEmail}</td>
+                    <td className="px-4 py-3 text-gray-600">{e.participants?.length > 0 ? e.participants.map(p => p.name).join(", ") : "—"}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${e.status === "paid" ? "bg-green-50 text-green-700 border-green-200" : "bg-blue-50 text-blue-600 border-blue-200"}`}>
+                        {e.status === "paid" ? "✓ Paid" : "Free"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-500">{formatDate(e.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-gray-400 mt-2">{filteredEnrollments.length} enrollment{filteredEnrollments.length !== 1 ? "s" : ""}</p>
+        </>
+      )}
+
+      {view === "courses" && (
+        <>
+          <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
+                  <th className="px-4 py-3 font-semibold text-purple-700">Title</th>
+                  <th className="px-4 py-3 font-semibold text-purple-700">Instructor</th>
+                  <th className="px-4 py-3 font-semibold text-purple-700">Category</th>
+                  <th className="px-4 py-3 font-semibold text-purple-700">Price</th>
+                  <th className="px-4 py-3 font-semibold text-purple-700">Enrolled</th>
+                  <th className="px-4 py-3 font-semibold text-purple-700">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {filteredCourses.length === 0 ? (
+                  <tr><td colSpan={6} className="text-center py-10 text-gray-400">No courses found</td></tr>
+                ) : filteredCourses.map(c => (
+                  <tr key={c._id} className="bg-white hover:bg-pink-50/30 transition-colors">
+                    <td className="px-4 py-3 font-medium text-gray-800">{c.title}</td>
+                    <td className="px-4 py-3 text-gray-600">{c.instructor}</td>
+                    <td className="px-4 py-3 text-gray-600">{c.category}</td>
+                    <td className="px-4 py-3 text-gray-600">{c.price > 0 ? `£${c.price}` : "Free"}</td>
+                    <td className="px-4 py-3 text-gray-600">{c.currentEnrollment}{c.maxEnrollment ? ` / ${c.maxEnrollment}` : ""}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${c.enrollmentOpen ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-50 text-gray-500 border-gray-200"}`}>
+                        {c.enrollmentOpen ? "Open" : "Closed"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-gray-400 mt-2">{filteredCourses.length} course{filteredCourses.length !== 1 ? "s" : ""}</p>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
-  const [data, setData]       = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("Tickets");
   const navigate = useNavigate();
 
@@ -339,8 +451,9 @@ export default function AdminDashboard() {
 
   // Get current user id from token
   let currentUserId = null;
-    const token = localStorage.getItem("token");
-    currentUserId = JSON.parse(atob(token.split(".")[1])).id;
+  const token = localStorage.getItem("token");
+  currentUserId = JSON.parse(atob(token.split(".")[1])).id;
+
 
   useEffect(() => {
     if (!role || (role !== "admin" && role !== "moderator")) {
@@ -433,6 +546,11 @@ export default function AdminDashboard() {
                   {data.teams.length}
                 </span>
               )}
+              {tab === "Courses" && data?.enrollments && (
+                <span className={"ml-1.5 text-xs px-1.5 py-0.5 rounded-full " + (activeTab === tab ? "bg-white/20" : "bg-gray-100 text-gray-500")}>
+                  {data.enrollments.length}
+                </span>
+              )}
               {tab === "Users" && data?.users && (
                 <span className={"ml-1.5 text-xs px-1.5 py-0.5 rounded-full " + (activeTab === tab ? "bg-white/20" : "bg-gray-100 text-gray-500")}>
                   {data.users.length}
@@ -446,8 +564,11 @@ export default function AdminDashboard() {
         <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-gray-100 shadow-sm p-6">
           {activeTab === "Tickets" && <TicketsTab tickets={data.tickets} />}
           {activeTab === "Revenue" && <RevenueTab events={data.events} />}
-          {activeTab === "Teams"   && <TeamsTab teams={data.teams} />}
-          {activeTab === "Users"   && isAdmin && (
+          {activeTab === "Teams" && <TeamsTab teams={data.teams} />}
+          {activeTab === "Courses" && (
+            <CoursesTab enrollments={data.enrollments ?? []} courses={data.courses ?? []} />
+          )}
+          {activeTab === "Users" && isAdmin && (
             <UsersTab
               users={data.users}
               currentUserId={currentUserId}
