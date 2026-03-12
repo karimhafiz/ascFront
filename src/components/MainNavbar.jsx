@@ -24,7 +24,7 @@ export default function Navbar() {
       return payload?.email ?? null;
     } catch { return null; }
   })();
-  
+
 
   const toggleDropdown = (e) => {
     e.preventDefault();
@@ -86,11 +86,10 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
           ? "bg-white/70 backdrop-blur-xl shadow-lg py-2"
           : "bg-white/30 backdrop-blur-md py-4"
-      } border-b border-white/40`}
+        } border-b border-white/40`}
     >
       <div className="container mx-auto flex justify-between items-center px-4">
         {/* Logo */}
@@ -159,11 +158,10 @@ export default function Navbar() {
           <li>
             <Link
               to="/"
-              className={`relative group flex items-center px-3 py-2 rounded-full ${
-                isActive("/")
+              className={`relative group flex items-center px-3 py-2 rounded-full ${isActive("/")
                   ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-700 font-medium"
                   : "text-pink-600 hover:bg-pink-100/40"
-              } transition-all duration-300`}
+                } transition-all duration-300`}
               onClick={closeMenu}
             >
               <svg
@@ -188,11 +186,10 @@ export default function Navbar() {
           >
             <div
               onClick={toggleDropdown}
-              className={`relative flex items-center px-3 py-2 rounded-full cursor-pointer ${
-                location.pathname.includes("/events")
+              className={`relative flex items-center px-3 py-2 rounded-full cursor-pointer ${location.pathname.includes("/events")
                   ? "bg-gradient-to-r from-indigo-500/20 to-blue-500/20 text-indigo-700 font-medium"
                   : "text-indigo-600 hover:bg-indigo-100/40"
-              } transition-all duration-300`}
+                } transition-all duration-300`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -208,9 +205,8 @@ export default function Navbar() {
               </svg>
               Events
               <svg
-                className={`ml-1 w-3.5 h-3.5 transition-transform duration-300 ${
-                  dropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`ml-1 w-3.5 h-3.5 transition-transform duration-300 ${dropdownOpen ? "rotate-180" : ""
+                  }`}
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -221,11 +217,10 @@ export default function Navbar() {
               )}
             </div>
             <ul
-              className={`absolute left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl z-50 border border-white/30 overflow-hidden md:left-1/2 md:-translate-x-1/2 transition-all duration-300 ${
-                dropdownOpen
+              className={`absolute left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl z-50 border border-white/30 overflow-hidden md:left-1/2 md:-translate-x-1/2 transition-all duration-300 ${dropdownOpen
                   ? "opacity-100 translate-y-0 pointer-events-auto"
                   : "opacity-0 -translate-y-2 pointer-events-none"
-              }`}
+                }`}
             >
               <li>
                 <Link
@@ -269,13 +264,24 @@ export default function Navbar() {
             </ul>
           </li>
           <li>
+            <Link to="/courses" className={`relative group flex items-center px-3 py-2 rounded-full ${isActive("/courses") ? "bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-700 font-medium" : "text-purple-600 hover:bg-purple-100/40"} transition-all duration-300`} onClick={closeMenu}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              Courses
+              {isActive("/courses") && (
+                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></span>
+              )}
+              <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+            </Link>
+          </li>
+          <li>
             <Link
               to="/about"
-              className={`relative group flex items-center px-3 py-2 rounded-full ${
-                isActive("/about")
+              className={`relative group flex items-center px-3 py-2 rounded-full ${isActive("/about")
                   ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-700 font-medium"
                   : "text-green-600 hover:bg-green-100/40"
-              } transition-all duration-300`}
+                } transition-all duration-300`}
               onClick={closeMenu}
             >
               <svg
@@ -296,11 +302,10 @@ export default function Navbar() {
           <li>
             <Link
               to="/contact"
-              className={`relative group flex items-center px-3 py-2 rounded-full ${
-                isActive("/contact")
+              className={`relative group flex items-center px-3 py-2 rounded-full ${isActive("/contact")
                   ? "bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-700 font-medium"
                   : "text-blue-600 hover:bg-blue-100/40"
-              } transition-all duration-300`}
+                } transition-all duration-300`}
               onClick={closeMenu}
             >
               <svg
@@ -325,11 +330,10 @@ export default function Navbar() {
               <li>
                 <Link
                   to="/login"
-                  className={`relative group flex items-center px-3 py-2 rounded-full ${
-                    isActive("/login")
+                  className={`relative group flex items-center px-3 py-2 rounded-full ${isActive("/login")
                       ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-700 font-medium"
                       : "text-pink-600 hover:bg-pink-100/40"
-                  } transition-all duration-300`}
+                    } transition-all duration-300`}
                   onClick={closeMenu}
                 >
                   Login
@@ -341,11 +345,10 @@ export default function Navbar() {
               <li>
                 <Link
                   to="/signup"
-                  className={`relative group flex items-center px-3 py-2 rounded-full ${
-                    isActive("/signup")
+                  className={`relative group flex items-center px-3 py-2 rounded-full ${isActive("/signup")
                       ? "bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-700 font-medium"
                       : "text-purple-600 hover:bg-purple-100/40"
-                  } transition-all duration-300`}
+                    } transition-all duration-300`}
                   onClick={closeMenu}
                 >
                   Sign Up
@@ -360,11 +363,10 @@ export default function Navbar() {
             <li>
               <Link
                 to="/admin"
-                className={`relative group flex items-center px-3 py-2 rounded-full ${
-                  isActive("/admin")
+                className={`relative group flex items-center px-3 py-2 rounded-full ${isActive("/admin")
                     ? "bg-gradient-to-r from-yellow-400/20 to-yellow-600/20 text-yellow-700 font-medium"
                     : "text-yellow-600 hover:bg-yellow-100/40"
-                } transition-all duration-300`}
+                  } transition-all duration-300`}
                 onClick={closeMenu}
               >
                 Dashboard
@@ -386,11 +388,10 @@ export default function Navbar() {
             >
               <div
                 onClick={() => setUserDropdownOpen(true)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-full cursor-pointer transition-all duration-300 ${
-                  userDropdownOpen
+                className={`flex items-center gap-2 px-3 py-2 rounded-full cursor-pointer transition-all duration-300 ${userDropdownOpen
                     ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20"
                     : "hover:bg-pink-100/40"
-                }`}
+                  }`}
               >
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm shadow-pink-200">
                   {userEmail ? userEmail[0].toUpperCase() : "?"}
@@ -407,9 +408,8 @@ export default function Navbar() {
                 </svg>
               </div>
 
-              <div className={`absolute right-1/2 translate-x-1/2 mt-1 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 overflow-hidden z-50 transition-all duration-200 ${
-                userDropdownOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
-              }`}>
+              <div className={`absolute right-1/2 translate-x-1/2 mt-1 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 overflow-hidden z-50 transition-all duration-200 ${userDropdownOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+                }`}>
                 <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-pink-50/60 to-purple-50/60">
                   <p className="text-xs font-medium text-pink-600 truncate">{userEmail}</p>
                 </div>

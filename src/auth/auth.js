@@ -15,15 +15,17 @@ export async function combinedLoader() {
 
   console.log("fetching:", `${import.meta.env.VITE_DEV_URI}events`);
   const response = await fetch(`${import.meta.env.VITE_DEV_URI}events`);
+  const courseResponse = await fetch(`${import.meta.env.VITE_DEV_URI}courses`);
   console.log("response status:", response.status);
   
   if (!response.ok) {
     throw new Error("Failed to fetch events");
   }
   const events = await response.json();
+  const courses = await courseResponse.json();
   console.log("events loaded:", events.length);
 
-  return { token, events };
+  return { token, events, courses };
 }
 
 export function checkAuthLoader() {

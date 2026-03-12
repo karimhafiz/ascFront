@@ -29,7 +29,11 @@ import ProfilePage from "./pages/ProfilePage";
 import TicketPage from "./pages/TicketPage";
 import TicketVerify from "./pages/TicketVerify";
 import { eventDetailLoader } from "./util/util";
-
+import CoursesPage from "./pages/Courses";
+import CourseConfirmation from "./pages/CourseConfirmation";
+import CourseDetails from "./pages/CourseDetails";
+import CourseFormPage from "./pages/CourseFormPage";
+import { action as courseAction } from "./components/CourseForm";
 
 
 const router = createBrowserRouter([
@@ -49,6 +53,16 @@ const router = createBrowserRouter([
       { path: "profile", element: <ProfilePage /> },
       { path: "tickets/:ticketId", element: <TicketPage /> },
       { path: "tickets/verify/:ticketCode", element: <TicketVerify /> },
+      { path: "courses", element: <CoursesPage /> },
+      { path: "courses/:courseId", element: <CourseDetails /> },
+      {
+        element: <ModeratorRoute />,
+        children: [
+          { path: "courses/new", element: <CourseFormPage />, action: courseAction },
+          { path: "courses/:courseId/edit", element: <CourseFormPage />, action: courseAction },
+        ],
+      },
+      { path: "course-confirmation", element: <CourseConfirmation /> },
       {
         path: "events",
         element: <EventRoot />,
