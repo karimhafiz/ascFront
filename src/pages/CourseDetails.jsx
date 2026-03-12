@@ -22,6 +22,16 @@ export default function CourseDetails() {
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [enrollError, setEnrollError] = useState("");
+  const [multiMode, setMultiMode] = useState(false);
+  const [participants, setParticipants] = useState([{ name: "", age: "", email: "" }]);
+
+  const addParticipant = () => setParticipants(p => [...p, { name: "", age: "", email: "" }]);
+  const removeParticipant = (i) => setParticipants(p => p.filter((_, idx) => idx !== i));
+  const updateParticipant = (i, field, value) => setParticipants(p => {
+    const updated = [...p];
+    updated[i] = { ...updated[i], [field]: value };
+    return updated;
+  });
   const canManage = isAdmin() || isModerator();
 
   const { data: course, isLoading, error } = useQuery({
@@ -38,10 +48,17 @@ export default function CourseDetails() {
     if (!email) { setEnrollError("Please enter your email."); return; }
     try {
       setIsProcessing(true);
+      const enrollParticipants = participants.filter(p => p.name.trim());
+      if (!enrollParticipants.length) {
+        setEnrollError("Please enter at least one participant's name.");
+        setIsProcessing(false);
+        return;
+      }
+
       const res = await fetch(`${import.meta.env.VITE_DEV_URI}courses/${courseId}/enroll`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${getAuthToken()}` },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, participants: enrollParticipants }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Enrollment failed");
@@ -179,6 +196,90 @@ export default function CourseDetails() {
                       />
                     </div>
 
+                    {/* Participant details — always shown */}
+                    {!multiMode && (
+                      <div className="bg-purple-50/50 rounded-xl p-3 space-y-2">
+                        <p className="text-xs font-medium text-purple-600">Your Details</p>
+                        <input
+                          type="text"
+                          placeholder="Your name *"
+                          value={participants[0]?.name || ""}
+                          onChange={e => updateParticipant(0, "name", e.target.value)}
+                          className="input input-sm bg-white/80 border-white/40 w-full rounded-lg text-purple-900 text-sm"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Age (optional)"
+                          min="1"
+                          value={participants[0]?.age || ""}
+                          onChange={e => updateParticipant(0, "age", e.target.value)}
+                          className="input input-sm bg-white/80 border-white/40 w-full rounded-lg text-purple-900 text-sm"
+                        />
+                      </div>
+                    )}
+
+                    {/* Multi-person toggle */}
+                    <button
+                      type="button"
+                      onClick={() => setMultiMode(m => !m)}
+                      className="w-full text-xs text-purple-500 hover:text-purple-700 flex items-center justify-center gap-1.5 py-1.5 rounded-xl border border-purple-200/60 hover:bg-purple-50/50 transition-all"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={multiMode ? "M20 12H4" : "M12 4v16m8-8H4"} />
+                      </svg>
+                      {multiMode ? "Back to single enrollment" : "Enroll multiple people"}
+                    </button>
+
+                    {/* Multi-person form */}
+                    {multiMode && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-purple-600">Participants</p>
+                        {participants.map((p, i) => (
+                          <div key={i} className="flex gap-2 items-start bg-purple-50/50 rounded-xl p-2.5">
+                            <div className="flex-1 space-y-1.5">
+                              <input
+                                type="text"
+                                placeholder="Name *"
+                                value={p.name}
+                                onChange={e => updateParticipant(i, "name", e.target.value)}
+                                className="input input-sm bg-white/80 border-white/40 w-full rounded-lg text-purple-900 text-sm"
+                              />
+                              <input
+                                type="number"
+                                placeholder="Age"
+                                min="1"
+                                value={p.age}
+                                onChange={e => updateParticipant(i, "age", e.target.value)}
+                                className="input input-sm bg-white/80 border-white/40 w-full rounded-lg text-purple-900 text-sm"
+                              />
+                              <input
+                                type="email"
+                                placeholder="Email (optional)"
+                                value={p.email}
+                                onChange={e => updateParticipant(i, "email", e.target.value)}
+                                className="input input-sm bg-white/80 border-white/40 w-full rounded-lg text-purple-900 text-sm"
+                              />
+                            </div>
+                            {participants.length > 1 && (
+                              <button onClick={() => removeParticipant(i)} className="text-red-400 hover:text-red-600 mt-1 transition-colors">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button onClick={addParticipant} className="w-full text-xs py-1.5 rounded-xl border border-purple-200 text-purple-600 hover:bg-purple-50 transition-all">
+                          + Add another person
+                        </button>
+                        {course.price > 0 && (
+                          <p className="text-xs text-purple-500 text-center font-medium">
+                            Total: £{(course.price * participants.filter(p => p.name.trim()).length).toFixed(2)} ({participants.filter(p => p.name.trim()).length} × £{course.price})
+                          </p>
+                        )}
+                      </div>
+                    )}
+
                     {enrollError && (
                       <p className="text-red-500 text-sm bg-red-50/50 rounded-xl p-2">{enrollError}</p>
                     )}
@@ -196,7 +297,11 @@ export default function CourseDetails() {
                           </svg>
                           Redirecting...
                         </span>
-                      ) : course.price > 0 ? "Enroll & Pay" : "Enroll for Free"}
+                      ) : course.price > 0
+                        ? multiMode
+                          ? `Pay £${(course.price * participants.filter(p => p.name.trim()).length).toFixed(2)} for ${participants.filter(p => p.name.trim()).length} ${participants.filter(p => p.name.trim()).length === 1 ? "person" : "people"}`
+                          : "Enroll & Pay"
+                        : "Enroll for Free"}
                     </button>
 
                     {course.price > 0 && (
