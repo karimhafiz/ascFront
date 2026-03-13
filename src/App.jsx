@@ -16,9 +16,9 @@ import ErrorPage from "./pages/Errorpage";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import { loginAction, signupAction } from "./auth/authActions";
-import { logoutAction, combinedLoader } from "./auth/auth";
-import { action as eventAction } from "./components/EventForm";
+import { loginAction, signupAction, logoutAction } from "./auth/authActions";
+import { combinedLoader, eventDetailLoader } from "./loaders/loaders";
+import { eventAction } from "./actions/eventActions";
 import CancelPage from "./pages/CancelPage";
 import TeamConfirmationPage from "./pages/TeamConfirmationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -28,12 +28,11 @@ import SportsPage from "./pages/Sports";
 import ProfilePage from "./pages/ProfilePage";
 import TicketPage from "./pages/TicketPage";
 import TicketVerify from "./pages/TicketVerify";
-import { eventDetailLoader } from "./util/util";
+import { courseAction } from "./actions/courseActions";
 import CoursesPage from "./pages/Courses";
 import CourseConfirmation from "./pages/CourseConfirmation";
 import CourseDetails from "./pages/CourseDetails";
 import CourseFormPage from "./pages/CourseFormPage";
-import { action as courseAction } from "./components/CourseForm";
 
 
 const router = createBrowserRouter([

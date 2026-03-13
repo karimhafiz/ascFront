@@ -1,5 +1,3 @@
-import { redirect } from "react-router-dom";
-
 const API = import.meta.env.VITE_DEV_URI;
 
 // ── In-memory token store (not accessible via XSS unlike localStorage) ──
@@ -64,55 +62,6 @@ export async function refreshAccessToken() {
   return _refreshPromise;
 }
 
-// Call on app startup to restore session from refresh token cookie
-export async function initAuth() {
-  return refreshAccessToken();
-}
-
-// ── Loaders ──
-
-export async function combinedLoader() {
-  // Try to restore session if no token in memory
-  if (!_accessToken) {
-    await refreshAccessToken();
-  }
-
-  const [response, courseResponse] = await Promise.all([
-    fetch(`${API}events`),
-    fetch(`${API}courses`),
-  ]);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch events");
-  }
-  const events = await response.json();
-  const courses = await courseResponse.json();
-
-  return { token: _accessToken, events, courses };
-}
-
-export function checkAuthLoader() {
-  const token = getAuthToken();
-  if (!token) {
-    return redirect("/auth");
-  }
-}
-
-// ── Logout ──
-
-export async function logoutAction() {
-  try {
-    await fetch(`${API}users/logout`, {
-      method: "POST",
-      credentials: "include",
-    });
-  } catch {
-    // logout endpoint failed, clear local state anyway
-  }
-  clearAuth();
-  return redirect("/");
-}
-
 // ── Token utilities ──
 
 export function parseJwt(token) {
@@ -153,7 +102,6 @@ export async function fetchWithAuth(url, options = {}) {
   let token = getAuthToken();
 
   if (!token || !isAuthenticated()) {
-    // Try to refresh before giving up
     const refreshed = await refreshAccessToken();
     if (!refreshed) {
       throw new Error("Session expired. Please log in again.");
