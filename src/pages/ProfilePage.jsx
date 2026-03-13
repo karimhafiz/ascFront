@@ -328,10 +328,86 @@ const CATEGORY_COLORS = {
 
 function EnrollmentRow({ enrollment }) {
   const [expanded, setExpanded] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelDone, setCancelDone] = useState(enrollment.subscriptionStatus === "cancelled");
+  const [participants, setParticipants] = useState(enrollment.participants || []);
+  const [removingIdx, setRemovingIdx] = useState(null);
+  const [confirm, setConfirm] = useState(null);
+  const [toast, setToast] = useState(null);
   const course = enrollment.courseId;
   if (!course) return null;
   const gradient = CATEGORY_COLORS[course.category] || CATEGORY_COLORS.Other;
-  const hasParticipants = enrollment.participants?.length > 0;
+  const hasParticipants = participants.length > 0;
+  const isSubscription = !!enrollment.subscriptionId;
+  const periodEnd = enrollment.currentPeriodEnd ? new Date(enrollment.currentPeriodEnd) : null;
+
+  const showToast = (message, type = "error") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const handleCancel = () => {
+    setConfirm({
+      title: "Cancel subscription",
+      message: "Are you sure you want to cancel? You'll keep access until the end of your current billing period.",
+      confirmText: "Yes, cancel",
+      variant: "danger",
+      onConfirm: async () => {
+        setConfirm(null);
+        setCancelling(true);
+        try {
+          const token = localStorage.getItem("token");
+          const res = await fetch(
+            `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/cancel`,
+            { method: "POST", headers: { Authorization: "Bearer " + token } }
+          );
+          const data = await res.json();
+          if (res.ok) setCancelDone(true);
+          else showToast(data.error || "Failed to cancel");
+        } catch {
+          showToast("Something went wrong");
+        }
+        setCancelling(false);
+      },
+    });
+  };
+
+  const handleRemoveParticipant = (index) => {
+    const name = participants[index]?.name || "this participant";
+    setConfirm({
+      title: "Remove participant",
+      message: `Remove ${name} from this course? This cannot be undone.`,
+      confirmText: "Remove",
+      variant: "danger",
+      onConfirm: async () => {
+        setConfirm(null);
+        setRemovingIdx(index);
+        try {
+          const token = localStorage.getItem("token");
+          const res = await fetch(
+            `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/remove-participant`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: "Bearer " + token,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ participantIndex: index }),
+            }
+          );
+          const data = await res.json();
+          if (res.ok) {
+            setParticipants(data.participants);
+          } else {
+            showToast(data.error || "Failed to remove participant");
+          }
+        } catch {
+          showToast("Something went wrong");
+        }
+        setRemovingIdx(null);
+      },
+    });
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
@@ -352,20 +428,66 @@ function EnrollmentRow({ enrollment }) {
             {course.city && <span> · {course.city}</span>}
           </p>
           {course.schedule && <p className="text-xs text-gray-400 mt-1">{course.schedule}</p>}
+          <p className="text-xs text-gray-400 mt-1 font-mono">
+            {enrollment._id.slice(-8).toUpperCase()}
+            {" · "}
+            {participants.length} participant{participants.length !== 1 ? "s" : ""}
+            {isSubscription && " · Monthly"}
+          </p>
         </div>
         <div className="flex flex-col items-end justify-center px-5 gap-2 flex-shrink-0">
           <span className="text-sm font-semibold text-gray-800">
-            {course.price > 0 ? `£${course.price}` : "Free"}
+            {course.price > 0 ? formatCurrency(course.price * participants.length) : "Free"}
           </span>
+          {course.price > 0 && participants.length > 1 && (
+            <span className="text-[10px] text-gray-400">
+              {formatCurrency(course.price)} x {participants.length}
+            </span>
+          )}
           <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${
-            enrollment.status === "paid"
-              ? "bg-green-50 text-green-700 border-green-200"
-              : "bg-blue-50 text-blue-600 border-blue-200"
+            enrollment.status === "active"    ? "bg-green-50 text-green-700 border-green-200" :
+            enrollment.status === "paid"      ? "bg-green-50 text-green-700 border-green-200" :
+            enrollment.status === "free"      ? "bg-blue-50 text-blue-600 border-blue-200" :
+            enrollment.status === "cancelled" ? "bg-orange-50 text-orange-600 border-orange-200" :
+            enrollment.status === "past_due"  ? "bg-red-50 text-red-600 border-red-200" :
+                                               "bg-gray-50 text-gray-500 border-gray-200"
           }`}>
-            {enrollment.status === "paid" ? "✓ Enrolled" : "✓ Free"}
+            {enrollment.status === "active"    ? "✓ Subscribed" :
+             enrollment.status === "paid"      ? "✓ Enrolled" :
+             enrollment.status === "free"      ? "✓ Free" :
+             enrollment.status === "cancelled" ? "Cancelled" :
+             enrollment.status === "past_due"  ? "⚠ Payment due" :
+             enrollment.status}
           </span>
         </div>
       </div>
+
+      {/* Subscription info bar */}
+      {isSubscription && (
+        <div className={`px-5 py-2.5 text-xs flex items-center justify-between border-t ${cancelDone ? "bg-orange-50 border-orange-100" : "bg-blue-50 border-blue-100"}`}>
+          <div>
+            {cancelDone ? (
+              <span className="text-orange-600 font-medium">
+                ⏳ Cancelled — access until {periodEnd ? periodEnd.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "end of period"}
+              </span>
+            ) : (
+              <span className="text-blue-600">
+                🔄 Monthly subscription
+                {periodEnd && <span className="text-blue-400 ml-1">· renews {periodEnd.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>}
+              </span>
+            )}
+          </div>
+          {!cancelDone && (
+            <button
+              onClick={handleCancel}
+              disabled={cancelling}
+              className="text-xs text-red-500 hover:text-red-700 font-medium hover:underline transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+            >
+              {cancelling ? "Cancelling..." : "Cancel subscription"}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Footer — participants toggle + view course */}
       <div className="flex items-center justify-between border-t border-gray-50 px-5 py-2.5">
@@ -377,7 +499,7 @@ function EnrollmentRow({ enrollment }) {
             <svg className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
-            {expanded ? "Hide participants" : `${enrollment.participants.length} participant${enrollment.participants.length !== 1 ? "s" : ""}`}
+            {expanded ? "Hide participants" : `${participants.length} participant${participants.length !== 1 ? "s" : ""}`}
           </button>
         ) : (
           <span className="text-xs text-gray-400">No participants recorded</span>
@@ -396,20 +518,106 @@ function EnrollmentRow({ enrollment }) {
       {/* Participants list */}
       {expanded && hasParticipants && (
         <div className="px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {enrollment.participants.map((p, i) => (
-            <div key={i} className="flex items-center gap-2.5 bg-gray-50 rounded-xl px-3 py-2">
+          {participants.map((p, i) => (
+            <div key={i} className="flex items-center gap-2.5 bg-gray-50 rounded-xl px-3 py-2 group/participant">
               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                 {p.name?.[0]?.toUpperCase() ?? "?"}
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-xs font-medium text-gray-700 truncate">{p.name}</p>
                 <div className="flex gap-2 text-[10px] text-gray-400">
                   {p.age && <span>Age {p.age}</span>}
                   {p.email && <span className="truncate">{p.email}</span>}
                 </div>
               </div>
+              {participants.length > 1 && (
+                <button
+                  onClick={() => handleRemoveParticipant(i)}
+                  disabled={removingIdx !== null}
+                  title={`Remove ${p.name}`}
+                  className="opacity-0 group-hover/participant:opacity-100 transition-opacity text-red-400 hover:text-red-600 disabled:opacity-30 flex-shrink-0 cursor-pointer disabled:cursor-not-allowed"
+                >
+                  {removingIdx === i ? (
+                    <div className="w-4 h-4 rounded-full border-2 border-red-300 border-t-red-500 animate-spin" />
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
+                </button>
+              )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Confirm modal */}
+      {confirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirm(null)}>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full mx-4 p-6 animate-[scaleIn_0.15s_ease-out]" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                confirm.variant === "danger" ? "bg-red-50" : "bg-purple-50"
+              }`}>
+                {confirm.variant === "danger" ? (
+                  <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                  </svg>
+                )}
+              </div>
+              <h3 className="text-base font-semibold text-gray-900">{confirm.title}</h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-6 ml-[52px]">{confirm.message}</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirm(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirm.onConfirm}
+                className={`px-4 py-2 text-sm font-medium text-white rounded-xl transition-colors cursor-pointer ${
+                  confirm.variant === "danger"
+                    ? "bg-red-500 hover:bg-red-600"
+                    : "bg-purple-500 hover:bg-purple-600"
+                }`}
+              >
+                {confirm.confirmText || "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-[slideUp_0.2s_ease-out]">
+          <div className={`flex items-center gap-2.5 px-5 py-3 rounded-xl shadow-lg border text-sm font-medium ${
+            toast.type === "error"
+              ? "bg-red-50 text-red-700 border-red-200"
+              : "bg-green-50 text-green-700 border-green-200"
+          }`}>
+            {toast.type === "error" ? (
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+            {toast.message}
+            <button onClick={() => setToast(null)} className="ml-2 text-current opacity-50 hover:opacity-100 cursor-pointer">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
     </div>

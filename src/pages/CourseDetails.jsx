@@ -176,8 +176,18 @@ export default function CourseDetails() {
             <div className="glass-card shadow-xl border border-white/30 backdrop-blur-md rounded-2xl sticky top-4">
               <div className="p-6">
                 <h2 className="text-xl font-bold text-pink-700 mb-4">
-                  {course.price > 0 ? `Enroll — £${course.price}` : "Free Enrollment"}
+                  {course.price > 0
+                    ? course.isSubscription
+                      ? `Subscribe — £${course.price}/month`
+                      : `Enroll — £${course.price}`
+                    : "Free Enrollment"}
                 </h2>
+                {course.isSubscription && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 text-xs text-blue-700">
+                    <p className="font-semibold mb-1">📅 Monthly Subscription</p>
+                    <p>You'll be charged £{course.price} every month. You can cancel anytime from your profile, and you'll keep access until the end of your current billing period — no partial refunds.</p>
+                  </div>
+                )}
 
                 {!course.enrollmentOpen || isFull ? (
                   <div className="bg-gray-50 rounded-xl p-4 text-center text-gray-500 text-sm">
@@ -298,9 +308,11 @@ export default function CourseDetails() {
                           Redirecting...
                         </span>
                       ) : course.price > 0
-                        ? multiMode
-                          ? `Pay £${(course.price * participants.filter(p => p.name.trim()).length).toFixed(2)} for ${participants.filter(p => p.name.trim()).length} ${participants.filter(p => p.name.trim()).length === 1 ? "person" : "people"}`
-                          : "Enroll & Pay"
+                        ? course.isSubscription
+                          ? `Subscribe £${course.price}/month`
+                          : multiMode
+                            ? `Pay £${(course.price * participants.filter(p => p.name.trim()).length).toFixed(2)} for ${participants.filter(p => p.name.trim()).length} ${participants.filter(p => p.name.trim()).length === 1 ? "person" : "people"}`
+                            : "Enroll & Pay"
                         : "Enroll for Free"}
                     </button>
 

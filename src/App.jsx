@@ -58,7 +58,7 @@ const router = createBrowserRouter([
       {
         element: <ModeratorRoute />,
         children: [
-          { path: "courses/new", element: <CourseFormPage />, action: courseAction },
+          { path: "courses/new", element: <CourseFormPage  />, action: courseAction },
           { path: "courses/:courseId/edit", element: <CourseFormPage />, action: courseAction },
         ],
       },

@@ -14,7 +14,7 @@ export default function CourseFormPage() {
             if (!res.ok) throw new Error("Failed to fetch course");
             return res.json();
         },
-        enabled: isEditing, // only fetch if editing
+        enabled: isEditing,
     });
 
     if (isEditing && isLoading) return (
@@ -31,7 +31,7 @@ export default function CourseFormPage() {
 
     return (
         <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen py-10 px-4">
-            <CourseForm method={isEditing ? "PUT" : "POST"} course={course} />
+            <CourseForm method={isEditing ? "PUT" : "POST"} course={course} key={course?._id || "new"} />
         </div>
     );
 }

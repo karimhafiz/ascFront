@@ -17,7 +17,7 @@ export async function combinedLoader() {
   const response = await fetch(`${import.meta.env.VITE_DEV_URI}events`);
   const courseResponse = await fetch(`${import.meta.env.VITE_DEV_URI}courses`);
   console.log("response status:", response.status);
-  
+
   if (!response.ok) {
     throw new Error("Failed to fetch events");
   }

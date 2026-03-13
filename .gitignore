@@ -34,3 +34,5 @@ env.production
 *.njsproj
 *.sln
 *.sw?
+
+CLAUDE.md
