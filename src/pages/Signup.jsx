@@ -6,17 +6,18 @@ import {
     Navigate,
 } from "react-router-dom";
 import GoogleLogin from "../components/GoogleLogin";
+import { isAuthenticated } from "../auth/auth";
 
 const Signup = () => {
     const data = useActionData();
     const navigation = useNavigation();
-    const isSubmitting = navigation.state === "submitting"; const token = localStorage.getItem("token");
-    const expiration = localStorage.getItem("expiration");
+    const isSubmitting = navigation.state === "submitting";
 
-    // if user already has a valid token, take them away from signup
-    if (token && new Date(expiration) > new Date()) {
+    if (isAuthenticated()) {
         return <Navigate to="/" replace />;
     }
+
+    const isGoogleConflict = data?.authMethod === "google";
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">

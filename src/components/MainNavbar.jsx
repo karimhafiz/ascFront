@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { isAuthenticated, isAdmin, parseJwt, getAuthToken } from "../auth/auth";
+import { isAuthenticated, isAdmin, parseJwt, getAuthToken, clearAuth } from "../auth/auth";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,10 +42,17 @@ export default function Navbar() {
 
   const navigate = useNavigate();
 
-  const handleLogout = (e) => {
+  const handleLogout = async (e) => {
     e.preventDefault();
-    localStorage.removeItem("token");
-    localStorage.removeItem("expiration");
+    try {
+      await fetch(`${import.meta.env.VITE_DEV_URI}users/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // clear local state anyway
+    }
+    clearAuth();
     navigate("/");
   };
 

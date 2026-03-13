@@ -16,14 +16,10 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+import { getAuthToken, getUserRole as getAuthRole } from "../auth/auth";
+
 function getRole() {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    return JSON.parse(atob(token.split(".")[1])).role;
-  } catch {
-    return null;
-  }
+  return getAuthRole();
 }
 
 function formatDate(d) {
@@ -246,7 +242,7 @@ function UsersTab({ users, currentUserId, onRoleChange }) {
 
   const handleRole = async (userId, newRole) => {
     setUpdating(userId);
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     try {
       const res = await fetch(`${import.meta.env.VITE_DEV_URI}admin/users/${userId}/role`, {
         method: "PATCH",
@@ -451,8 +447,10 @@ export default function AdminDashboard() {
 
   // Get current user id from token
   let currentUserId = null;
-  const token = localStorage.getItem("token");
-  currentUserId = JSON.parse(atob(token.split(".")[1])).id;
+  try {
+    const token = getAuthToken();
+    if (token) currentUserId = JSON.parse(atob(token.split(".")[1])).id;
+  } catch { /* */ }
 
 
   useEffect(() => {
@@ -461,7 +459,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     fetch(import.meta.env.VITE_DEV_URI + "admin/dashboard", {
       headers: { Authorization: "Bearer " + token },
     })

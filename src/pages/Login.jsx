@@ -5,6 +5,7 @@ import {
   useNavigation,
   Navigate,
 } from "react-router-dom";
+import { isAuthenticated } from "../auth/auth";
 import GoogleLogin from "../components/GoogleLogin";
 
 const Login = () => {
@@ -12,13 +13,12 @@ const Login = () => {
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
-  const token = localStorage.getItem("token");
-  const expiration = localStorage.getItem("expiration");
-
-  // if already authenticated redirect to admin dashboard
-  if (token && new Date(expiration) > new Date()) {
-    return <Navigate to="/admin" replace />;
+  if (isAuthenticated()) {
+    return <Navigate to="/" replace />;
   }
+
+  const isGoogleConflict = data?.authMethod === "google";
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">
       <div
@@ -45,7 +45,7 @@ const Login = () => {
                 type="email"
                 name="email"
                 placeholder="Enter your email"
-                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 hover:border-pink-300 hover:bg-white/60 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
+                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
                 required
               />
             </div>
@@ -61,7 +61,7 @@ const Login = () => {
                 type="password"
                 name="password"
                 placeholder="Enter your password"
-                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 hover:border-pink-300 hover:bg-white/60 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
+                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
                 required
               />
             </div>
@@ -69,8 +69,9 @@ const Login = () => {
 
           <button
             type="submit"
-            className={`btn w-full text-base font-medium py-3 mt-6 rounded-xl bg-gradient-to-r from-pink-400 to-purple-400 text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] hover:border-2 hover:border-white transition-all ${isSubmitting ? "opacity-70" : ""
-              }`}
+            className={`btn w-full text-base font-medium py-3 mt-6 rounded-xl bg-gradient-to-r from-pink-400 to-purple-400 text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all ${
+              isSubmitting ? "opacity-70" : ""
+            }`}
             disabled={isSubmitting}
           >
             {isSubmitting ? (
@@ -104,17 +105,19 @@ const Login = () => {
         </Form>
 
         {data && data.message && (
-          <div className={`mt-6 backdrop-blur-sm border rounded-xl p-4 relative z-10 ${data.message.includes("Google")
+          <div className={`mt-6 backdrop-blur-sm border rounded-xl p-4 relative z-10 ${
+            isGoogleConflict
               ? "bg-blue-50/70 border-blue-200"
               : "bg-red-50/70 border-red-200 animate-pulse"
+          }`}>
+            <p className={`text-center font-medium ${
+              isGoogleConflict ? "text-blue-600" : "text-red-500"
             }`}>
-            <p className={`text-center font-medium ${data.message.includes("Google") ? "text-blue-600" : "text-red-500"
-              }`}>
               {data.message}
             </p>
-            {data.message.includes("Google") && (
+            {isGoogleConflict && (
               <p className="text-center text-sm text-blue-400 mt-1">
-                Use the button below ↓
+                Use the Google button below to sign in
               </p>
             )}
           </div>
