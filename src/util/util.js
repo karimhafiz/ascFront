@@ -63,13 +63,4 @@ export const generateRecurringEvents = (event) => {
   return occurrences;
 };
 
-// src/pages/eventDetailLoader.js
-export async function eventDetailLoader({ params }) {
-  const { eventId } = params;
-  const response = await fetch(
-    `${import.meta.env.VITE_DEV_URI}events/${eventId}`
-  );
-  if (!response.ok) throw new Error("Failed to fetch event details");
-  return response.json();
-}
 

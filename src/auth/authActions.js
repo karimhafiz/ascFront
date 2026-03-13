@@ -1,5 +1,7 @@
 import { redirect } from "react-router-dom";
-import { setAuth } from "./auth";
+import { setAuth, clearAuth } from "./auth";
+
+const API = import.meta.env.VITE_DEV_URI;
 
 export async function loginAction({ request }) {
   const data = await request.formData();
@@ -94,4 +96,17 @@ export async function signupAction({ request }) {
     console.error("Error during signup:\n", error);
     return { message: "An error occurred. Please try again later." };
   }
+}
+
+export async function logoutAction() {
+  try {
+    await fetch(`${API}users/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch {
+    // clear local state anyway
+  }
+  clearAuth();
+  return redirect("/");
 }
