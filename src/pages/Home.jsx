@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import EventCard from "../components/EventCard";
-import { isAdmin, isModerator } from "../auth/auth";
+import { isAdmin, isModerator, getAuthToken } from "../auth/auth";
 
 const DEFAULTS = {
   heroTitle: "Welcome to Ayendah Sazan",
@@ -57,7 +57,7 @@ export default function Home() {
     setSaving(true);
     setSaveError(null);
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       const formData = new FormData();
       formData.append("contentData", JSON.stringify({
         heroTitle: draft.heroTitle,

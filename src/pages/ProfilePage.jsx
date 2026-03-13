@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { isAuthenticated } from "../auth/auth";
+import { isAuthenticated, getAuthToken } from "../auth/auth";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
@@ -24,7 +24,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isAuthenticated()) { navigate("/login"); return; }
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     fetch(import.meta.env.VITE_DEV_URI + "users/profile", {
       headers: { Authorization: "Bearer " + token },
     })
@@ -356,7 +356,7 @@ function EnrollmentRow({ enrollment }) {
         setConfirm(null);
         setCancelling(true);
         try {
-          const token = localStorage.getItem("token");
+          const token = getAuthToken();
           const res = await fetch(
             `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/cancel`,
             { method: "POST", headers: { Authorization: "Bearer " + token } }
@@ -383,7 +383,7 @@ function EnrollmentRow({ enrollment }) {
         setConfirm(null);
         setRemovingIdx(index);
         try {
-          const token = localStorage.getItem("token");
+          const token = getAuthToken();
           const res = await fetch(
             `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/remove-participant`,
             {

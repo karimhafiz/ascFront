@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { isAdmin, isModerator } from "../auth/auth";
+import { isAdmin, isModerator, getAuthToken } from "../auth/auth";
 
 const DEFAULT_CARDS = [
   {
@@ -125,7 +125,7 @@ export default function About() {
     setSaving(true);
     setSaveError(null);
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       const formData = new FormData();
       formData.append("contentData", JSON.stringify({
         aboutHeroTitle: draft.aboutHeroTitle,

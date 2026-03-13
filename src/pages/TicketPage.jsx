@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { isAuthenticated } from "../auth/auth";
+import { isAuthenticated, getAuthToken } from "../auth/auth";
 import TicketCard from "../components/TicketCard";
 
 export default function TicketPage() {
@@ -12,7 +12,7 @@ export default function TicketPage() {
 
   useEffect(() => {
     if (!isAuthenticated()) { navigate("/login"); return; }
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     fetch(`${import.meta.env.VITE_DEV_URI}tickets/${ticketId}`, {
       headers: { Authorization: "Bearer " + token },
     })
