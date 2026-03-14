@@ -139,7 +139,7 @@ const CourseForm = ({ method, course = {} }) => {
                         <label className={labelClass}>Image</label>
                         <input
                             type="file" name="image" accept="image/*"
-                            className="file-input w-full rounded-lg border border-slate-300 bg-white text-slate-700 file:mr-4 file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-slate-700 hover:file:bg-slate-200"
+                            className="file-input w-full rounded-lg border border-slate-300 bg-white text-slate-700 file:mr-4 file:border-0 file:bg-purple-50 file:px-4 file:py-2 file:text-purple-700 hover:file:bg-purple-100"
                             onChange={handleImageChange}
                         />
                         {previewImage && <img src={previewImage} alt="Preview" className="mt-3 max-w-xs rounded-lg shadow-md" />}
@@ -154,7 +154,7 @@ const CourseForm = ({ method, course = {} }) => {
                         type="button"
                         onClick={() => navigate(-1)}
                         disabled={isSubmitting}
-                        className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-60"
+                        className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-60 cursor-pointer"
                     >
                         Cancel
                     </button>

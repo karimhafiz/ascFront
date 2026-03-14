@@ -201,7 +201,7 @@ function TeamsTab({ teams }) {
             <div className="px-5 pb-4">
               <button
                 onClick={() => setExpanded(expanded === team._id ? null : team._id)}
-                className="text-xs text-purple-500 hover:text-purple-700 font-medium flex items-center gap-1"
+                className="text-xs text-purple-500 hover:text-purple-700 font-medium flex items-center gap-1 cursor-pointer"
               >
                 {expanded === team._id ? "Hide members" : "Show members"}
                 <svg className={"w-3 h-3 transition-transform " + (expanded === team._id ? "rotate-180" : "")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -211,7 +211,7 @@ function TeamsTab({ teams }) {
               {expanded === team._id && (
                 <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                   {team.members.map((m, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-1.5">
+                    <div key={i} className="flex items-center gap-2 text-xs text-purple-600 bg-purple-50/50 rounded-lg px-3 py-1.5">
                       <span className="w-5 h-5 rounded-full bg-purple-100 text-purple-600 font-bold flex items-center justify-center text-[10px]">
                         {m.name?.[0]?.toUpperCase() ?? "?"}
                       </span>
@@ -348,10 +348,10 @@ function CoursesTab({ enrollments, courses }) {
           onChange={e => setSearch(e.target.value)}
           className="flex-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/60 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
         />
-        <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
+        <div className="flex bg-purple-50 rounded-xl p-1 gap-1">
           {["enrollments", "courses"].map(v => (
             <button key={v} onClick={() => setView(v)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${view === v ? "bg-white shadow-sm text-purple-700" : "text-gray-500 hover:text-gray-700"}`}>
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize cursor-pointer ${view === v ? "bg-white shadow-sm text-purple-700" : "text-gray-500 hover:text-gray-700"}`}>
               {v}
             </button>
           ))}

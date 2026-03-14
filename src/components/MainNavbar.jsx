@@ -110,7 +110,7 @@ export default function Navbar() {
         </Link>{" "}
         {/* Hamburger Menu for Mobile */}{" "}
         <button
-          className="block md:hidden text-pink-600 focus:outline-none bg-white/60 hover:bg-pink-100/80 rounded-full p-2 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+          className="block md:hidden text-pink-600 focus:outline-none bg-white/60 hover:bg-pink-100/80 rounded-full p-2 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer"
           onClick={(e) => {
             e.stopPropagation(); // Prevent event bubbling
 
@@ -436,7 +436,7 @@ export default function Navbar() {
 
                 <button
                   onClick={(e) => { handleLogout(e); closeMenu(); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50/60 hover:text-red-600 transition-all duration-200"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50/60 hover:text-red-600 transition-all duration-200 cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

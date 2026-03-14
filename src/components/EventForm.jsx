@@ -43,11 +43,11 @@ const EventForm = ({ method, event = {} }) => {
 
   const labelClass = "label font-semibold text-slate-700";
   const fieldClass =
-    "w-full rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:border-sky-700 focus:ring-2 focus:ring-sky-100 focus:outline-none";
+    "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 focus:outline-none";
   const selectClass = `${fieldClass} pr-10`;
   const textareaClass = `${fieldClass} min-h-28`;
   const fileClass =
-    "file-input w-full rounded-lg border border-slate-300 bg-white text-slate-700 file:mr-4 file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-slate-700 hover:file:bg-slate-200 focus:border-sky-700 focus:ring-2 focus:ring-sky-100 focus:outline-none";
+    "file-input w-full rounded-lg border border-slate-300 bg-white text-slate-700 file:mr-4 file:border-0 file:bg-purple-50 file:px-4 file:py-2 file:text-purple-700 hover:file:bg-purple-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 focus:outline-none";
 
   return (
     <div className="max-w-4xl mx-auto rounded-xl border border-slate-200 bg-slate-50/95 p-8 shadow-card">

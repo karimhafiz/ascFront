@@ -61,7 +61,7 @@ export default function ProfilePage() {
     : "?";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
       <div className="max-w-4xl mx-auto px-4 pt-8">
         <div className="mb-6 flex items-center gap-5">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-md shadow-pink-200 flex-shrink-0">
@@ -98,7 +98,7 @@ export default function ProfilePage() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 ${
+                className={`px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 cursor-pointer ${
                   activeTab === tab
                     ? "border-pink-500 text-pink-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"

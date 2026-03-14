@@ -25,15 +25,15 @@ const CustomToolbar = (toolbar) => {
   return (
     <div className="flex flex-wrap items-center justify-between mb-5 gap-3">
       <div className="flex items-center gap-2">
-        <button onClick={goToBack} className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 hover:scale-105 transition-all shadow-sm" style={{ cursor: "pointer" }}>
+        <button onClick={goToBack} className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 hover:scale-105 transition-all shadow-sm cursor-pointer">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
         </button>
-        <button onClick={goToCurrent} className="px-4 h-9 rounded-xl bg-white/60 hover:bg-purple-50 border border-purple-200/50 text-purple-600 text-sm font-medium hover:scale-105 transition-all shadow-sm" style={{ cursor: "pointer" }}>
+        <button onClick={goToCurrent} className="px-4 h-9 rounded-xl bg-white/60 hover:bg-purple-50 border border-purple-200/50 text-purple-600 text-sm font-medium hover:scale-105 transition-all shadow-sm cursor-pointer">
           Today
         </button>
-        <button onClick={goToNext} className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 hover:scale-105 transition-all shadow-sm" style={{ cursor: "pointer" }}>
+        <button onClick={goToNext} className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 hover:scale-105 transition-all shadow-sm cursor-pointer">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
           </svg>
@@ -54,8 +54,7 @@ const CustomToolbar = (toolbar) => {
           <button
             key={view}
             onClick={() => toolbar.onView(view)}
-            style={{ cursor: "pointer" }}
-            className={`px-3 h-7 rounded-lg text-sm font-medium transition-all duration-200 ${
+            className={`px-3 h-7 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
               view === toolbar.view
                 ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-sm"
                 : "text-purple-600 hover:bg-white/60"
@@ -192,7 +191,8 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
             toolbar: CustomToolbar,
             event: ({ event }) => (
               <div
-                style={{ cursor: "pointer", overflow: "hidden", lineHeight: 1.3 }}
+                style={{ overflow: "hidden", lineHeight: 1.3 }}
+                className="cursor-pointer"
                 title={[event.title, event.openingTime, event.city].filter(Boolean).join(" · ")}
               >
                 <div style={{
@@ -240,7 +240,7 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
                     <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-600 font-medium mt-1 inline-block">🔁 Recurring</span>
                   )}
                 </div>
-                <button onClick={() => setSelectedEvent(null)} className="text-gray-400 hover:text-gray-600 ml-2 transition-colors" style={{ cursor: "pointer" }}>
+                <button onClick={() => setSelectedEvent(null)} className="text-gray-400 hover:text-gray-600 ml-2 transition-colors cursor-pointer">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -282,10 +282,10 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
               </div>
 
               <div className="flex gap-2">
-                <button onClick={() => setSelectedEvent(null)} style={{ cursor: "pointer" }} className="flex-1 py-2 rounded-xl border border-purple-200 text-purple-600 text-sm hover:bg-purple-50 transition-all">
+                <button onClick={() => setSelectedEvent(null)} className="flex-1 py-2 rounded-xl border border-purple-200 text-purple-600 text-sm hover:bg-purple-50 transition-all cursor-pointer">
                   Close
                 </button>
-                <button onClick={handleConfirmNavigate} style={{ cursor: "pointer" }} className="flex-1 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium hover:scale-105 transition-all shadow-sm">
+                <button onClick={handleConfirmNavigate} className="flex-1 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium hover:scale-105 transition-all shadow-sm cursor-pointer">
                   View Details →
                 </button>
               </div>

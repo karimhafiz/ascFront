@@ -190,7 +190,7 @@ export default function CourseDetails() {
                 )}
 
                 {!course.enrollmentOpen || isFull ? (
-                  <div className="bg-gray-50 rounded-xl p-4 text-center text-gray-500 text-sm">
+                  <div className="bg-purple-50 rounded-xl p-4 text-center text-purple-400 text-sm">
                     {isFull ? "This course is currently full." : "Enrollment is currently closed."}
                   </div>
                 ) : (

@@ -157,7 +157,7 @@ export default function EventDetails() {
         <div className="flex justify-end gap-2 mb-6">
           <button
             onClick={handleShare}
-            className="btn btn-circle glass bg-gradient-to-br from-pink-400 to-purple-500 text-white hover:scale-110 transition-all duration-300 border-none shadow-md"
+            className="btn btn-circle glass bg-gradient-to-br from-pink-400 to-purple-500 text-white hover:scale-110 transition-all duration-300 border-none shadow-md cursor-pointer"
             aria-label="Share on Facebook"
           >
             <svg
@@ -340,13 +340,13 @@ export default function EventDetails() {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => { setAwaitingConfirm(false); setQuantity(1); }}
-                                className="flex-1 text-xs py-1.5 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-100 transition-all"
+                                className="flex-1 text-xs py-1.5 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-100 transition-all cursor-pointer"
                               >
                                 Change
                               </button>
                               <button
                                 onClick={handleBuyTickets}
-                                className="flex-1 text-xs py-1.5 rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-all font-medium"
+                                className="flex-1 text-xs py-1.5 rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-all font-medium cursor-pointer"
                               >
                                 Yes, continue
                               </button>
