@@ -23,7 +23,7 @@ const CustomToolbar = (toolbar) => {
   const goToCurrent = () => toolbar.onNavigate("TODAY");
 
   return (
-    <div className="flex flex-wrap items-center justify-between mb-5 gap-3">
+    <div className="flex flex-wrap items-center justify-between mb-5 gap-3 py-5 px-3">
       <div className="flex items-center gap-2">
         <button onClick={goToBack} className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 hover:scale-105 transition-all shadow-sm cursor-pointer">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -114,8 +114,7 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
     };
     if (hasEvent) return {
       style: {
-        backgroundColor: "rgba(196, 181, 253, 0.2)",
-        cursor: "pointer",
+        backgroundColor: "rgba(196, 181, 253, 0.15)",
       },
     };
     if (!isCurrentMonth) return {
@@ -128,15 +127,17 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
     const color = getEventColor(event.title);
     return {
       style: {
-        background: color.bg,
-        borderRadius: "4px",
+        background: `linear-gradient(135deg, ${color.bg}, ${color.bg}dd)`,
+        borderRadius: "6px",
         border: "none",
-        borderLeft: `4px solid rgba(0,0,0,0.7)`,
+        borderLeft: `3px solid ${color.bg}`,
         color: "white",
-        padding: "1px 6px",
-        boxShadow: `0 1px 4px ${color.shadow}`,
+        padding: "2px 8px",
+        boxShadow: `0 2px 6px ${color.shadow}`,
         cursor: "pointer",
         overflow: "hidden",
+        fontSize: "0.75rem",
+        lineHeight: "1.4",
       },
     };
   };
@@ -191,30 +192,14 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
             toolbar: CustomToolbar,
             event: ({ event }) => (
               <div
-                style={{ overflow: "hidden", lineHeight: 1.3 }}
-                className="cursor-pointer"
+                className="cursor-pointer overflow-hidden"
                 title={[event.title, event.openingTime, event.city].filter(Boolean).join(" · ")}
               >
-                <div style={{
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  fontSize: "0.72rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.01em",
-                  textShadow: "0 1px 2px rgba(0,0,0,0.15)",
-                }}>
-                  {event.isReoccurring ? "↻ " : ""}{event.title}
+                <div className="truncate text-[0.7rem] font-semibold leading-tight drop-shadow-sm">
+                  {event.isReoccurring && <span className="opacity-80">↻ </span>}{event.title}
                 </div>
                 {event.openingTime && (
-                  <div style={{
-                    fontSize: "0.62rem",
-                    opacity: 0.85,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    marginTop: 1,
-                  }}>
+                  <div className="truncate text-[0.6rem] opacity-80 mt-px">
                     {event.openingTime}
                   </div>
                 )}

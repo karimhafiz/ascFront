@@ -202,7 +202,7 @@ export default function CourseDetails() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter your email"
-                        className="input bg-white/60 border-white/30 focus:border-purple-400 w-full rounded-xl text-purple-900"
+                        className="glass-input"
                       />
                     </div>
 
@@ -215,7 +215,7 @@ export default function CourseDetails() {
                           placeholder="Your name *"
                           value={participants[0]?.name || ""}
                           onChange={e => updateParticipant(0, "name", e.target.value)}
-                          className="input input-sm bg-white/80 border-white/40 w-full rounded-lg text-purple-900 text-sm"
+                          className="glass-input text-sm py-1.5"
                         />
                         <input
                           type="number"
@@ -223,7 +223,7 @@ export default function CourseDetails() {
                           min="1"
                           value={participants[0]?.age || ""}
                           onChange={e => updateParticipant(0, "age", e.target.value)}
-                          className="input input-sm bg-white/80 border-white/40 w-full rounded-lg text-purple-900 text-sm"
+                          className="glass-input text-sm py-1.5"
                         />
                       </div>
                     )}
@@ -252,7 +252,7 @@ export default function CourseDetails() {
                                 placeholder="Name *"
                                 value={p.name}
                                 onChange={e => updateParticipant(i, "name", e.target.value)}
-                                className="input input-sm bg-white/80 border-white/40 w-full rounded-lg text-purple-900 text-sm"
+                                className="glass-input text-sm py-1.5"
                               />
                               <input
                                 type="number"
@@ -260,14 +260,14 @@ export default function CourseDetails() {
                                 min="1"
                                 value={p.age}
                                 onChange={e => updateParticipant(i, "age", e.target.value)}
-                                className="input input-sm bg-white/80 border-white/40 w-full rounded-lg text-purple-900 text-sm"
+                                className="glass-input text-sm py-1.5"
                               />
                               <input
                                 type="email"
                                 placeholder="Email (optional)"
                                 value={p.email}
                                 onChange={e => updateParticipant(i, "email", e.target.value)}
-                                className="input input-sm bg-white/80 border-white/40 w-full rounded-lg text-purple-900 text-sm"
+                                className="glass-input text-sm py-1.5"
                               />
                             </div>
                             {participants.length > 1 && (

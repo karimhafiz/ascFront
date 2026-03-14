@@ -10,10 +10,10 @@ const CourseForm = ({ method, course = {} }) => {
     const navigation = useNavigation();
     const isSubmitting = navigation.state === "submitting";
 
-    const labelClass = "label font-semibold text-slate-700";
-    const fieldClass = "w-full rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 focus:outline-none px-3 py-2";
-    const selectClass = `${fieldClass} pr-10`;
-    const textareaClass = `${fieldClass} min-h-28`;
+    const labelClass = "glass-label";
+    const fieldClass = "glass-input";
+    const selectClass = "glass-input glass-select";
+    const textareaClass = "glass-input";
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -25,14 +25,22 @@ const CourseForm = ({ method, course = {} }) => {
     };
 
     return (
-        <div className="max-w-3xl mx-auto rounded-xl border border-slate-200 bg-slate-50/95 p-8 shadow-lg">
+        <div className="max-w-3xl mx-auto rounded-xl border border-white/30 bg-white/90 backdrop-blur-md p-8 shadow-xl">
             <h1 className="mb-6 text-center text-3xl font-bold tracking-tight text-slate-900">
                 {method === "PUT" ? "Edit Course" : "Create New Course"}
             </h1>
 
             {data?.errors && (
-                <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-800">
-                    {Object.values(data.errors).map((err, i) => <p key={i} className="text-sm">{err}</p>)}
+                <div className="mb-6 rounded-xl border border-red-200 bg-red-50/90 backdrop-blur-sm px-5 py-4 text-red-700">
+                    <div className="flex items-center gap-2 mb-2">
+                        <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <p className="font-semibold text-sm">Please fix the following:</p>
+                    </div>
+                    <ul className="list-disc list-inside space-y-1 ml-7">
+                        {Object.values(data.errors).map((err, i) => <li key={i} className="text-sm">{err}</li>)}
+                    </ul>
                 </div>
             )}
 
@@ -139,7 +147,7 @@ const CourseForm = ({ method, course = {} }) => {
                         <label className={labelClass}>Image</label>
                         <input
                             type="file" name="image" accept="image/*"
-                            className="file-input w-full rounded-lg border border-slate-300 bg-white text-slate-700 file:mr-4 file:border-0 file:bg-purple-50 file:px-4 file:py-2 file:text-purple-700 hover:file:bg-purple-100"
+                            className="glass-input-file"
                             onChange={handleImageChange}
                         />
                         {previewImage && <img src={previewImage} alt="Preview" className="mt-3 max-w-xs rounded-lg shadow-md" />}
@@ -161,7 +169,7 @@ const CourseForm = ({ method, course = {} }) => {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 px-5 py-2.5 font-medium text-white hover:opacity-90 disabled:opacity-60"
+                        className="rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 px-5 py-2.5 font-medium text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
                     >
                         {isSubmitting ? "Saving..." : "Save Course"}
                     </button>

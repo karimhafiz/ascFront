@@ -60,7 +60,7 @@ export default function CoursesPage() {
               placeholder="Search courses or instructors..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/60 border border-white/40 text-purple-900 placeholder-purple-400 focus:outline-none focus:border-purple-400 backdrop-blur-sm"
+              className="glass-input pl-9 py-2.5"
             />
           </div>
           <div className="flex gap-2 flex-wrap">

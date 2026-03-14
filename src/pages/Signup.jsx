@@ -36,7 +36,7 @@ const Signup = () => {
                 <Form method="post" action="/signup" className="space-y-7 relative z-10">
                     <div className="form-control">
                         <label className="label mb-1">
-                            <span className="label-text text-purple-700 font-medium text-lg">
+                            <span className="glass-label text-lg">
                                 Name
                             </span>
                         </label>
@@ -45,14 +45,14 @@ const Signup = () => {
                                 type="text"
                                 name="name"
                                 placeholder="Your full name"
-                                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 hover:border-pink-300 hover:bg-white/60 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
+                                className="glass-input py-3"
                                 required
                             />
                         </div>
                     </div>
                     <div className="form-control">
                         <label className="label mb-1">
-                            <span className="label-text text-purple-700 font-medium text-lg">
+                            <span className="glass-label text-lg">
                                 Email
                             </span>
                         </label>
@@ -61,14 +61,14 @@ const Signup = () => {
                                 type="email"
                                 name="email"
                                 placeholder="Enter your email"
-                                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 hover:border-pink-300 hover:bg-white/60 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
+                                className="glass-input py-3"
                                 required
                             />
                         </div>
                     </div>
                     <div className="form-control">
                         <label className="label mb-1">
-                            <span className="label-text text-purple-700 font-medium text-lg">
+                            <span className="glass-label text-lg">
                                 Password
                             </span>
                         </label>
@@ -77,7 +77,7 @@ const Signup = () => {
                                 type="password"
                                 name="password"
                                 placeholder="Enter your password"
-                                className="input w-full bg-white/40 border-white/30 backdrop-blur-sm rounded-xl px-5 py-3 hover:border-pink-300 hover:bg-white/60 focus:border-pink-300 focus:ring focus:ring-pink-200 transition-all"
+                                className="glass-input py-3"
                                 required
                             />
                         </div>

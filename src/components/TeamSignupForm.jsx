@@ -141,7 +141,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
           <div>
             <label className="block font-medium text-purple-700 mb-1">Team Name</label>
             <input
-              className="w-full bg-white/60 border border-purple-200/60 focus:border-purple-400 focus:ring-2 focus:ring-purple-300/50 rounded-xl px-4 py-2.5 text-purple-800 placeholder-purple-400/70 backdrop-blur-sm transition-all duration-300"
+              className="glass-input py-2.5"
               placeholder="Team Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -152,7 +152,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
           <div>
             <label className="block font-medium text-purple-700 mb-1">Manager Name</label>
             <input
-              className="w-full bg-white/60 border border-purple-200/60 focus:border-purple-400 focus:ring-2 focus:ring-purple-300/50 rounded-xl px-4 py-2.5 text-purple-800 placeholder-purple-400/70 backdrop-blur-sm transition-all duration-300"
+              className="glass-input py-2.5"
               placeholder="Manager Name"
               value={managerName}
               onChange={(e) => setManagerName(e.target.value)}
@@ -163,7 +163,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
           <div>
             <label className="block font-medium text-purple-700 mb-1">Manager Email</label>
             <input
-              className="w-full bg-white/60 border border-purple-200/60 focus:border-purple-400 focus:ring-2 focus:ring-purple-300/50 rounded-xl px-4 py-2.5 text-purple-800 placeholder-purple-400/70 backdrop-blur-sm transition-all duration-300"
+              className="glass-input py-2.5"
               placeholder="Manager Email"
               value={managerEmail}
               onChange={(e) => setManagerEmail(e.target.value)}
@@ -184,14 +184,14 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
                 <div key={idx} className="flex items-center gap-2 bg-white/40 rounded-lg p-2 backdrop-blur-sm border border-white/70">
                   <div className="flex-grow space-y-2">
                     <input
-                      className="w-full bg-white/70 border border-purple-100/70 focus:border-purple-400 rounded-lg px-3 py-1.5 text-purple-800 text-sm placeholder-purple-400/70"
+                      className="glass-input text-sm py-1.5"
                       placeholder="Member Name"
                       value={member.name}
                       onChange={(e) => handleMemberChange(idx, "name", e.target.value)}
                       required
                     />
                     <input
-                      className="w-full bg-white/70 border border-purple-100/70 focus:border-purple-400 rounded-lg px-3 py-1.5 text-purple-800 text-sm placeholder-purple-400/70"
+                      className="glass-input text-sm py-1.5"
                       placeholder="Member Email"
                       value={member.email}
                       onChange={(e) => handleMemberChange(idx, "email", e.target.value)}

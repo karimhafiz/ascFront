@@ -40,7 +40,7 @@ export default function Contact() {
         "your_public_key" // Replace with your EmailJS Public Key
       )
       .then(
-        (response) => {
+        () => {
           setIsSubmitting(false);
           setSuccessMessage("Your message has been sent successfully!");
           setFormData({
@@ -51,7 +51,7 @@ export default function Contact() {
             message: "",
           });
         },
-        (error) => {
+        () => {
           setIsSubmitting(false);
           setErrorMessage(
             "Failed to send your message. Please try again later."
@@ -84,7 +84,7 @@ export default function Contact() {
             <div className="flex gap-6 mb-6">
               <div className="w-1/2">
                 <label
-                  className="block text-purple-700 text-sm font-medium mb-2"
+                  className="glass-label"
                   htmlFor="firstName"
                 >
                   First Name *
@@ -95,13 +95,13 @@ export default function Contact() {
                   placeholder="First Name"
                   value={formData.firstName}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-white/50 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm text-purple-900"
+                  className="glass-input py-3"
                   required
                 />
               </div>
               <div className="w-1/2">
                 <label
-                  className="block text-purple-700 text-sm font-medium mb-2"
+                  className="glass-label"
                   htmlFor="lastName"
                 >
                   Last Name *
@@ -112,14 +112,14 @@ export default function Contact() {
                   placeholder="Last Name"
                   value={formData.lastName}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-white/50 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm text-purple-900"
+                  className="glass-input py-3"
                   required
                 />
               </div>
             </div>
             <div className="mb-6">
               <label
-                className="block text-purple-700 text-sm font-medium mb-2"
+                className="glass-label"
                 htmlFor="email"
               >
                 Email *
@@ -130,13 +130,13 @@ export default function Contact() {
                 placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-white/50 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm text-purple-900"
+                className="glass-input py-3"
                 required
               />
             </div>
             <div className="mb-6">
               <label
-                className="block text-purple-700 text-sm font-medium mb-2"
+                className="glass-label"
                 htmlFor="subject"
               >
                 Subject
@@ -147,12 +147,12 @@ export default function Contact() {
                 placeholder="Subject"
                 value={formData.subject}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-white/50 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm text-purple-900"
+                className="glass-input py-3"
               />
             </div>
             <div className="mb-6">
               <label
-                className="block text-purple-700 text-sm font-medium mb-2"
+                className="glass-label"
                 htmlFor="message"
               >
                 Message
@@ -163,28 +163,34 @@ export default function Contact() {
                 placeholder="Type your message here..."
                 value={formData.message}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-white/50 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm text-purple-900"
+                className="glass-input py-3"
                 required
               ></textarea>
             </div>
             <div className="text-center">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-3 rounded-xl hover:scale-105 transition-all duration-300 shadow-md"
+                className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-3 rounded-xl hover:scale-105 transition-all duration-300 shadow-md cursor-pointer"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Sending..." : "Send Message"}
               </button>
             </div>
             {successMessage && (
-              <p className="text-green-600 text-center mt-4 bg-green-100/30 p-3 rounded-xl backdrop-blur-sm">
+              <div className="mt-4 flex items-center gap-2 bg-green-50/80 border border-green-200 text-green-700 text-sm p-3 rounded-xl backdrop-blur-sm">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
                 {successMessage}
-              </p>
+              </div>
             )}
             {errorMessage && (
-              <p className="text-red-600 text-center mt-4 bg-red-100/30 p-3 rounded-xl backdrop-blur-sm">
+              <div className="mt-4 flex items-center gap-2 bg-red-50/80 border border-red-200 text-red-600 text-sm p-3 rounded-xl backdrop-blur-sm">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
                 {errorMessage}
-              </p>
+              </div>
             )}
           </form>
         </div>

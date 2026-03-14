@@ -3,6 +3,7 @@ import { useRouteLoaderData } from "react-router-dom";
 import EventCard from "../components/EventCard";
 import RecurringEventsCalendar from "../components/RecurringEventsCalendar";
 
+
 export default function EventPage() {
   const { events } = useRouteLoaderData("root");
   // Only show events where typeOfEvent === 'ASC'

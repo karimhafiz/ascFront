@@ -48,7 +48,7 @@ function EditableField({ editing, value, onChange, className, multiline, placeho
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full bg-white/70 border border-purple-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none text-sm"
+      className="glass-input text-sm resize-none"
     />
   );
 
@@ -57,7 +57,7 @@ function EditableField({ editing, value, onChange, className, multiline, placeho
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full bg-white/70 border border-purple-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
+      className="glass-input text-sm"
     />
   );
 }
@@ -122,8 +122,26 @@ export default function About() {
   };
 
   const handleSave = async () => {
-    setSaving(true);
     setSaveError(null);
+
+    // ── Client-side validation ──
+    const errors = [];
+    if (!draft.aboutHeroTitle?.trim()) errors.push("Hero title cannot be empty.");
+    if (!draft.aboutHeroDescription?.trim()) errors.push("Hero description cannot be empty.");
+    if (!draft.missionTitle?.trim()) errors.push("Mission title cannot be empty.");
+    if (!draft.missionText?.trim()) errors.push("Mission text cannot be empty.");
+    if (!draft.getInvolvedTitle?.trim()) errors.push("Get Involved title cannot be empty.");
+    if (!draft.getInvolvedText?.trim()) errors.push("Get Involved text cannot be empty.");
+    draft.activityCards.forEach((card, i) => {
+      if (!card.title?.trim()) errors.push(`Activity card ${i + 1} title cannot be empty.`);
+      if (!card.description?.trim()) errors.push(`Activity card ${i + 1} description cannot be empty.`);
+    });
+    if (errors.length > 0) {
+      setSaveError(errors.join(" "));
+      return;
+    }
+
+    setSaving(true);
     try {
       const token = getAuthToken();
       const formData = new FormData();
@@ -145,7 +163,10 @@ export default function About() {
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message || `Server error (${res.status})`);
+      }
       const { pageContent: saved } = await res.json();
       const merged = {
         ...DEFAULTS,
@@ -158,8 +179,8 @@ export default function About() {
       setEditing(false);
       setCardImageFiles({});
       setCardImagePreviews({});
-    } catch {
-      setSaveError("Failed to save changes. Please try again.");
+    } catch (err) {
+      setSaveError(err.message || "Failed to save changes. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -199,8 +220,21 @@ export default function About() {
       )}
 
       {saveError && (
-        <div className="fixed top-24 right-6 z-50 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl shadow">
-          {saveError}
+        <div className="fixed top-36 right-6 z-50 max-w-sm bg-red-50/95 backdrop-blur-sm border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl shadow-lg animate-scale-in">
+          <div className="flex items-start gap-2">
+            <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <div>
+              <p className="font-medium mb-0.5">Could not save</p>
+              <p className="text-xs leading-relaxed">{saveError}</p>
+            </div>
+            <button onClick={() => setSaveError(null)} className="ml-auto text-red-400 hover:text-red-600 flex-shrink-0 cursor-pointer">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
 
@@ -209,13 +243,13 @@ export default function About() {
         {editing ? (
           <>
             <input
-              className="w-full text-center text-3xl font-bold text-purple-700 mb-3 bg-white/70 border border-purple-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              className="glass-input text-center text-3xl font-bold text-purple-700 mb-3"
               value={draft.aboutHeroTitle}
               onChange={(e) => setDraft({ ...draft, aboutHeroTitle: e.target.value })}
             />
             <textarea
               rows={3}
-              className="w-full text-center text-lg text-gray-700 bg-white/70 border border-purple-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+              className="glass-input text-center text-lg resize-none"
               value={draft.aboutHeroDescription}
               onChange={(e) => setDraft({ ...draft, aboutHeroDescription: e.target.value })}
             />
@@ -263,13 +297,13 @@ export default function About() {
                   {editing ? (
                     <>
                       <input
-                        className="w-full text-center font-semibold text-purple-700 bg-white/70 border border-purple-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                        className="glass-input text-center font-semibold text-purple-700 py-1.5"
                         value={card.title}
                         onChange={(e) => updateCard(i, "title", e.target.value)}
                       />
                       <textarea
                         rows={3}
-                        className="w-full text-center text-gray-600 bg-white/70 border border-purple-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none text-sm"
+                        className="glass-input text-center text-sm resize-none py-1.5"
                         value={card.description}
                         onChange={(e) => updateCard(i, "description", e.target.value)}
                       />
@@ -292,13 +326,13 @@ export default function About() {
         {editing ? (
           <>
             <input
-              className="w-full text-center text-2xl font-bold text-purple-700 mb-4 bg-white/70 border border-purple-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              className="glass-input text-center text-2xl font-bold text-purple-700 mb-4"
               value={draft.missionTitle}
               onChange={(e) => setDraft({ ...draft, missionTitle: e.target.value })}
             />
             <textarea
               rows={4}
-              className="w-full text-center text-gray-700 bg-white/70 border border-purple-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+              className="glass-input text-center resize-none"
               value={draft.missionText}
               onChange={(e) => setDraft({ ...draft, missionText: e.target.value })}
             />
@@ -316,13 +350,13 @@ export default function About() {
         {editing ? (
           <>
             <input
-              className="w-full text-center text-2xl font-bold text-purple-700 mb-4 bg-white/70 border border-purple-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              className="glass-input text-center text-2xl font-bold text-purple-700 mb-4"
               value={draft.getInvolvedTitle}
               onChange={(e) => setDraft({ ...draft, getInvolvedTitle: e.target.value })}
             />
             <textarea
               rows={3}
-              className="w-full text-center text-gray-700 bg-white/70 border border-purple-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none mb-4"
+              className="glass-input text-center resize-none mb-4"
               value={draft.getInvolvedText}
               onChange={(e) => setDraft({ ...draft, getInvolvedText: e.target.value })}
             />

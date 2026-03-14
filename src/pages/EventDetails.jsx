@@ -114,9 +114,21 @@ export default function EventDetails() {
     );
   };
 
-  if (isLoading) return <p className="text-center text-gray-500">Loading...</p>;
-  if (error)
-    return <p className="text-center text-red-500">Error: {error.message}</p>;
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-10 h-10 rounded-full border-4 border-pink-200 border-t-purple-500 animate-spin" />
+        <p className="text-sm text-purple-400">Loading event details…</p>
+      </div>
+    </div>
+  );
+  if (error) return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">
+      <div className="bg-white/90 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-red-100 text-center max-w-sm">
+        <p className="text-red-500 font-medium mb-4">{error.message}</p>
+      </div>
+    </div>
+  );
 
   const isEventInPast = new Date(event.date) < new Date();
 
@@ -301,7 +313,7 @@ export default function EventDetails() {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="input bg-white/60 border-white/30 focus:border-purple-400 w-full backdrop-blur-sm rounded-xl text-purple-900"
+                        className="glass-input"
                         placeholder="Enter your email"
                         required
                       />
@@ -325,7 +337,7 @@ export default function EventDetails() {
                             const val = parseInt(e.target.value, 10);
                             setQuantity(String(isNaN(val) || val < 1 ? 1 : val));
                           }}
-                          className="input bg-white/60 border-white/30 focus:border-purple-400 w-full backdrop-blur-sm rounded-xl text-purple-900"
+                          className="glass-input"
                         />
                         {event.ticketPrice > 0 && (
                           <p className="text-sm text-purple-600 mt-1">

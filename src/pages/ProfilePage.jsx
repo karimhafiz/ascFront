@@ -252,7 +252,10 @@ function TeamRow({ team }) {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-      <div className="flex items-center px-5 py-4 gap-4">
+      <div
+        onClick={() => team.members?.length > 0 && setExpanded(v => !v)}
+        className={`flex items-center px-5 py-4 gap-4 transition-colors ${team.members?.length > 0 ? "cursor-pointer hover:bg-purple-50/30" : ""}`}
+      >
         {/* Icon */}
         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center flex-shrink-0">
           <svg className="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -270,49 +273,42 @@ function TeamRow({ team }) {
         </div>
 
         {/* Right side */}
-        <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-          <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${
-            team.paid
-              ? "bg-green-50 text-green-700 border-green-200"
-              : "bg-orange-50 text-orange-600 border-orange-200"
-          }`}>
-            {team.paid ? "✓ Paid" : "Pending"}
-          </span>
-          <span className="text-xs text-gray-400">
-            {team.members?.length ?? 0} member{team.members?.length !== 1 ? "s" : ""}
-          </span>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex flex-col items-end gap-1.5">
+            <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${
+              team.paid
+                ? "bg-green-50 text-green-700 border-green-200"
+                : "bg-orange-50 text-orange-600 border-orange-200"
+            }`}>
+              {team.paid ? "✓ Paid" : "Pending"}
+            </span>
+            <span className="text-xs text-gray-400">
+              {team.members?.length ?? 0} member{team.members?.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+          {team.members?.length > 0 && (
+            <svg className={`w-4 h-4 text-purple-400 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          )}
         </div>
       </div>
 
-      {/* Members toggle */}
-      {team.members?.length > 0 && (
-        <>
-          <button
-            onClick={() => setExpanded(v => !v)}
-            className="w-full flex items-center justify-between px-5 py-2.5 text-xs font-medium text-purple-500 hover:text-purple-700 border-t border-gray-50 hover:bg-purple-50/40 transition-all"
-          >
-            <span>{expanded ? "Hide members" : `Show ${team.members.length} member${team.members.length !== 1 ? "s" : ""}`}</span>
-            <svg className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-
-          {expanded && (
-            <div className="px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {team.members.map((m, i) => (
-                <div key={i} className="flex items-center gap-2.5 bg-gray-50 rounded-xl px-3 py-2">
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-                    {m.name?.[0]?.toUpperCase() ?? "?"}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-gray-700 truncate">{m.name}</p>
-                    {m.email && <p className="text-[10px] text-gray-400 truncate">{m.email}</p>}
-                  </div>
-                </div>
-              ))}
+      {/* Members list */}
+      {team.members?.length > 0 && expanded && (
+        <div className="px-5 pb-4 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-gray-50">
+          {team.members.map((m, i) => (
+            <div key={i} className="flex items-center gap-2.5 bg-purple-50/40 rounded-xl px-3 py-2">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                {m.name?.[0]?.toUpperCase() ?? "?"}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-gray-700 truncate">{m.name}</p>
+                {m.email && <p className="text-[10px] text-gray-400 truncate">{m.email}</p>}
+              </div>
             </div>
-          )}
-        </>
+          ))}
+        </div>
       )}
     </div>
   );

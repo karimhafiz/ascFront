@@ -51,7 +51,7 @@ function TicketsTab({ tickets }) {
         placeholder="Search by buyer email or event…"
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="w-full mb-4 px-4 py-2 rounded-xl border border-gray-200 bg-white/60 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+        className="glass-input mb-4"
       />
       <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
         <table className="w-full text-sm">
@@ -269,7 +269,7 @@ function UsersTab({ users, currentUserId, onRoleChange }) {
         placeholder="Search by name or email…"
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="w-full mb-4 px-4 py-2 rounded-xl border border-gray-200 bg-white/60 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+        className="glass-input mb-4"
       />
       <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
         <table className="w-full text-sm">
@@ -303,7 +303,7 @@ function UsersTab({ users, currentUserId, onRoleChange }) {
                       value={u.role}
                       disabled={updating === u._id}
                       onChange={e => handleRole(u._id, e.target.value)}
-                      className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-purple-200 disabled:opacity-50"
+                      className="glass-input glass-select text-xs px-2 py-1 disabled:opacity-50"
                     >
                       <option value="user">user</option>
                       <option value="moderator">moderator</option>
@@ -346,7 +346,7 @@ function CoursesTab({ enrollments, courses }) {
           placeholder="Search courses or emails…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="flex-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/60 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+          className="glass-input flex-1"
         />
         <div className="flex bg-purple-50 rounded-xl p-1 gap-1">
           {["enrollments", "courses"].map(v => (
