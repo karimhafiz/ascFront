@@ -3,37 +3,36 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 
 import "./App.css";
-import Main from "./components/Main";
-import Home from "./pages/Home";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import EventPage from "./pages/Event";
-import EventDetails from "./pages/EventDetails";
-import NewEvent from "./pages/NewEvent";
-import EditEvent from "./pages/EditEvent";
-import EventRoot from "./pages/EventRoot";
+import Main from "./components/common/Main";
+import Home from "./pages/content/Home";
+import About from "./pages/content/About";
+import Contact from "./pages/content/Contact";
+import EventPage from "./pages/events/Event";
+import EventDetails from "./pages/events/EventDetails";
+import NewEvent from "./pages/events/NewEvent";
+import EditEvent from "./pages/events/EditEvent";
+import EventRoot from "./pages/events/EventRoot";
 import ErrorPage from "./pages/Errorpage";
-import OrderConfirmation from "./pages/OrderConfirmation";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import OrderConfirmation from "./pages/payments/OrderConfirmation";
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
 import { loginAction, signupAction, logoutAction } from "./auth/authActions";
 import { combinedLoader, eventDetailLoader } from "./loaders/loaders";
-import { eventAction } from "./actions/eventActions";
-import CancelPage from "./pages/CancelPage";
-import TeamConfirmationPage from "./pages/TeamConfirmationPage";
-import ProtectedRoute from "./components/ProtectedRoute";
-import ModeratorRoute from "./components/ModeratorRoute";
-import AdminDashboard from "./pages/AdminDashboard";
-import SportsPage from "./pages/Sports";
+import { eventAction } from "./api/eventActions";
+import CancelPage from "./pages/payments/CancelPage";
+import TeamConfirmationPage from "./pages/teams/TeamConfirmationPage";
+import ProtectedRoute from "./components/common/ProtectedRoute";
+import ModeratorRoute from "./components/common/ModeratorRoute";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import SportsPage from "./pages/content/Sports";
 import ProfilePage from "./pages/ProfilePage";
-import TicketPage from "./pages/TicketPage";
-import TicketVerify from "./pages/TicketVerify";
-import { courseAction } from "./actions/courseActions";
-import CoursesPage from "./pages/Courses";
-import CourseConfirmation from "./pages/CourseConfirmation";
-import CourseDetails from "./pages/CourseDetails";
-import CourseFormPage from "./pages/CourseFormPage";
-
+import TicketPage from "./pages/tickets/TicketPage";
+import TicketVerify from "./pages/tickets/TicketVerify";
+import { courseAction } from "./api/courseActions";
+import CoursesPage from "./pages/courses/Courses";
+import CourseConfirmation from "./pages/courses/CourseConfirmation";
+import CourseDetails from "./pages/courses/CourseDetails";
+import CourseFormPage from "./pages/courses/CourseFormPage";
 
 const router = createBrowserRouter([
   {
@@ -57,7 +56,7 @@ const router = createBrowserRouter([
       {
         element: <ModeratorRoute />,
         children: [
-          { path: "courses/new", element: <CourseFormPage  />, action: courseAction },
+          { path: "courses/new", element: <CourseFormPage />, action: courseAction },
           { path: "courses/:courseId/edit", element: <CourseFormPage />, action: courseAction },
         ],
       },
@@ -77,17 +76,13 @@ const router = createBrowserRouter([
               { index: true, element: <EventDetails /> },
               {
                 element: <ModeratorRoute />,
-                children: [
-                  { path: "edit", element: <EditEvent />, action: eventAction },
-                ],
+                children: [{ path: "edit", element: <EditEvent />, action: eventAction }],
               },
             ],
           },
           {
             element: <ModeratorRoute />,
-            children: [
-              { path: "new", element: <NewEvent />, action: eventAction },
-            ],
+            children: [{ path: "new", element: <NewEvent />, action: eventAction }],
           },
         ],
       },

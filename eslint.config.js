@@ -28,5 +28,39 @@ export default [
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
     },
   },
+  {
+    files: ["**/*.test.{js,jsx}", "**/*.spec.{js,jsx}"],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+        global: "writable",
+        require: "readonly",
+      },
+    },
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
+  {
+    files: ["jest.setup.js", "__mocks__/**/*.js"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+      },
+    },
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
+  {
+    files: ["tailwind.config.js"],
+    languageOptions: {
+      globals: {
+        require: "readonly",
+      },
+    },
+  },
   eslintConfigPrettier,
 ];
