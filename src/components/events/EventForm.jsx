@@ -41,7 +41,7 @@ const EventForm = ({ method, event = {} }) => {
   const fileClass = "glass-input-file";
 
   return (
-    <div className="max-w-4xl mx-auto rounded-xl border border-white/30 bg-white/90 backdrop-blur-md p-8 shadow-xl">
+    <div className="max-w-4xl mx-auto rounded-xl border border-white/30 bg-white/90 backdrop-blur-md p-4 sm:p-8 shadow-xl">
       <h1 className="mb-6 text-center text-3xl font-bold tracking-tight text-slate-900">
         {method === "PATCH" ? "Edit Event" : "Create New Event"}
       </h1>

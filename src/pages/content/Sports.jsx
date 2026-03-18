@@ -22,7 +22,7 @@ export default function SportsPage() {
     <div className="container mx-auto p-6">
       {/* Recurring Sports Events Section */}
       <div className="mb-10">
-        <div className="glass-card p-0 md:p-6 transition-all overflow-x-auto rounded-2xl border border-white/30 shadow-xl">
+        <div className="glass-card p-2 sm:p-4 md:p-6 transition-all overflow-x-auto rounded-2xl border border-white/30 shadow-xl">
           <RecurringEventsCalendar
             events={allSportsEvents}
             title="Sports Events Calendar"

@@ -52,7 +52,7 @@ export default function TicketCard({ ticket, ticketsInGroup }) {
       <div className="px-6 py-6 flex items-center justify-between border-b border-dashed border-gray-200">
         <div>
           <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Ticket ID</p>
-          <p className="text-2xl font-bold text-gray-900 tracking-widest font-mono">
+          <p className="text-lg sm:text-2xl font-bold text-gray-900 tracking-widest font-mono">
             {ticket.ticketCode ?? "—"}
           </p>
         </div>

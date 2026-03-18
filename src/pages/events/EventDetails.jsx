@@ -350,7 +350,7 @@ export default function EventDetails() {
                 </div>
               </div>
             ) : !isEventInPast ? (
-              <div className="glass-card shadow-xl border border-white/30 backdrop-blur-md rounded-2xl sticky top-4 hover:shadow-2xl transition-all duration-300">
+              <div className="glass-card shadow-xl border border-white/30 backdrop-blur-md rounded-2xl md:sticky md:top-20 hover:shadow-2xl transition-all duration-300">
                 <div className="card-body">
                   <h2 className="card-title text-xl text-pink-700">
                     {event.isTournament ? "Team Registration" : "Purchase Tickets"}
