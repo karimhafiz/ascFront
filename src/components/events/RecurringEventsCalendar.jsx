@@ -67,7 +67,7 @@ const CustomToolbar = (toolbar) => {
         </button>
       </div>
 
-      <span className="font-bold text-purple-800 text-lg">
+      <span className="font-bold text-purple-800 text-sm sm:text-lg">
         {toolbar.view === "day" ? (
           moment(toolbar.date).format("ddd, D MMMM YYYY")
         ) : toolbar.view === "week" ? (
@@ -118,9 +118,26 @@ function getEventColor(title) {
   return EVENT_COLORS[Math.abs(hash) % EVENT_COLORS.length];
 }
 
+function useCalendarHeight() {
+  const [height, setHeight] = useState(580);
+  React.useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      if (w < 480) setHeight(350);
+      else if (w < 768) setHeight(420);
+      else setHeight(580);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return height;
+}
+
 export default function RecurringEventsCalendar({ events, title = "Events Calendar" }) {
   const navigate = useNavigate();
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const calendarHeight = useCalendarHeight();
 
   const expandedEvents = events.flatMap((event) =>
     event.isReoccurring ? generateRecurringEvents(event) : [event]
@@ -187,12 +204,12 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
   return (
     <div className="w-full py-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 px-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 px-2 gap-2">
         <div>
-          <h2 className="text-2xl font-bold text-purple-800">{title}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-purple-800">{title}</h2>
           <div className="h-1 w-16 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full mt-1.5"></div>
         </div>
-        <div className="flex items-center gap-4 text-xs text-purple-500">
+        <div className="flex items-center gap-3 sm:gap-4 text-xs text-purple-500">
           <span className="flex items-center gap-1.5">
             <span className="w-3.5 h-3.5 rounded-full bg-pink-200 border-2 border-pink-500 inline-block"></span>
             Today
@@ -211,7 +228,7 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
           events={calendarEvents}
           startAccessor="start"
           endAccessor="end"
-          style={{ height: 580, width: "100%", background: "transparent" }}
+          style={{ height: calendarHeight, width: "100%", background: "transparent" }}
           onSelectEvent={handleSelectEvent}
           views={["month", "week", "day"]}
           popup

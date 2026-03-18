@@ -61,7 +61,9 @@ export default function Contact() {
   return (
     <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen px-4 py-16">
       <div className="container mx-auto">
-        <h1 className="text-5xl font-extrabold text-center text-purple-700 mb-8">Get in Touch</h1>
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-center text-purple-700 mb-8">
+          Get in Touch
+        </h1>
         <p className="text-center text-lg text-indigo-700 mb-12">
           Please fill out the form below to send us your query. Alternatively, you can email us at{" "}
           <a
@@ -74,10 +76,10 @@ export default function Contact() {
         <div className="flex justify-center">
           <form
             onSubmit={handleSubmit}
-            className="w-full max-w-lg glass-card shadow-xl rounded-2xl px-8 py-10 border border-white/30 backdrop-blur-md"
+            className="w-full max-w-lg glass-card shadow-xl rounded-2xl px-5 sm:px-8 py-8 sm:py-10 border border-white/30 backdrop-blur-md"
           >
-            <div className="flex gap-6 mb-6">
-              <div className="w-1/2">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6">
+              <div className="w-full sm:w-1/2">
                 <label className="glass-label" htmlFor="firstName">
                   First Name *
                 </label>
@@ -91,7 +93,7 @@ export default function Contact() {
                   required
                 />
               </div>
-              <div className="w-1/2">
+              <div className="w-full sm:w-1/2">
                 <label className="glass-label" htmlFor="lastName">
                   Last Name *
                 </label>

@@ -59,7 +59,7 @@ function TicketsTab({ tickets }) {
         className="glass-input mb-4"
       />
       <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[600px]">
           <thead>
             <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
               <th className="px-4 py-3 font-semibold text-purple-700">Event</th>
@@ -156,7 +156,7 @@ function RevenueTab({ events }) {
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[600px]">
           <thead>
             <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
               <th className="px-4 py-3 font-semibold text-purple-700">Event</th>
@@ -314,7 +314,7 @@ function UsersTab({ users, currentUserId, onRoleChange }) {
         className="glass-input mb-4"
       />
       <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[600px]">
           <thead>
             <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
               <th className="px-4 py-3 font-semibold text-purple-700">Name</th>
@@ -421,7 +421,7 @@ function CoursesTab({ enrollments, courses }) {
       {view === "enrollments" && (
         <>
           <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[600px]">
               <thead>
                 <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
                   <th className="px-4 py-3 font-semibold text-purple-700">Course</th>
@@ -473,7 +473,7 @@ function CoursesTab({ enrollments, courses }) {
       {view === "courses" && (
         <>
           <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[600px]">
               <thead>
                 <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
                   <th className="px-4 py-3 font-semibold text-purple-700">Title</th>
@@ -598,12 +598,12 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gradient-to-tr from-pink-50 via-white to-purple-50 py-10 px-4">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
               {isAdmin ? "Admin Dashboard" : "Moderator Dashboard"}
             </h1>
-            <p className="text-sm text-gray-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
               {isAdmin
                 ? "Full access — manage events, users, and view all data"
                 : "View-only access to tickets, revenue, and teams"}
@@ -611,7 +611,7 @@ export default function AdminDashboard() {
           </div>
           <span
             className={
-              "text-xs font-medium px-3 py-1 rounded-full border capitalize " +
+              "text-xs font-medium px-3 py-1 rounded-full border capitalize shrink-0 " +
               (roleBadgeClass[role] ?? roleBadgeClass.user)
             }
           >
@@ -620,13 +620,13 @@ export default function AdminDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-white/70 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-1.5">
+        <div className="flex gap-1 bg-white/70 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-1.5 overflow-x-auto">
           {visibleTabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={
-                "flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-all " +
+                "flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap " +
                 (activeTab === tab
                   ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")
@@ -678,7 +678,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Tab content */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-gray-100 shadow-sm p-6">
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm p-3 sm:p-6">
           {activeTab === "Tickets" && <TicketsTab tickets={data.tickets} />}
           {activeTab === "Revenue" && <RevenueTab events={data.events} />}
           {activeTab === "Teams" && <TeamsTab teams={data.teams} />}

@@ -200,11 +200,11 @@ export default function About() {
     <div className="container mx-auto p-6">
       {/* ── Edit toolbar ── */}
       {canEdit && (
-        <div className="fixed top-24 right-6 z-50 flex gap-2">
+        <div className="sticky top-16 z-40 flex justify-end gap-2 -mx-6 px-6 py-2 mb-4 bg-white/60 backdrop-blur-sm border-b border-white/40">
           {!editing ? (
             <button
               onClick={handleEdit}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 hover:scale-105 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 hover:scale-105 transition-all"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -220,14 +220,14 @@ export default function About() {
             <>
               <button
                 onClick={handleCancel}
-                className="px-4 py-2.5 rounded-full bg-white border border-gray-200 text-gray-600 text-sm font-medium shadow hover:bg-gray-50 transition-all"
+                className="px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-600 text-sm font-medium shadow hover:bg-gray-50 transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 hover:scale-105 transition-all disabled:opacity-60"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 hover:scale-105 transition-all disabled:opacity-60"
               >
                 {saving ? "Saving…" : "Save Changes"}
               </button>
@@ -237,7 +237,7 @@ export default function About() {
       )}
 
       {saveError && (
-        <div className="fixed top-36 right-6 z-50 max-w-sm bg-red-50/95 backdrop-blur-sm border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl shadow-lg animate-scale-in">
+        <div className="fixed top-28 sm:top-36 right-3 sm:right-6 z-50 max-w-[calc(100vw-1.5rem)] sm:max-w-sm bg-red-50/95 backdrop-blur-sm border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl shadow-lg animate-scale-in">
           <div className="flex items-start gap-2">
             <svg
               className="w-4 h-4 mt-0.5 flex-shrink-0"
@@ -293,7 +293,9 @@ export default function About() {
           </>
         ) : (
           <>
-            <h1 className="text-4xl font-bold text-primary mb-4">{pageContent.aboutHeroTitle}</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-primary mb-4">
+              {pageContent.aboutHeroTitle}
+            </h1>
             <p className="text-lg text-gray-700">{pageContent.aboutHeroDescription}</p>
           </>
         )}
@@ -310,7 +312,7 @@ export default function About() {
                 key={i}
                 className={`glass-card overflow-hidden transition-all ${editing ? "ring-2 ring-purple-200" : ""}`}
               >
-                <div className="relative w-full h-64">
+                <div className="relative w-full h-48 sm:h-64">
                   <img
                     src={imgSrc}
                     alt={card.title}

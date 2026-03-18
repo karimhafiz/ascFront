@@ -121,7 +121,7 @@ export default function CourseDetails() {
               <img
                 src={course.images[0]}
                 alt={course.title}
-                className="w-full h-64 object-cover rounded-2xl shadow-xl"
+                className="w-full h-48 sm:h-64 object-cover rounded-2xl shadow-xl"
               />
             )}
 
@@ -266,7 +266,7 @@ export default function CourseDetails() {
 
           {/* Right — enrollment */}
           <div className="md:col-span-1">
-            <div className="glass-card shadow-xl border border-white/30 backdrop-blur-md rounded-2xl sticky top-4">
+            <div className="glass-card shadow-xl border border-white/30 backdrop-blur-md rounded-2xl md:sticky md:top-20">
               <div className="p-6">
                 <h2 className="text-xl font-bold text-pink-700 mb-4">
                   {course.price > 0

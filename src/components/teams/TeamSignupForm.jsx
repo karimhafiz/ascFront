@@ -84,7 +84,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-gradient-to-br from-white/80 to-purple-100/80 rounded-2xl shadow-xl border border-white/50 backdrop-blur-md p-8 relative w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-gradient-to-br from-white/80 to-purple-100/80 rounded-2xl shadow-xl border border-white/50 backdrop-blur-md p-5 sm:p-8 relative w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
         <button
           className="absolute top-3 right-3 btn btn-sm btn-circle bg-white/50 hover:bg-white/70 border-none text-purple-700 hover:scale-110 transition-all duration-300"
           onClick={onClose}

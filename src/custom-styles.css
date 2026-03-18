@@ -4,7 +4,7 @@
 body {
   background: linear-gradient(145deg, #f8fafc 0%, #eef2f7 45%, #e2e8f0 100%);
   min-height: 100vh;
-  padding-top: 80px; /* Add padding for the fixed navbar */
+  padding-top: 64px; /* Add padding for the fixed navbar */
   color: #0f172a;
 }
 
@@ -248,7 +248,7 @@ textarea.glass-input {
 }
 
 .glass-calendar .rbc-row {
-  min-height: 90px !important;
+  min-height: 80px !important;
 }
 
 .glass-calendar .rbc-month-row {
@@ -392,50 +392,51 @@ textarea.glass-input {
 }
 
 /* Additional responsive adjustments */
+
+/* Navbar is ~64px at all sizes (hamburger button height + py-3 padding on mobile = 64px) */
+
 @media (max-width: 768px) {
   .glass-calendar .rbc-calendar {
-    padding: 5px !important;
+    padding: 4px !important;
   }
 
   .glass-calendar .rbc-header {
-    padding: 5px !important;
-    font-size: 0.85rem !important;
+    padding: 4px 2px !important;
+    font-size: 0.7rem !important;
   }
 
   .glass-calendar .rbc-date-cell {
-    padding: 4px !important;
-    font-size: 0.85rem !important;
+    padding: 2px 4px !important;
+    font-size: 0.7rem !important;
   }
 
   .glass-calendar .rbc-event {
-    padding: 2px 6px !important;
-    font-size: 0.75rem !important;
+    padding: 1px 4px !important;
+    font-size: 0.65rem !important;
   }
 
-  nav ul {
-    background-color: rgba(255, 255, 255, 0.95) !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  .glass-calendar .rbc-row {
+    min-height: 50px !important;
   }
 
-  nav ul li a {
-    font-weight: 500 !important;
-    padding: 10px 16px !important;
-    display: flex !important;
-    align-items: center !important;
-    border-radius: 12px !important;
+  .glass-calendar .rbc-toolbar-label {
+    font-size: 1rem !important;
   }
 
-  nav ul li + li {
-    margin-top: 8px !important;
+}
+
+@media (max-width: 480px) {
+  .glass-calendar .rbc-row {
+    min-height: 40px !important;
   }
 
-  nav ul li.group ul {
-    position: relative !important;
-    left: 0 !important;
-    width: 100% !important;
-    margin-top: 10px !important;
-    margin-bottom: 10px !important;
-    background-color: rgba(249, 250, 251, 0.9) !important;
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
+  .glass-calendar .rbc-header {
+    font-size: 0.6rem !important;
+    padding: 3px 1px !important;
+  }
+
+  .glass-calendar .rbc-event {
+    font-size: 0.55rem !important;
+    padding: 0 2px !important;
   }
 }

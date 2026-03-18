@@ -97,22 +97,22 @@ export default function Navbar() {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? "bg-white/70 backdrop-blur-xl shadow-lg py-2"
-          : "bg-white/30 backdrop-blur-md py-4"
-      } border-b border-white/40`}
+          : "bg-white/30 backdrop-blur-md py-3 lg:py-4"
+      }`}
     >
-      <div className="container mx-auto flex justify-between items-center px-4">
+      <div className="flex justify-between items-center px-4 lg:px-8">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2 group">
+        <Link to="/" className="flex items-center space-x-2 group shrink-0">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-pink-500/20 group-hover:scale-110 transition-transform duration-300">
             ASC
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-700 bg-clip-text text-transparent drop-shadow-sm group-hover:tracking-wider transition-all duration-300">
+          <span className="text-lg lg:text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-700 bg-clip-text text-transparent drop-shadow-sm group-hover:tracking-wider transition-all duration-300  sm:inline">
             Ayendah Sazan
           </span>
         </Link>{" "}
         {/* Hamburger Menu for Mobile */}{" "}
         <button
-          className="block md:hidden text-pink-600 focus:outline-none bg-white/60 hover:bg-pink-100/80 rounded-full p-2 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer"
+          className="block lg:hidden text-pink-600 focus:outline-none bg-white/60 hover:bg-pink-100/80 rounded-full p-2 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer"
           onClick={(e) => {
             e.stopPropagation(); // Prevent event bubbling
 
@@ -120,6 +120,7 @@ export default function Navbar() {
               // If menu is open, explicitly close it
               setIsMenuOpen(false);
               setDropdownOpen(false);
+              setUserDropdownOpen(false);
             } else {
               // If menu is closed, open it
               setIsMenuOpen(true);
@@ -162,12 +163,12 @@ export default function Navbar() {
         {/* Navigation Links */}{" "}
         <ul
           ref={menuRef}
-          className={`${menuClasses} md:flex space-y-6 md:space-y-0 md:space-x-8 absolute md:static top-16 left-0 w-full md:w-auto bg-white/95 md:bg-transparent backdrop-blur-xl p-6 md:p-0 rounded-b-2xl shadow-xl md:shadow-none border-x border-b border-white/30 md:border-none transition-all duration-300 animate-fadeIn`}
+          className={`${menuClasses} lg:flex lg:items-center space-y-6 lg:space-y-0 lg:space-x-5 xl:space-x-8 absolute lg:static top-full left-0 w-full lg:w-auto bg-white/95 lg:bg-transparent backdrop-blur-xl p-6 lg:p-0 rounded-b-2xl shadow-xl lg:shadow-none border-x border-b border-white/30 lg:border-none transition-all duration-300 animate-fadeIn`}
         >
           <li>
             <Link
               to="/"
-              className={`relative group flex items-center px-3 py-2 rounded-full ${
+              className={`relative group flex items-center px-3 py-2 lg:py-1 rounded-full ${
                 isActive("/")
                   ? "bg-gradient-to-r from-pink-500/20 to-rose-500/20 text-pink-700 font-medium"
                   : "text-pink-600 hover:bg-pink-100/40"
@@ -184,15 +185,15 @@ export default function Navbar() {
               </svg>
               Home
               {isActive("/") && (
-                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></span>
+                <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></span>
               )}
-              <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+              <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
             </Link>
           </li>
           <li ref={dropdownRef} className="relative" tabIndex={0}>
             <div
               onClick={toggleDropdown}
-              className={`relative flex items-center px-3 py-2 rounded-full cursor-pointer ${
+              className={`relative flex items-center px-3 py-2 lg:py-1 rounded-full cursor-pointer ${
                 location.pathname.includes("/events")
                   ? "bg-gradient-to-r from-rose-500/20 to-fuchsia-500/20 text-rose-700 font-medium"
                   : "text-rose-600 hover:bg-rose-100/40"
@@ -221,11 +222,11 @@ export default function Navbar() {
                 <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.085l3.71-3.855a.75.75 0 1 1 1.08 1.04l-4.24 4.4a.75.75 0 0 1-1.08 0l-4.24-4.4a.75.75 0 0 1 .02-1.06z" />
               </svg>
               {location.pathname.includes("/events") && (
-                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-rose-500 to-fuchsia-500 rounded-full"></span>
+                <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-rose-500 to-fuchsia-500 rounded-full"></span>
               )}
             </div>
             <ul
-              className={`absolute left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl z-50 border border-white/30 overflow-hidden md:left-1/2 md:-translate-x-1/2 transition-all duration-300 ${
+              className={`absolute left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl z-50 border border-white/30 overflow-hidden lg:left-1/2 lg:-translate-x-1/2 transition-all duration-300 ${
                 dropdownOpen
                   ? "opacity-100 translate-y-0 pointer-events-auto"
                   : "opacity-0 -translate-y-2 pointer-events-none"
@@ -275,7 +276,7 @@ export default function Navbar() {
           <li>
             <Link
               to="/courses"
-              className={`relative group flex items-center px-3 py-2 rounded-full ${isActive("/courses") ? "bg-gradient-to-r from-fuchsia-500/20 to-purple-500/20 text-fuchsia-700 font-medium" : "text-fuchsia-600 hover:bg-fuchsia-100/40"} transition-all duration-300`}
+              className={`relative group flex items-center px-3 py-2 lg:py-1 rounded-full ${isActive("/courses") ? "bg-gradient-to-r from-fuchsia-500/20 to-purple-500/20 text-fuchsia-700 font-medium" : "text-fuchsia-600 hover:bg-fuchsia-100/40"} transition-all duration-300`}
               onClick={closeMenu}
             >
               <svg
@@ -294,15 +295,15 @@ export default function Navbar() {
               </svg>
               Courses
               {isActive("/courses") && (
-                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-fuchsia-500 to-purple-500 rounded-full"></span>
+                <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-fuchsia-500 to-purple-500 rounded-full"></span>
               )}
-              <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-purple-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+              <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-purple-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
             </Link>
           </li>
           <li>
             <Link
               to="/about"
-              className={`relative group flex items-center px-3 py-2 rounded-full ${
+              className={`relative group flex items-center px-3 py-2 lg:py-1 rounded-full ${
                 isActive("/about")
                   ? "bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-purple-700 font-medium"
                   : "text-purple-600 hover:bg-purple-100/40"
@@ -319,15 +320,15 @@ export default function Navbar() {
               </svg>
               About
               {isActive("/about") && (
-                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full"></span>
+                <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full"></span>
               )}
-              <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+              <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
             </Link>
           </li>
           <li>
             <Link
               to="/contact"
-              className={`relative group flex items-center px-3 py-2 rounded-full ${
+              className={`relative group flex items-center px-3 py-2 lg:py-1 rounded-full ${
                 isActive("/contact")
                   ? "bg-gradient-to-r from-violet-500/20 to-indigo-500/20 text-violet-700 font-medium"
                   : "text-violet-600 hover:bg-violet-100/40"
@@ -345,9 +346,9 @@ export default function Navbar() {
               </svg>
               Contact
               {isActive("/contact") && (
-                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full"></span>
+                <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full"></span>
               )}
-              <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+              <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
             </Link>
           </li>
           {/* authentication links */}
@@ -356,7 +357,7 @@ export default function Navbar() {
               <li>
                 <Link
                   to="/login"
-                  className={`relative group flex items-center px-3 py-2 rounded-full ${
+                  className={`relative group flex items-center px-3 py-2 lg:py-1 rounded-full ${
                     isActive("/login")
                       ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-700 font-medium"
                       : "text-pink-600 hover:bg-pink-100/40"
@@ -365,14 +366,14 @@ export default function Navbar() {
                 >
                   Login
                   {isActive("/login") && (
-                    <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></span>
+                    <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></span>
                   )}
                 </Link>
               </li>
               <li>
                 <Link
                   to="/signup"
-                  className={`relative group flex items-center px-3 py-2 rounded-full ${
+                  className={`relative group flex items-center px-3 py-2 lg:py-1 rounded-full ${
                     isActive("/signup")
                       ? "bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-700 font-medium"
                       : "text-purple-600 hover:bg-purple-100/40"
@@ -381,7 +382,7 @@ export default function Navbar() {
                 >
                   Sign Up
                   {isActive("/signup") && (
-                    <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></span>
+                    <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></span>
                   )}
                 </Link>
               </li>
@@ -391,7 +392,7 @@ export default function Navbar() {
             <li>
               <Link
                 to="/admin"
-                className={`relative group flex items-center px-3 py-2 rounded-full ${
+                className={`relative group flex items-center px-3 py-2 lg:py-1 rounded-full ${
                   isActive("/admin")
                     ? "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-700 font-medium"
                     : "text-indigo-600 hover:bg-indigo-100/40"
@@ -408,16 +409,20 @@ export default function Navbar() {
               ref={userDropdownRef}
               className="relative"
               onMouseEnter={() => {
-                clearTimeout(userCloseTimer.current);
-                setUserDropdownOpen(true);
+                if (window.innerWidth >= 1024) {
+                  clearTimeout(userCloseTimer.current);
+                  setUserDropdownOpen(true);
+                }
               }}
               onMouseLeave={() => {
-                userCloseTimer.current = setTimeout(() => setUserDropdownOpen(false), 150);
+                if (window.innerWidth >= 1024) {
+                  userCloseTimer.current = setTimeout(() => setUserDropdownOpen(false), 150);
+                }
               }}
             >
               <div
-                onClick={() => setUserDropdownOpen(true)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-full cursor-pointer transition-all duration-300 ${
+                onClick={() => setUserDropdownOpen((prev) => !prev)}
+                className={`flex items-center gap-2 px-3 py-2 lg:py-1 rounded-full cursor-pointer transition-all duration-300 ${
                   userDropdownOpen
                     ? "bg-gradient-to-r from-indigo-500/20 to-purple-500/20"
                     : "hover:bg-indigo-100/40"
@@ -426,7 +431,7 @@ export default function Navbar() {
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm shadow-indigo-200">
                   {userEmail ? userEmail[0].toUpperCase() : "?"}
                 </div>
-                <span className="text-sm font-medium max-w-[120px] truncate hidden sm:block text-indigo-700">
+                <span className="text-sm font-medium max-w-[180px] truncate text-indigo-700">
                   {userEmail}
                 </span>
                 <svg
@@ -438,58 +443,99 @@ export default function Navbar() {
                 </svg>
               </div>
 
-              <div
-                className={`absolute right-1/2 translate-x-1/2 mt-1 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 overflow-hidden z-50 transition-all duration-200 ${
-                  userDropdownOpen
-                    ? "opacity-100 translate-y-0 pointer-events-auto"
-                    : "opacity-0 -translate-y-2 pointer-events-none"
-                }`}
-              >
-                <div className="px-4 py-3 border-b border-indigo-100/60 bg-gradient-to-r from-indigo-50/60 to-purple-50/60">
-                  <p className="text-xs font-medium text-indigo-600 truncate">{userEmail}</p>
-                </div>
+              {/* Desktop: absolute dropdown — only rendered when open, hidden below lg */}
+              {userDropdownOpen && (
+                <div className="hidden lg:block absolute right-0 mt-1 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 overflow-hidden z-50 animate-fadeIn">
+                  <div className="px-4 py-3 border-b border-indigo-100/60 bg-gradient-to-r from-indigo-50/60 to-purple-50/60">
+                    <p className="text-xs font-medium text-indigo-600 truncate">{userEmail}</p>
+                  </div>
 
-                <Link
-                  to="/profile"
-                  onClick={closeMenu}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50/60 hover:to-purple-50/60 hover:text-indigo-700 transition-all duration-200"
-                >
-                  <svg
-                    className="w-4 h-4 text-indigo-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                  <Link
+                    to="/profile"
+                    onClick={closeMenu}
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50/60 hover:to-purple-50/60 hover:text-indigo-700 transition-all duration-200"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                  My Profile
-                </Link>
+                    <svg
+                      className="w-4 h-4 text-indigo-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                    My Profile
+                  </Link>
 
-                <div className="h-px bg-gradient-to-r from-transparent via-indigo-100 to-transparent mx-3" />
+                  <div className="h-px bg-gradient-to-r from-transparent via-indigo-100 to-transparent mx-3" />
 
-                <button
-                  onClick={(e) => {
-                    handleLogout(e);
-                    closeMenu();
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50/60 hover:text-red-600 transition-all duration-200 cursor-pointer"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
-                  Log out
-                </button>
-              </div>
+                  <button
+                    onClick={(e) => {
+                      handleLogout(e);
+                      closeMenu();
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50/60 hover:text-red-600 transition-all duration-200 cursor-pointer"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                      />
+                    </svg>
+                    Log out
+                  </button>
+                </div>
+              )}
+
+              {/* Mobile: inline expanded items — only rendered when mobile menu is open */}
+              {userDropdownOpen && isMenuOpen && (
+                <div className="lg:hidden mt-2 space-y-1 bg-indigo-50/40 rounded-xl p-2 animate-fadeIn">
+                  <Link
+                    to="/profile"
+                    onClick={closeMenu}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-white/60 rounded-lg transition-all duration-200"
+                  >
+                    <svg
+                      className="w-4 h-4 text-indigo-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                    My Profile
+                  </Link>
+
+                  <button
+                    onClick={(e) => {
+                      handleLogout(e);
+                      closeMenu();
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50/60 rounded-lg transition-all duration-200 cursor-pointer"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                      />
+                    </svg>
+                    Log out
+                  </button>
+                </div>
+              )}
             </li>
           )}
         </ul>
