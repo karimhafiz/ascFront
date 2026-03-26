@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Navbar from "../../../src/components/common/MainNavbar";
 import "@testing-library/jest-dom";
@@ -84,21 +84,27 @@ describe("MainNavbar", () => {
     expect(screen.getByText("A")).toBeInTheDocument();
   });
 
-  it("should show My Profile link when authenticated", () => {
+  it("should show My Profile link when authenticated", async () => {
     isAuthenticated.mockReturnValue(true);
     parseJwt.mockReturnValue({ email: "alice@test.com" });
     getAuthToken.mockReturnValue("some-token");
 
     renderNavbar();
+    await act(async () => {
+      fireEvent.click(screen.getByText("alice@test.com"));
+    });
     expect(screen.getByText("My Profile")).toBeInTheDocument();
   });
 
-  it("should show Log out button when authenticated", () => {
+  it("should show Log out button when authenticated", async () => {
     isAuthenticated.mockReturnValue(true);
     parseJwt.mockReturnValue({ email: "alice@test.com" });
     getAuthToken.mockReturnValue("some-token");
 
     renderNavbar();
+    await act(async () => {
+      fireEvent.click(screen.getByText("alice@test.com"));
+    });
     expect(screen.getByText("Log out")).toBeInTheDocument();
   });
 });

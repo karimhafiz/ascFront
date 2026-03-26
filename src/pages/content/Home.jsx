@@ -192,7 +192,7 @@ export default function Home() {
         <div className="hero-content flex flex-col-reverse lg:flex-row items-center gap-6 sm:gap-12 px-4">
           {/* Text card */}
           <div
-            className={`text-center lg:text-left max-w-lg glass-card p-5 sm:p-8 rounded-2xl backdrop-blur-md border shadow-xl transition-all duration-500 ${editing ? "border-purple-300 ring-2 ring-purple-200" : "border-white/30 hover:shadow-2xl"}`}
+            className={`text-center lg:text-left md:max-w-lg glass-card p-5 sm:p-8 rounded-2xl backdrop-blur-md border shadow-xl transition-all duration-500 ${editing ? "border-purple-300 ring-2 ring-purple-200" : "border-white/30 hover:shadow-2xl"}`}
           >
             {editing ? (
               <>
@@ -212,10 +212,10 @@ export default function Home() {
               </>
             ) : (
               <>
-                <h1 className="text-4xl md:text-5xl font-bold text-purple-700 mb-4">
+                <h1 className="text-3xl md:text-4xl xl:text-5xl font-bold text-purple-700 mb-4">
                   {pageContent.heroTitle}
                 </h1>
-                <p className="text-base md:text-lg text-indigo-700 mb-6">
+                <p className="text-sm md:text-base xl:text-lg text-indigo-700 mb-6">
                   {pageContent.heroDescription}
                 </p>
               </>
