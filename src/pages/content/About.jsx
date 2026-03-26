@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { isAdmin, isModerator, getAuthToken } from "../../auth/auth";
+import { compressImage } from "../../util/compressImage";
 
 const DEFAULT_CARDS = [
   {
@@ -121,10 +122,11 @@ export default function About() {
     setDraft({ ...draft, activityCards: cards });
   };
 
-  const handleCardImageChange = (index, file) => {
+  const handleCardImageChange = async (index, file) => {
     if (!file) return;
-    setCardImageFiles((prev) => ({ ...prev, [index]: file }));
-    setCardImagePreviews((prev) => ({ ...prev, [index]: URL.createObjectURL(file) }));
+    const compressed = await compressImage(file);
+    setCardImageFiles((prev) => ({ ...prev, [index]: compressed }));
+    setCardImagePreviews((prev) => ({ ...prev, [index]: URL.createObjectURL(compressed) }));
   };
 
   const handleSave = async () => {

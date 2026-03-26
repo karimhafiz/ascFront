@@ -3,6 +3,7 @@ import { Link, useRouteLoaderData } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import EventCard from "../../components/events/EventCard";
 import { isAdmin, isModerator, getAuthToken } from "../../auth/auth";
+import { compressImage } from "../../util/compressImage";
 
 const DEFAULTS = {
   heroTitle: "Welcome to Ayendah Sazan",
@@ -273,11 +274,12 @@ export default function Home() {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
-                    setHeroImageFile(file);
-                    setHeroImagePreview(URL.createObjectURL(file));
+                    const compressed = await compressImage(file);
+                    setHeroImageFile(compressed);
+                    setHeroImagePreview(URL.createObjectURL(compressed));
                   }}
                 />
               </>
