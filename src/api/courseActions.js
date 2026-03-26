@@ -1,5 +1,6 @@
 import { redirect } from "react-router-dom";
 import { getAuthToken } from "../auth/auth";
+import { compressImage } from "../util/compressImage";
 
 export async function courseAction({ request, params }) {
   const method = request.method.toUpperCase();
@@ -28,7 +29,10 @@ export async function courseAction({ request, params }) {
   const body = new FormData();
   body.append("courseData", JSON.stringify(courseData));
   const imageFile = formData.get("image");
-  if (imageFile instanceof File && imageFile.size > 0) body.append("image", imageFile);
+  if (imageFile instanceof File && imageFile.size > 0) {
+    const compressed = await compressImage(imageFile);
+    body.append("image", compressed);
+  }
 
   const url = params.courseId
     ? `${import.meta.env.VITE_DEV_URI}courses/${params.courseId}`

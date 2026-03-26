@@ -1,5 +1,6 @@
 import { redirect } from "react-router-dom";
 import { getAuthToken } from "../auth/auth";
+import { compressImage } from "../util/compressImage";
 
 export async function eventAction({ request, params }) {
   const method = request.method;
@@ -35,7 +36,8 @@ export async function eventAction({ request, params }) {
   formData.append("eventData", JSON.stringify(eventData));
   const imageFile = data.get("image");
   if (imageFile && imageFile instanceof File && imageFile.size > 0) {
-    formData.append("image", imageFile);
+    const compressed = await compressImage(imageFile);
+    formData.append("image", compressed);
   }
 
   let url = `${import.meta.env.VITE_DEV_URI}events`;
