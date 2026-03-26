@@ -1,38 +1,47 @@
-import React from "react";
+import { lazy, Suspense, createElement } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 
 import "./App.css";
 import Main from "./components/common/Main";
-import Home from "./pages/content/Home";
-import About from "./pages/content/About";
-import Contact from "./pages/content/Contact";
-import EventPage from "./pages/events/Event";
-import EventDetails from "./pages/events/EventDetails";
-import NewEvent from "./pages/events/NewEvent";
-import EditEvent from "./pages/events/EditEvent";
-import EventRoot from "./pages/events/EventRoot";
 import ErrorPage from "./pages/Errorpage";
-import OrderConfirmation from "./pages/payments/OrderConfirmation";
-import Login from "./pages/auth/Login";
-import Signup from "./pages/auth/Signup";
+import ProtectedRoute from "./components/common/ProtectedRoute";
+import ModeratorRoute from "./components/common/ModeratorRoute";
 import { loginAction, signupAction, logoutAction } from "./auth/authActions";
 import { combinedLoader, eventDetailLoader } from "./loaders/loaders";
 import { eventAction } from "./api/eventActions";
-import CancelPage from "./pages/payments/CancelPage";
-import TeamConfirmationPage from "./pages/teams/TeamConfirmationPage";
-import ProtectedRoute from "./components/common/ProtectedRoute";
-import ModeratorRoute from "./components/common/ModeratorRoute";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import SportsPage from "./pages/content/Sports";
-import ProfilePage from "./pages/ProfilePage";
-import TicketPage from "./pages/tickets/TicketPage";
-import TicketVerify from "./pages/tickets/TicketVerify";
 import { courseAction } from "./api/courseActions";
-import CoursesPage from "./pages/courses/Courses";
-import CourseConfirmation from "./pages/courses/CourseConfirmation";
-import CourseDetails from "./pages/courses/CourseDetails";
-import CourseFormPage from "./pages/courses/CourseFormPage";
+
+const Home = lazy(() => import("./pages/content/Home"));
+const About = lazy(() => import("./pages/content/About"));
+const Contact = lazy(() => import("./pages/content/Contact"));
+const EventPage = lazy(() => import("./pages/events/Event"));
+const EventDetails = lazy(() => import("./pages/events/EventDetails"));
+const NewEvent = lazy(() => import("./pages/events/NewEvent"));
+const EditEvent = lazy(() => import("./pages/events/EditEvent"));
+const EventRoot = lazy(() => import("./pages/events/EventRoot"));
+const OrderConfirmation = lazy(() => import("./pages/payments/OrderConfirmation"));
+const Login = lazy(() => import("./pages/auth/Login"));
+const Signup = lazy(() => import("./pages/auth/Signup"));
+const CancelPage = lazy(() => import("./pages/payments/CancelPage"));
+const TeamConfirmationPage = lazy(() => import("./pages/teams/TeamConfirmationPage"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const SportsPage = lazy(() => import("./pages/content/Sports"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const TicketPage = lazy(() => import("./pages/tickets/TicketPage"));
+const TicketVerify = lazy(() => import("./pages/tickets/TicketVerify"));
+const CoursesPage = lazy(() => import("./pages/courses/Courses"));
+const CourseConfirmation = lazy(() => import("./pages/courses/CourseConfirmation"));
+const CourseDetails = lazy(() => import("./pages/courses/CourseDetails"));
+const CourseFormPage = lazy(() => import("./pages/courses/CourseFormPage"));
+
+const fallback = (
+  <div className="flex justify-center items-center p-12">
+    <span className="loading loading-spinner loading-lg" />
+  </div>
+);
+
+const w = (C) => <Suspense fallback={fallback}>{createElement(C)}</Suspense>;
 
 const router = createBrowserRouter([
   {
@@ -42,47 +51,47 @@ const router = createBrowserRouter([
     loader: combinedLoader,
     errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <Home /> },
-      { path: "cancel", element: <CancelPage /> },
-      { path: "team-confirmation", element: <TeamConfirmationPage /> },
-      { path: "order-confirmation", element: <OrderConfirmation /> },
-      { path: "about", element: <About /> },
-      { path: "contact", element: <Contact /> },
-      { path: "profile", element: <ProfilePage /> },
-      { path: "tickets/:ticketId", element: <TicketPage /> },
-      { path: "tickets/verify/:ticketCode", element: <TicketVerify /> },
-      { path: "courses", element: <CoursesPage /> },
-      { path: "courses/:courseId", element: <CourseDetails /> },
+      { index: true, element: w(Home) },
+      { path: "cancel", element: w(CancelPage) },
+      { path: "team-confirmation", element: w(TeamConfirmationPage) },
+      { path: "order-confirmation", element: w(OrderConfirmation) },
+      { path: "about", element: w(About) },
+      { path: "contact", element: w(Contact) },
+      { path: "profile", element: w(ProfilePage) },
+      { path: "tickets/:ticketId", element: w(TicketPage) },
+      { path: "tickets/verify/:ticketCode", element: w(TicketVerify) },
+      { path: "courses", element: w(CoursesPage) },
+      { path: "courses/:courseId", element: w(CourseDetails) },
       {
         element: <ModeratorRoute />,
         children: [
-          { path: "courses/new", element: <CourseFormPage />, action: courseAction },
-          { path: "courses/:courseId/edit", element: <CourseFormPage />, action: courseAction },
+          { path: "courses/new", element: w(CourseFormPage), action: courseAction },
+          { path: "courses/:courseId/edit", element: w(CourseFormPage), action: courseAction },
         ],
       },
-      { path: "course-confirmation", element: <CourseConfirmation /> },
+      { path: "course-confirmation", element: w(CourseConfirmation) },
       {
         path: "events",
-        element: <EventRoot />,
+        element: w(EventRoot),
         children: [
-          { index: true, element: <EventPage /> },
-          { path: "asc", element: <EventPage /> },
-          { path: "sports", element: <SportsPage /> },
+          { index: true, element: w(EventPage) },
+          { path: "asc", element: w(EventPage) },
+          { path: "sports", element: w(SportsPage) },
           {
             path: ":eventId",
             id: "event-detail",
             loader: eventDetailLoader,
             children: [
-              { index: true, element: <EventDetails /> },
+              { index: true, element: w(EventDetails) },
               {
                 element: <ModeratorRoute />,
-                children: [{ path: "edit", element: <EditEvent />, action: eventAction }],
+                children: [{ path: "edit", element: w(EditEvent), action: eventAction }],
               },
             ],
           },
           {
             element: <ModeratorRoute />,
-            children: [{ path: "new", element: <NewEvent />, action: eventAction }],
+            children: [{ path: "new", element: w(NewEvent), action: eventAction }],
           },
         ],
       },
@@ -90,10 +99,10 @@ const router = createBrowserRouter([
         path: "admin",
         element: <ProtectedRoute />,
         errorElement: <ErrorPage />,
-        children: [{ index: true, element: <AdminDashboard /> }],
+        children: [{ index: true, element: w(AdminDashboard) }],
       },
-      { path: "login", element: <Login />, action: loginAction },
-      { path: "signup", element: <Signup />, action: signupAction },
+      { path: "login", element: w(Login), action: loginAction },
+      { path: "signup", element: w(Signup), action: signupAction },
       { path: "logout", action: logoutAction },
     ],
   },

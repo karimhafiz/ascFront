@@ -53,7 +53,7 @@ const GoogleLogin = () => {
         onClick={handleClick}
         className="flex items-center justify-center btn w-full text-base font-medium py-3 mt-6 rounded-xl bg-gradient-to-r from-pink-400 to-purple-400 text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] hover:border-2 hover:border-white transition-all"
       >
-        <img src={googleLogo} alt="Google" className="h-5 w-5 mr-3" />
+        <img src={googleLogo} alt="Google" className="h-5 w-5 mr-3" width="20" height="20" />
         Continue with Google
       </button>
     </>

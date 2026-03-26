@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useRouteLoaderData } from "react-router-dom";
 import { isAdmin, isModerator } from "../../auth/auth";
 
-import { formatDateRange } from "../../util/util";
+import { formatDateRange, optimizeCloudinaryUrl } from "../../util/util";
 
 export default function EventCard({ event }) {
   const { token } = useRouteLoaderData("root");
@@ -66,7 +66,13 @@ export default function EventCard({ event }) {
       {/* Image */}
       <div className="w-full">
         {event.images && event.images.length > 0 ? (
-          <img src={event.images[0]} alt={event.title} className="w-full h-48 object-cover" />
+          <img
+            src={optimizeCloudinaryUrl(event.images[0])}
+            alt={event.title}
+            className="w-full h-48 object-cover"
+            width="400"
+            height="192"
+          />
         ) : (
           <div className="bg-gradient-to-br from-pink-100/60 to-purple-100/60 w-full h-48 flex items-center justify-center backdrop-blur-sm">
             <svg

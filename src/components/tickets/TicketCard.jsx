@@ -1,5 +1,6 @@
 import React from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { optimizeCloudinaryUrl } from "../../util/util";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
@@ -45,7 +46,13 @@ export default function TicketCard({ ticket, ticketsInGroup }) {
 
       {/* Event image */}
       {event?.images?.[0] && (
-        <img src={event.images[0]} alt={event.title} className="w-full h-48 object-fill" />
+        <img
+          src={optimizeCloudinaryUrl(event.images[0])}
+          alt={event.title}
+          className="w-full h-48 object-fill"
+          width="400"
+          height="192"
+        />
       )}
 
       {/* Ticket code + QR */}

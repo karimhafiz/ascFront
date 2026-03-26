@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { isAdmin, isModerator, getAuthToken } from "../../auth/auth";
+import { optimizeCloudinaryUrl } from "../../util/util";
 
 const CATEGORY_COLORS = {
   Language: { bg: "from-blue-500 to-indigo-600", badge: "bg-blue-100 text-blue-700" },
@@ -39,7 +40,13 @@ export default function CourseCard({ course }) {
         <Link to={`/courses/${course._id}`} className="block">
           {/* Image or gradient banner */}
           {course.images && course.images.length > 0 ? (
-            <img src={course.images[0]} alt={course.title} className="w-full h-44 object-cover" />
+            <img
+              src={optimizeCloudinaryUrl(course.images[0])}
+              alt={course.title}
+              className="w-full h-44 object-cover"
+              width="400"
+              height="176"
+            />
           ) : (
             <div
               className={`w-full h-44 bg-gradient-to-br ${colors.bg} flex items-center justify-center`}

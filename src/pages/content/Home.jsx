@@ -235,6 +235,9 @@ export default function Home() {
               src={heroImage}
               alt="Community Event"
               className={`rounded-2xl shadow-xl object-cover w-full h-auto ring-4 ${editing ? "ring-purple-300" : "ring-white/50"}`}
+              fetchpriority="high"
+              width="500"
+              height="375"
             />
             <div className="absolute bottom-4 left-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm px-4 py-2 rounded-xl shadow-lg backdrop-blur-sm">
               {editing ? (
