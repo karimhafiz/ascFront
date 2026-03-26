@@ -65,13 +65,16 @@ export async function refreshAccessToken() {
 // ── Token utilities ──
 
 export function parseJwt(token) {
+  if (!token) return null;
   try {
     const base64Payload = token.split(".")[1];
-    const padded = base64Payload.padEnd(base64Payload.length + (4 - (base64Payload.length % 4)) % 4, "=");
+    const padded = base64Payload.padEnd(
+      base64Payload.length + ((4 - (base64Payload.length % 4)) % 4),
+      "="
+    );
     const payload = atob(padded);
     return JSON.parse(payload);
-  } catch (err) {
-    console.error("parseJwt failed:", err);
+  } catch {
     return null;
   }
 }
