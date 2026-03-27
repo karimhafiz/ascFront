@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { isAdmin, isModerator, getAuthToken } from "../../auth/auth";
-import { optimizeCloudinaryUrl } from "../../util/util";
+import { optimizeCloudinaryUrl, toSlug } from "../../util/util";
 
 const CATEGORY_COLORS = {
   Language: { bg: "from-blue-500 to-indigo-600", badge: "bg-blue-100 text-blue-700" },
@@ -37,7 +37,7 @@ export default function CourseCard({ course }) {
   return (
     <div className="group">
       <div className="glass-card rounded-2xl shadow-lg border border-white/30 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-        <Link to={`/courses/${course._id}`} className="block">
+        <Link to={`/courses/${toSlug(course.title, course._id)}`} className="block">
           {/* Image or gradient banner */}
           {course.images && course.images.length > 0 ? (
             <img
@@ -170,7 +170,7 @@ export default function CourseCard({ course }) {
         {canManage && (
           <div className="flex gap-2 p-3 bg-gray-50/80 border-t border-gray-100">
             <Link
-              to={`/courses/${course._id}/edit`}
+              to={`/courses/${toSlug(course.title, course._id)}/edit`}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs font-semibold transition-all"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

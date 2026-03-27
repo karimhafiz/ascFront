@@ -104,6 +104,6 @@ describe("CourseCard", () => {
   it("should link to course details", () => {
     renderCard();
     const link = screen.getByRole("link", { name: /English Language/i });
-    expect(link).toHaveAttribute("href", "/courses/c1");
+    expect(link).toHaveAttribute("href", "/courses/english-language-c1");
   });
 });

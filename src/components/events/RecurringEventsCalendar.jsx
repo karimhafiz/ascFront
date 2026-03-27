@@ -3,7 +3,7 @@ import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useNavigate } from "react-router-dom";
-import { generateRecurringEvents } from "../../util/util";
+import { generateRecurringEvents, toSlug } from "../../util/util";
 
 const CustomToolbar = (toolbar) => {
   const goToBack = () => {
@@ -197,7 +197,7 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
 
   const handleSelectEvent = (event) => setSelectedEvent(event);
   const handleConfirmNavigate = () => {
-    if (selectedEvent) navigate(`/events/${selectedEvent._id}`);
+    if (selectedEvent) navigate(`/events/${toSlug(selectedEvent.title, selectedEvent._id)}`);
     setSelectedEvent(null);
   };
 

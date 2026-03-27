@@ -223,6 +223,7 @@ export default function Home() {
             )}
             <Link
               to="/about"
+              aria-label="Learn more about Ayendah Sazan"
               className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 text-base rounded-xl shadow-md hover:scale-105 transition-all duration-300"
             >
               Learn More

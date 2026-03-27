@@ -67,3 +67,17 @@ export const optimizeCloudinaryUrl = (url) => {
   if (!url || !url.includes("/upload/")) return url;
   return url.replace("/upload/", "/upload/f_auto,q_auto/");
 };
+
+// Build a readable slug URL param: "my-event-title-<mongoId>"
+export const toSlug = (title, id) => {
+  const slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+  return `${slug}-${id}`;
+};
+
+// Extract the MongoDB ObjectId from the end of a slug (always 24 hex chars)
+export const slugToId = (slug) => slug.slice(-24);

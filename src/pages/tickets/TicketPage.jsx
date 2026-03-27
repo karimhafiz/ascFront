@@ -4,7 +4,7 @@ import { isAuthenticated, getAuthToken } from "../../auth/auth";
 import TicketCard from "../../components/tickets/TicketCard";
 
 export default function TicketPage() {
-  const { ticketId } = useParams();
+  const { ticketCode } = useParams();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,7 +16,7 @@ export default function TicketPage() {
       return;
     }
     const token = getAuthToken();
-    fetch(`${import.meta.env.VITE_DEV_URI}tickets/${ticketId}`, {
+    fetch(`${import.meta.env.VITE_DEV_URI}tickets/${ticketCode}`, {
       headers: { Authorization: "Bearer " + token },
     })
       .then(async (res) => {
@@ -26,7 +26,7 @@ export default function TicketPage() {
       .then(setTicket)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [ticketId, navigate]);
+  }, [ticketCode, navigate]);
 
   if (loading)
     return (

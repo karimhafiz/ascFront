@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { FaUsers, FaTrophy, FaCalendarAlt, FaMapMarkerAlt } from "react-icons/fa";
+import { toSlug } from "../../util/util";
 
 export default function TeamConfirmationPage() {
   const [searchParams] = useSearchParams();
@@ -183,7 +184,8 @@ export default function TeamConfirmationPage() {
               </Link>
               {event && (
                 <Link
-                  to={`/events/${event._id}`}
+                  to={`/events/${toSlug(event.title, event._id)}`}
+                  aria-label={`View ${event.title} tournament`}
                   className="flex-1 btn bg-white/60 border border-purple-200 text-purple-700 hover:bg-white/80 hover:scale-105 transition-all duration-300 rounded-xl"
                 >
                   View Tournament

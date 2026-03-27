@@ -1,11 +1,14 @@
 import React, { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import TeamSignupForm from "../../components/teams/TeamSignupForm";
 import { parseJwt, getAuthToken } from "../../auth/auth";
+import { slugToId } from "../../util/util";
 
 export default function EventDetails() {
-  const { eventId } = useParams();
+  const { eventSlug } = useParams();
+  const eventId = slugToId(eventSlug);
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState("1");
   const [email, setEmail] = useState(() => {
@@ -131,6 +134,13 @@ export default function EventDetails() {
 
   return (
     <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen">
+      <Helmet>
+        <title>{event.title} | ASC Events</title>
+        <meta
+          name="description"
+          content={event.shortDescription || event.longDescription?.slice(0, 155)}
+        />
+      </Helmet>
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white p-6 md:p-12 shadow-lg backdrop-blur-sm">
         <div className="container mx-auto">

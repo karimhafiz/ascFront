@@ -58,15 +58,15 @@ const router = createBrowserRouter([
       { path: "about", element: w(About) },
       { path: "contact", element: w(Contact) },
       { path: "profile", element: w(ProfilePage) },
-      { path: "tickets/:ticketId", element: w(TicketPage) },
+      { path: "tickets/:ticketCode", element: w(TicketPage) },
       { path: "tickets/verify/:ticketCode", element: w(TicketVerify) },
       { path: "courses", element: w(CoursesPage) },
-      { path: "courses/:courseId", element: w(CourseDetails) },
+      { path: "courses/:courseSlug", element: w(CourseDetails) },
       {
         element: <ModeratorRoute />,
         children: [
           { path: "courses/new", element: w(CourseFormPage), action: courseAction },
-          { path: "courses/:courseId/edit", element: w(CourseFormPage), action: courseAction },
+          { path: "courses/:courseSlug/edit", element: w(CourseFormPage), action: courseAction },
         ],
       },
       { path: "course-confirmation", element: w(CourseConfirmation) },
@@ -78,7 +78,7 @@ const router = createBrowserRouter([
           { path: "asc", element: w(EventPage) },
           { path: "sports", element: w(SportsPage) },
           {
-            path: ":eventId",
+            path: ":eventSlug",
             id: "event-detail",
             loader: eventDetailLoader,
             children: [
