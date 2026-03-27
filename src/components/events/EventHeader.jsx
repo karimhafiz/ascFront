@@ -38,7 +38,7 @@ const EventHeader = () => {
         </div>
         <NavLink
           to="/events/new"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-md shadow-pink-200/50 hover:scale-105 transition-all cursor-pointer"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-md shadow-pink-200/50 transition-all cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

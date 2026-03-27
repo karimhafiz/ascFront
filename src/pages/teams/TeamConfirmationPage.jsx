@@ -178,7 +178,7 @@ export default function TeamConfirmationPage() {
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
                 to="/profile"
-                className="flex-1 btn bg-gradient-to-r from-purple-500 to-pink-500 border-none text-white hover:scale-105 transition-all duration-300 rounded-xl shadow-md"
+                className="flex-1 btn bg-gradient-to-r from-purple-500 to-pink-500 border-none text-white transition-all duration-300 rounded-xl shadow-md"
               >
                 View My Profile
               </Link>
@@ -186,14 +186,14 @@ export default function TeamConfirmationPage() {
                 <Link
                   to={`/events/${toSlug(event.title, event._id)}`}
                   aria-label={`View ${event.title} tournament`}
-                  className="flex-1 btn bg-white/60 border border-purple-200 text-purple-700 hover:bg-white/80 hover:scale-105 transition-all duration-300 rounded-xl"
+                  className="flex-1 btn bg-white/60 border border-purple-200 text-purple-700 hover:bg-white/80 transition-all duration-300 rounded-xl"
                 >
                   View Tournament
                 </Link>
               )}
               <Link
                 to="/"
-                className="flex-1 btn bg-white/60 border border-purple-200 text-purple-700 hover:bg-white/80 hover:scale-105 transition-all duration-300 rounded-xl"
+                className="flex-1 btn bg-white/60 border border-purple-200 text-purple-700 hover:bg-white/80 transition-all duration-300 rounded-xl"
               >
                 Return to Home
               </Link>

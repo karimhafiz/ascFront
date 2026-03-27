@@ -146,7 +146,7 @@ export default function OrderConfirmation() {
           <div className="space-y-3">
             <Link
               to="/profile"
-              className="block w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl hover:scale-105 transition-all font-medium"
+              className="block w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl transition-all font-medium"
             >
               View My Tickets
             </Link>
@@ -208,7 +208,7 @@ export default function OrderConfirmation() {
         <div className="space-y-3">
           <button
             onClick={() => window.print()}
-            className="w-full btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none hover:scale-105 transition-all duration-300 shadow-md"
+            className="w-full btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none transition-all duration-300 shadow-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -228,7 +228,7 @@ export default function OrderConfirmation() {
           </button>
           <button
             onClick={handleAddToCalendar}
-            className="w-full btn glass border border-purple-300 text-purple-700 hover:bg-purple-100/30 hover:scale-105 transition-all duration-300"
+            className="w-full btn glass border border-purple-300 text-purple-700 hover:bg-purple-100/30 transition-all duration-300"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -248,7 +248,7 @@ export default function OrderConfirmation() {
           </button>
           <Link
             to="/profile"
-            className="block text-center w-full btn glass border border-gray-300 text-gray-700 hover:bg-gray-100/30 hover:scale-105 transition-all duration-300"
+            className="block text-center w-full btn glass border border-gray-300 text-gray-700 hover:bg-gray-100/30 transition-all duration-300"
           >
             View All Tickets
           </Link>

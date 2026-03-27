@@ -170,7 +170,7 @@ export default function EventCard({ event }) {
 
           <button
             onClick={handleViewDetails}
-            className="btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none hover:scale-105 transition-all duration-300 shadow-md w-full cursor-pointer"
+            className="btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none transition-all duration-300 shadow-md w-full cursor-pointer"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -199,7 +199,7 @@ export default function EventCard({ event }) {
             <div className="flex gap-2 mt-2">
               <button
                 onClick={handleEditEvent}
-                className="btn btn-sm flex-1 glass border-purple-300 text-purple-700 hover:bg-purple-100/30 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer"
+                className="btn btn-sm flex-1 glass border-purple-300 text-purple-700 hover:bg-purple-100/30 transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer"
                 title="Edit Event"
               >
                 <svg
@@ -220,7 +220,7 @@ export default function EventCard({ event }) {
               </button>
               <button
                 onClick={handleRemoveEvent}
-                className="btn btn-sm flex-1 bg-red-100/50 border-red-300 text-red-700 hover:bg-red-200/50 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer"
+                className="btn btn-sm flex-1 bg-red-100/50 border-red-300 text-red-700 hover:bg-red-200/50 transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer"
                 title="Remove Event"
               >
                 <svg

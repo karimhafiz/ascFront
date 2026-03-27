@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { isAdmin, isModerator, getAuthToken } from "../../auth/auth";
 import { compressImage } from "../../util/compressImage";
+import { Link } from "react-router-dom";
+import ConfirmModal from "../../components/common/ConfirmModal";
 
 const DEFAULT_CARDS = [
   {
@@ -42,6 +44,20 @@ const DEFAULTS = {
     "Join us in making a difference! Whether you want to volunteer, attend an event, or support our initiatives, there are many ways to get involved with Ayendah Sazan.",
 };
 
+function mergeWithDefaults(saved) {
+  return {
+    ...DEFAULTS,
+    ...saved,
+    activityCards: saved.activityCards?.length
+      ? saved.activityCards.map((c, i) => ({
+          ...DEFAULT_CARDS[i],
+          ...c,
+          image: c.image || DEFAULT_CARDS[i].image,
+        }))
+      : DEFAULTS.activityCards,
+  };
+}
+
 function EditableField({ editing, value, onChange, className, multiline, placeholder, rows = 3 }) {
   if (!editing)
     return multiline ? (
@@ -71,6 +87,13 @@ function EditableField({ editing, value, onChange, className, multiline, placeho
   );
 }
 
+const SECTION_LABELS = {
+  hero: "the hero section",
+  cards: "all activity cards",
+  mission: "the mission section",
+  getInvolved: "the Get Involved section",
+};
+
 export default function About() {
   const canEdit = isAdmin() || isModerator();
 
@@ -80,7 +103,9 @@ export default function About() {
   const [cardImageFiles, setCardImageFiles] = useState({});
   const [cardImagePreviews, setCardImagePreviews] = useState({});
   const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [pendingReset, setPendingReset] = useState(null); // section key or "all"
   const cardImageRefs = useRef([]);
 
   useEffect(() => {
@@ -88,13 +113,7 @@ export default function About() {
       .then((r) => r.json())
       .then((data) => {
         if (data && Object.keys(data).length > 0) {
-          const merged = {
-            ...DEFAULTS,
-            ...data,
-            activityCards: data.activityCards?.length
-              ? data.activityCards.map((c, i) => ({ ...DEFAULT_CARDS[i], ...c }))
-              : DEFAULTS.activityCards,
-          };
+          const merged = mergeWithDefaults(data);
           setPageContent(merged);
           setDraft(merged);
         }
@@ -115,6 +134,50 @@ export default function About() {
     setCardImageFiles({});
     setCardImagePreviews({});
     setSaveError(null);
+  };
+
+  const resetSection = (section) => setPendingReset(section);
+
+  const doReset = async () => {
+    const section = pendingReset;
+    setPendingReset(null);
+    setResetting(true);
+    setSaveError(null);
+    try {
+      const token = getAuthToken();
+      const url =
+        section === "all"
+          ? `${import.meta.env.VITE_DEV_URI}pageContent/about`
+          : `${import.meta.env.VITE_DEV_URI}pageContent/about/${section}`;
+
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message || `Server error (${res.status})`);
+      }
+
+      const data = await res.json();
+      if (section === "all") {
+        setPageContent(DEFAULTS);
+        setDraft(DEFAULTS);
+        setEditing(false);
+      } else {
+        const merged = mergeWithDefaults(data.pageContent || {});
+        setPageContent(merged);
+        setDraft(JSON.parse(JSON.stringify(merged)));
+        if (section === "cards") {
+          setCardImageFiles({});
+          setCardImagePreviews({});
+        }
+      }
+    } catch (err) {
+      setSaveError(err.message || "Failed to reset. Please try again.");
+    } finally {
+      setResetting(false);
+    }
   };
 
   const updateCard = (index, field, value) => {
@@ -180,14 +243,7 @@ export default function About() {
         throw new Error(body?.message || `Server error (${res.status})`);
       }
       const { pageContent: saved } = await res.json();
-      const merged = {
-        ...DEFAULTS,
-        ...saved,
-        activityCards: saved.activityCards?.length
-          ? saved.activityCards.map((c, i) => ({ ...DEFAULT_CARDS[i], ...c }))
-          : DEFAULTS.activityCards,
-      };
-      setPageContent(merged);
+      setPageContent(mergeWithDefaults(saved));
       setEditing(false);
       setCardImageFiles({});
       setCardImagePreviews({});
@@ -198,15 +254,26 @@ export default function About() {
     }
   };
 
+  const resetLabel =
+    pendingReset === "all" ? "the entire about page" : SECTION_LABELS[pendingReset];
+
   return (
     <div className="container mx-auto p-6">
+      <ConfirmModal
+        isOpen={!!pendingReset}
+        title="Reset to Defaults?"
+        message={`Reset ${resetLabel} to default content? This will permanently clear any custom text and images for that section.`}
+        confirmLabel="Reset"
+        onConfirm={doReset}
+        onCancel={() => setPendingReset(null)}
+      />
       {/* ── Edit toolbar ── */}
       {canEdit && (
         <div className="sticky top-16 z-40 flex justify-end gap-2 -mx-6 px-6 py-2 mb-4 bg-white/60 backdrop-blur-sm border-b border-white/40">
           {!editing ? (
             <button
               onClick={handleEdit}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 hover:scale-105 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 transition-all cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -222,14 +289,21 @@ export default function About() {
             <>
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-600 text-sm font-medium shadow hover:bg-gray-50 transition-all"
+                className="px-4 py-2 rounded-full bg-white border border-purple-200 text-purple-600 text-sm font-medium shadow hover:bg-purple-50 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
+                onClick={() => resetSection("all")}
+                disabled={resetting}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-amber-300 text-amber-700 text-sm font-medium shadow hover:bg-amber-50 transition-all disabled:opacity-60 cursor-pointer"
+              >
+                {resetting ? "Resetting…" : "Reset All to Defaults"}
+              </button>
+              <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 hover:scale-105 transition-all disabled:opacity-60"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 transition-all disabled:opacity-60 cursor-pointer"
               >
                 {saving ? "Saving…" : "Save Changes"}
               </button>
@@ -292,6 +366,13 @@ export default function About() {
               value={draft.aboutHeroDescription}
               onChange={(e) => setDraft({ ...draft, aboutHeroDescription: e.target.value })}
             />
+            <button
+              onClick={() => resetSection("hero")}
+              disabled={resetting}
+              className="mt-3 px-3 py-1.5 rounded-full bg-white border border-amber-300 text-amber-700 text-xs font-medium shadow hover:bg-amber-50 transition-all disabled:opacity-60 cursor-pointer"
+            >
+              Reset to Defaults
+            </button>
           </>
         ) : (
           <>
@@ -305,7 +386,18 @@ export default function About() {
 
       {/* ── What We Do ── */}
       <div className="mb-12">
-        <h2 className="text-3xl font-bold text-secondary mb-6 text-center">What We Do</h2>
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <h2 className="text-3xl font-bold text-secondary">What We Do</h2>
+          {editing && (
+            <button
+              onClick={() => resetSection("cards")}
+              disabled={resetting}
+              className="px-3 py-1.5 rounded-full bg-white border border-amber-300 text-amber-700 text-xs font-medium shadow hover:bg-amber-50 transition-all disabled:opacity-60 cursor-pointer"
+            >
+              Reset to Defaults
+            </button>
+          )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {(editing ? draft.activityCards : pageContent.activityCards).map((card, i) => {
             const imgSrc = cardImagePreviews[i] || card.image;
@@ -324,7 +416,7 @@ export default function About() {
                     <>
                       <button
                         onClick={() => cardImageRefs.current[i]?.click()}
-                        className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 rounded-full text-xs font-medium text-purple-700 shadow hover:bg-white transition-all"
+                        className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 rounded-full text-xs font-medium text-purple-700 shadow hover:bg-white transition-all cursor-pointer"
                       >
                         <svg
                           className="w-3.5 h-3.5"
@@ -396,6 +488,13 @@ export default function About() {
               value={draft.missionText}
               onChange={(e) => setDraft({ ...draft, missionText: e.target.value })}
             />
+            <button
+              onClick={() => resetSection("mission")}
+              disabled={resetting}
+              className="mt-3 px-3 py-1.5 rounded-full bg-white border border-amber-300 text-amber-700 text-xs font-medium shadow hover:bg-amber-50 transition-all disabled:opacity-60 cursor-pointer"
+            >
+              Reset to Defaults
+            </button>
           </>
         ) : (
           <>
@@ -422,6 +521,13 @@ export default function About() {
               value={draft.getInvolvedText}
               onChange={(e) => setDraft({ ...draft, getInvolvedText: e.target.value })}
             />
+            <button
+              onClick={() => resetSection("getInvolved")}
+              disabled={resetting}
+              className="mb-4 px-3 py-1.5 rounded-full bg-white border border-amber-300 text-amber-700 text-xs font-medium shadow hover:bg-amber-50 transition-all disabled:opacity-60 cursor-pointer"
+            >
+              Reset to Defaults
+            </button>
           </>
         ) : (
           <>
@@ -431,12 +537,12 @@ export default function About() {
             <p className="text-lg text-gray-700 mb-6">{pageContent.getInvolvedText}</p>
           </>
         )}
-        <a
-          href="/contact"
-          className="inline-block btn btn-primary px-6 py-3 text-white rounded-xl shadow-md hover:scale-105 hover:bg-pink-400 transition-all"
+        <Link
+          to="/contact"
+          className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-full font-semibold shadow-lg shadow-pink-200 transition-all"
         >
           Contact Us
-        </a>
+        </Link>
       </div>
     </div>
   );

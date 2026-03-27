@@ -152,7 +152,7 @@ export default function Contact() {
             <div className="text-center">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-3 rounded-xl hover:scale-105 transition-all duration-300 shadow-md cursor-pointer"
+                className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-3 rounded-xl transition-all duration-300 shadow-md cursor-pointer"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Sending..." : "Send Message"}

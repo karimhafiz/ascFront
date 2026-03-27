@@ -112,7 +112,7 @@ export default function Navbar() {
         </Link>{" "}
         {/* Hamburger Menu for Mobile */}{" "}
         <button
-          className="block lg:hidden text-pink-600 focus:outline-none bg-white/60 hover:bg-pink-100/80 rounded-full p-2 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer"
+          className="block lg:hidden text-pink-600 focus:outline-none bg-white/60 hover:bg-pink-100/80 rounded-full p-2 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
           onClick={(e) => {
             e.stopPropagation(); // Prevent event bubbling
 
