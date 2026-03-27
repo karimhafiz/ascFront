@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isAuthenticated, getAuthToken } from "../auth/auth";
-import { optimizeCloudinaryUrl } from "../util/util";
+import { optimizeCloudinaryUrl, toSlug } from "../util/util";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
@@ -256,7 +256,7 @@ function TicketRow({ ticket }) {
 
   return (
     <Link
-      to={`/tickets/${ticket._id}`}
+      to={`/tickets/${ticket.ticketCode}`}
       className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200 overflow-hidden flex group"
     >
       {/* Date block */}
@@ -665,7 +665,8 @@ function EnrollmentRow({ enrollment }) {
           <span className="text-xs text-gray-400">No participants recorded</span>
         )}
         <Link
-          to={`/courses/${course._id}`}
+          to={`/courses/${toSlug(course.title, course._id)}`}
+          aria-label={`View ${course.title} course`}
           className="text-xs font-medium text-purple-600 hover:text-purple-800 flex items-center gap-1 transition-colors"
         >
           View Course

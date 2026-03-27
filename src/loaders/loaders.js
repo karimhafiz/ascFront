@@ -30,7 +30,8 @@ export function checkAuthLoader() {
 }
 
 export async function eventDetailLoader({ params }) {
-  const { eventId } = params;
+  const { eventSlug } = params;
+  const eventId = eventSlug.slice(-24);
   const response = await fetch(`${API}events/${eventId}`);
   if (!response.ok) throw new Error("Failed to fetch event details");
   return response.json();

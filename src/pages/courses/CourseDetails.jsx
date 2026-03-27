@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAuthToken, parseJwt, isAdmin, isModerator } from "../../auth/auth";
 import { Link } from "react-router-dom";
+import { slugToId } from "../../util/util";
 
 const CATEGORY_COLORS = {
   Language: "from-blue-500 to-indigo-600",
@@ -13,7 +15,8 @@ const CATEGORY_COLORS = {
 };
 
 export default function CourseDetails() {
-  const { courseId } = useParams();
+  const { courseSlug } = useParams();
+  const courseId = slugToId(courseSlug);
   const navigate = useNavigate();
   const [email, setEmail] = useState(() => {
     const token = getAuthToken();
@@ -91,6 +94,13 @@ export default function CourseDetails() {
 
   return (
     <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen">
+      <Helmet>
+        <title>{course.title} | ASC Courses</title>
+        <meta
+          name="description"
+          content={course.shortDescription || course.description?.slice(0, 155)}
+        />
+      </Helmet>
       {/* Header */}
       <div className={`bg-gradient-to-r ${gradient} text-white p-8 md:p-14 shadow-lg`}>
         <div className="container mx-auto">
@@ -106,7 +116,7 @@ export default function CourseDetails() {
         {canManage && (
           <div className="flex gap-3 mb-6">
             <Link
-              to={`/courses/${courseId}/edit`}
+              to={`/courses/${courseSlug}/edit`}
               className="btn btn-sm bg-white/60 border border-purple-200 text-purple-700 rounded-xl hover:bg-white/80"
             >
               Edit Course

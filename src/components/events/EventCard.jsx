@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useRouteLoaderData } from "react-router-dom";
 import { isAdmin, isModerator } from "../../auth/auth";
 
-import { formatDateRange, optimizeCloudinaryUrl } from "../../util/util";
+import { formatDateRange, optimizeCloudinaryUrl, toSlug } from "../../util/util";
 
 export default function EventCard({ event }) {
   const { token } = useRouteLoaderData("root");
@@ -10,11 +10,11 @@ export default function EventCard({ event }) {
   const navigate = useNavigate();
 
   const handleViewDetails = () => {
-    navigate(`/events/${event._id}`);
+    navigate(`/events/${toSlug(event.title, event._id)}`);
   };
 
   const handleEditEvent = () => {
-    navigate(`/events/${event._id}/edit`, {
+    navigate(`/events/${toSlug(event.title, event._id)}/edit`, {
       state: { event },
     });
   };
