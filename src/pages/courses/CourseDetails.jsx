@@ -441,7 +441,7 @@ export default function CourseDetails() {
                     <button
                       onClick={handleEnroll}
                       disabled={isProcessing}
-                      className="btn bg-gradient-to-r from-pink-500 to-purple-600 w-full border-none text-white hover:scale-105 transition-all duration-300 shadow-md rounded-xl"
+                      className="btn bg-gradient-to-r from-pink-500 to-purple-600 w-full border-none text-white transition-all duration-300 shadow-md rounded-xl"
                     >
                       {isProcessing ? (
                         <span className="flex items-center justify-center gap-2">
@@ -490,7 +490,7 @@ export default function CourseDetails() {
         <div className="mt-8">
           <button
             onClick={() => navigate(-1)}
-            className="btn glass border border-purple-300 text-purple-700 hover:bg-purple-100/30 hover:scale-105 transition-all duration-300 rounded-xl"
+            className="btn glass border border-purple-300 text-purple-700 hover:bg-purple-100/30 transition-all duration-300 rounded-xl"
           >
             <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path

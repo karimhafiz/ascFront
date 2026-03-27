@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import EventCard from "../../components/events/EventCard";
 import { isAdmin, isModerator, getAuthToken } from "../../auth/auth";
 import { compressImage } from "../../util/compressImage";
+import ConfirmModal from "../../components/common/ConfirmModal";
 
 const DEFAULTS = {
   heroTitle: "Welcome to Ayendah Sazan",
@@ -12,6 +13,10 @@ const DEFAULTS = {
   heroBadgeText: "Inspiring Communities",
   heroImage: "/heroImage.jpg",
 };
+
+function mergeWithDefaults(saved) {
+  return { ...DEFAULTS, ...saved, heroImage: saved.heroImage || DEFAULTS.heroImage };
+}
 
 export default function Home() {
   const { events } = useRouteLoaderData("root");
@@ -23,7 +28,9 @@ export default function Home() {
   const [heroImagePreview, setHeroImagePreview] = useState(null);
   const [heroImageFile, setHeroImageFile] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const heroImageInputRef = useRef(null);
 
   useEffect(() => {
@@ -31,7 +38,7 @@ export default function Home() {
       .then((r) => r.json())
       .then((data) => {
         if (data && Object.keys(data).length > 0) {
-          const merged = { ...DEFAULTS, ...data };
+          const merged = mergeWithDefaults(data);
           setPageContent(merged);
           setDraft(merged);
         }
@@ -52,6 +59,34 @@ export default function Home() {
     setHeroImagePreview(null);
     setHeroImageFile(null);
     setSaveError(null);
+  };
+
+  const handleResetDefaults = () => setConfirmOpen(true);
+
+  const doReset = async () => {
+    setConfirmOpen(false);
+    setResetting(true);
+    setSaveError(null);
+    try {
+      const token = getAuthToken();
+      const res = await fetch(`${import.meta.env.VITE_DEV_URI}pageContent/home`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message || `Server error (${res.status})`);
+      }
+      setPageContent(DEFAULTS);
+      setDraft(DEFAULTS);
+      setHeroImagePreview(null);
+      setHeroImageFile(null);
+      setEditing(false);
+    } catch (err) {
+      setSaveError(err.message || "Failed to reset. Please try again.");
+    } finally {
+      setResetting(false);
+    }
   };
 
   const handleSave = async () => {
@@ -91,7 +126,7 @@ export default function Home() {
         throw new Error(body?.message || `Server error (${res.status})`);
       }
       const { pageContent: saved } = await res.json();
-      const merged = { ...DEFAULTS, ...saved };
+      const merged = mergeWithDefaults(saved);
       setPageContent(merged);
       setEditing(false);
       setHeroImagePreview(null);
@@ -108,6 +143,14 @@ export default function Home() {
 
   return (
     <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen">
+      <ConfirmModal
+        isOpen={confirmOpen}
+        title="Reset to Defaults?"
+        message="This will permanently clear all custom text and images on the home page."
+        confirmLabel="Reset"
+        onConfirm={doReset}
+        onCancel={() => setConfirmOpen(false)}
+      />
       <Helmet>
         <title>Ayendah Sazan - Home</title>
         <meta name="description" content={pageContent.heroDescription} />
@@ -115,11 +158,11 @@ export default function Home() {
 
       {/* ── Edit toolbar ── */}
       {canEdit && (
-        <div className="sticky top-16 mt-6 z-40 flex justify-end gap-2 -mx-4 px-6 py-2 mb-4 bg-white/60 backdrop-blur-sm border-b border-white/40">
+        <div className="sticky top-16 mt-6 z-40 flex justify-end gap-2 px-6 py-2 mb-4 bg-white/60 backdrop-blur-sm border-b border-white/40">
           {!editing ? (
             <button
               onClick={handleEdit}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 hover:scale-105 transition-all cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 transition-all cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -135,14 +178,21 @@ export default function Home() {
             <>
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-600 text-sm font-medium shadow hover:bg-gray-50 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-full bg-white border border-purple-200 text-purple-600 text-sm font-medium shadow hover:bg-purple-50 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
+                onClick={handleResetDefaults}
+                disabled={resetting}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-amber-300 text-amber-700 text-sm font-medium shadow hover:bg-amber-50 transition-all disabled:opacity-60 cursor-pointer"
+              >
+                {resetting ? "Resetting…" : "Reset to Defaults"}
+              </button>
+              <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 hover:scale-105 transition-all disabled:opacity-60 cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 transition-all disabled:opacity-60 cursor-pointer"
               >
                 {saving ? "Saving…" : "Save Changes"}
               </button>
@@ -224,13 +274,11 @@ export default function Home() {
             <Link
               to="/about"
               aria-label="Learn more about Ayendah Sazan"
-              className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 text-base rounded-xl shadow-md hover:scale-105 transition-all duration-300"
+              className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-full font-semibold shadow-lg shadow-pink-200 transition-all"
             >
               Learn More
             </Link>
           </div>
-
-          {/* Image */}
           <div
             className={`relative w-full max-w-sm md:max-w-md lg:max-w-lg transition-all duration-500 ${!editing ? "transform hover:rotate-1" : ""}`}
           >

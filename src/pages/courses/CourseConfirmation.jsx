@@ -87,7 +87,7 @@ export default function CourseConfirmation() {
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             to="/profile"
-            className="flex-1 btn bg-gradient-to-r from-purple-500 to-pink-500 border-none text-white hover:scale-105 transition-all rounded-xl shadow-md"
+            className="flex-1 btn bg-gradient-to-r from-purple-500 to-pink-500 border-none text-white transition-all rounded-xl shadow-md"
           >
             View My Profile
           </Link>

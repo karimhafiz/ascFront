@@ -27,7 +27,7 @@ const CustomToolbar = (toolbar) => {
       <div className="flex items-center gap-2">
         <button
           onClick={goToBack}
-          className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 hover:scale-105 transition-all shadow-sm cursor-pointer"
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 transition-all shadow-sm cursor-pointer"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -44,13 +44,13 @@ const CustomToolbar = (toolbar) => {
         </button>
         <button
           onClick={goToCurrent}
-          className="px-4 h-9 rounded-xl bg-white/60 hover:bg-purple-50 border border-purple-200/50 text-purple-600 text-sm font-medium hover:scale-105 transition-all shadow-sm cursor-pointer"
+          className="px-4 h-9 rounded-xl bg-white/60 hover:bg-purple-50 border border-purple-200/50 text-purple-600 text-sm font-medium transition-all shadow-sm cursor-pointer"
         >
           Today
         </button>
         <button
           onClick={goToNext}
-          className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 hover:scale-105 transition-all shadow-sm cursor-pointer"
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 transition-all shadow-sm cursor-pointer"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -393,7 +393,7 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
                 </button>
                 <button
                   onClick={handleConfirmNavigate}
-                  className="flex-1 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium hover:scale-105 transition-all shadow-sm cursor-pointer"
+                  className="flex-1 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium transition-all shadow-sm cursor-pointer"
                 >
                   View Details →
                 </button>

@@ -29,7 +29,7 @@ export default function ErrorPage({ error }) {
           </div>
         )}
         <button
-          className="btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none hover:scale-105 transition-all duration-300 shadow-md"
+          className="btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none transition-all duration-300 shadow-md"
           onClick={() => (window.location.href = "/")}
         >
           Return to Home

@@ -139,7 +139,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
                     <button
                       onClick={() => handleResumeTeam(team)}
                       disabled={loading}
-                      className="btn btn-sm bg-gradient-to-r from-amber-400 to-orange-500 border-none text-white hover:scale-105 transition-all duration-300 rounded-lg text-xs"
+                      className="btn btn-sm bg-gradient-to-r from-amber-400 to-orange-500 border-none text-white transition-all duration-300 rounded-lg text-xs"
                     >
                       Resume & Pay
                     </button>
@@ -220,7 +220,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
                   {members.length > 1 && (
                     <button
                       type="button"
-                      className="btn btn-sm bg-white/50 hover:bg-red-100/60 border border-red-200/50 text-red-500 hover:text-red-700 rounded-lg hover:scale-105 transition-all duration-300"
+                      className="btn btn-sm bg-white/50 hover:bg-red-100/60 border border-red-200/50 text-red-500 hover:text-red-700 rounded-lg transition-all duration-300"
                       onClick={() => removeMember(idx)}
                     >
                       <svg
@@ -244,7 +244,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
             </div>
             <button
               type="button"
-              className="btn btn-sm bg-purple-100/60 hover:bg-purple-200/60 border border-purple-200/60 text-purple-700 hover:scale-105 transition-all duration-300 rounded-lg"
+              className="btn btn-sm bg-purple-100/60 hover:bg-purple-200/60 border border-purple-200/60 text-purple-700 transition-all duration-300 rounded-lg"
               onClick={addMember}
             >
               <svg
@@ -266,7 +266,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
           </div>
 
           <button
-            className="btn bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white border-none hover:scale-105 transition-all duration-300 shadow-md w-full rounded-xl py-3"
+            className="btn bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white border-none transition-all duration-300 shadow-md w-full rounded-xl py-3"
             type="submit"
             disabled={loading}
           >

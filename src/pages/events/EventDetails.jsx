@@ -444,7 +444,7 @@ export default function EventDetails() {
 
                     <div className="pt-2">
                       <button
-                        className="btn bg-gradient-to-r from-pink-500 to-purple-600 w-full border-none text-white hover:scale-105 transition-all duration-300 shadow-md rounded-xl"
+                        className="btn bg-gradient-to-r from-pink-500 to-purple-600 w-full border-none text-white transition-all duration-300 shadow-md rounded-xl"
                         onClick={handleBuyTickets}
                         disabled={isProcessing || event.ticketsAvailable === 0}
                       >
@@ -519,7 +519,7 @@ export default function EventDetails() {
         {/* Back Button */}
         <div className="mt-8 mb-4">
           <button
-            className="btn glass border border-purple-300 text-purple-700 hover:bg-purple-100/30 hover:scale-105 transition-all duration-300"
+            className="btn glass border border-purple-300 text-purple-700 hover:bg-purple-100/30 transition-all duration-300"
             onClick={handleBack}
           >
             <svg
