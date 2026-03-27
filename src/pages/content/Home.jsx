@@ -115,7 +115,7 @@ export default function Home() {
 
       {/* ── Edit toolbar ── */}
       {canEdit && (
-        <div className="sticky top-16 z-40 flex justify-end gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm border-b border-white/40">
+        <div className="sticky top-16 mt-6 z-40 flex justify-end gap-2 -mx-4 px-6 py-2 mb-4 bg-white/60 backdrop-blur-sm border-b border-white/40">
           {!editing ? (
             <button
               onClick={handleEdit}
@@ -231,7 +231,9 @@ export default function Home() {
           </div>
 
           {/* Image */}
-          <div className="relative w-full max-w-sm md:max-w-md lg:max-w-lg transform hover:rotate-1 transition-all duration-500">
+          <div
+            className={`relative w-full max-w-sm md:max-w-md lg:max-w-lg transition-all duration-500 ${!editing ? "transform hover:rotate-1" : ""}`}
+          >
             <img
               src={heroImage}
               alt="Community Event"
