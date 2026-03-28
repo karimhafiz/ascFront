@@ -7,7 +7,6 @@ const CATEGORIES = ["All", "Language", "Religious", "Academic", "Arts", "Other"]
 
 export default function CoursesPage() {
   const { courses } = useRouteLoaderData("root");
-  console.log(courses);
   const canManage = isAdmin() || isModerator();
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
