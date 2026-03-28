@@ -22,8 +22,8 @@ export default function TicketCard({ ticket, ticketsInGroup }) {
   const event = ticket.eventId;
   const amountPaid = (event?.ticketPrice ?? 0).toFixed(2);
   const qrValue = ticket.ticketCode
-    ? `${import.meta.env.VITE_FRONT_END_URL}tickets/verify/${ticket.ticketCode}`
-    : `${import.meta.env.VITE_FRONT_END_URL}tickets/verify/${ticket._id}`;
+    ? `${window.location.origin}/tickets/verify/${ticket.ticketCode}`
+    : `${window.location.origin}/tickets/verify/${ticket._id}`;
 
   const buyerName = ticket.user?.name ?? null;
 
