@@ -1,10 +1,16 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getAuthToken } from "../../auth/auth";
+
+const TICKET_CODE_RE = /^TKT-[A-Z2-9]{6}$/;
 
 const fetchTicket = async (ticketCode) => {
-  const response = await fetch(`${import.meta.env.VITE_DEV_URI}tickets/verify/${ticketCode}`);
+  const response = await fetch(`${import.meta.env.VITE_DEV_URI}tickets/verify/${ticketCode}`, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+  });
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) throw new Error("AUTH_REQUIRED");
     if (response.status === 404) throw new Error("INVALID");
     throw new Error("Failed to fetch ticket");
   }
@@ -14,7 +20,10 @@ const fetchTicket = async (ticketCode) => {
 const checkInTicket = async (ticketCode) => {
   const response = await fetch(
     `${import.meta.env.VITE_DEV_URI}tickets/verify/${ticketCode}/checkin`,
-    { method: "POST" }
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${getAuthToken()}` },
+    }
   );
   if (!response.ok) throw new Error("Failed to check in ticket");
   return response.json();
@@ -48,6 +57,8 @@ export default function TicketVerify() {
   const [checkedInTicket, setCheckedInTicket] = useState(null);
   const [justCheckedIn, setJustCheckedIn] = useState(false);
 
+  const invalidFormat = !TICKET_CODE_RE.test(ticketCode);
+
   const {
     data: ticket,
     isLoading,
@@ -55,6 +66,7 @@ export default function TicketVerify() {
   } = useQuery({
     queryKey: ["verify-ticket", ticketCode],
     queryFn: () => fetchTicket(ticketCode),
+    enabled: !invalidFormat,
   });
 
   const checkInMutation = useMutation({
@@ -68,12 +80,20 @@ export default function TicketVerify() {
 
   const displayTicket = checkedInTicket || ticket;
 
+  const isAuthError = error?.message === "AUTH_REQUIRED";
+
   let status = "invalid";
   let statusColor = "bg-red-500";
   let statusIcon = "❌";
   let statusText = "Invalid Ticket";
 
-  if (displayTicket && !error) {
+  if (invalidFormat) {
+    statusText = "Invalid Code Format";
+  } else if (isAuthError) {
+    statusColor = "bg-amber-500";
+    statusIcon = "🔒";
+    statusText = "Authentication Required";
+  } else if (displayTicket && !error) {
     if (justCheckedIn) {
       status = "just-checked-in";
       statusColor = "bg-green-500";
@@ -116,11 +136,27 @@ export default function TicketVerify() {
             </div>
 
             {/* Content */}
-            {status === "invalid" ? (
+            {invalidFormat ? (
+              <div className="px-6 py-8 text-center">
+                <p className="text-lg font-semibold text-purple-900 mb-2">Invalid Code Format</p>
+                <p className="text-purple-600">
+                  Ticket codes must follow the format <span className="font-mono">TKT-XXXXXX</span>.
+                </p>
+              </div>
+            ) : isAuthError ? (
+              <div className="px-6 py-8 text-center">
+                <p className="text-lg font-semibold text-purple-900 mb-2">
+                  Authentication Required
+                </p>
+                <p className="text-purple-600">
+                  Please log in as staff (admin or moderator) to verify tickets.
+                </p>
+              </div>
+            ) : status === "invalid" ? (
               <div className="px-6 py-8 text-center">
                 <p className="text-lg font-semibold text-purple-900 mb-2">Ticket Not Found</p>
                 <p className="text-purple-600">
-                  The ticket code "{ticketCode}" could not be found in the system.
+                  The ticket code &quot;{ticketCode}&quot; could not be found in the system.
                 </p>
               </div>
             ) : (

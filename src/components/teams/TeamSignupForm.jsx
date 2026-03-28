@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getAuthToken } from "../../auth/auth";
 
 export default function TeamSignupForm({ eventId, managerId, onClose }) {
   const [name, setName] = useState("");
@@ -14,9 +15,9 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
   useEffect(() => {
     if (!managerEmail || !eventId) return;
     setLoadingUnpaid(true);
-    fetch(
-      `${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/unpaid?email=${encodeURIComponent(managerEmail)}`
-    )
+    fetch(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/unpaid`, {
+      headers: { Authorization: `Bearer ${getAuthToken()}` },
+    })
       .then((r) => r.json())
       .then((data) => setUnpaidTeams(data.teams || []))
       .catch(() => {})
@@ -29,6 +30,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
     try {
       const paymentRes = await fetch(`${import.meta.env.VITE_DEV_URI}teams/${team._id}/pay`, {
         method: "POST",
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
       const paymentData = await paymentRes.json();
       if (!paymentRes.ok || !paymentData.url)
@@ -58,7 +60,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
     try {
       const res = await fetch(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/signup`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${getAuthToken()}` },
         body: JSON.stringify({
           name,
           members,
@@ -70,6 +72,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
 
       const paymentRes = await fetch(`${import.meta.env.VITE_DEV_URI}teams/${data.team._id}/pay`, {
         method: "POST",
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
       const paymentData = await paymentRes.json();
       if (!paymentRes.ok || !paymentData.url)
