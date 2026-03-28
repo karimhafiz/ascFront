@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, useActionData, useNavigation, Navigate } from "react-router-dom";
+import { Form, useActionData, useNavigation, Navigate, Link } from "react-router-dom";
 import { isAuthenticated } from "../../auth/auth";
 import GoogleLogin from "../../components/auth/GoogleLogin";
 
@@ -119,6 +119,15 @@ const Login = () => {
         <div className="relative z-10">
           <p className="text-center text-gray-600 mt-4">or</p>
           <GoogleLogin />
+          <p className="text-center text-sm text-gray-500 mt-6">
+            Don&apos;t have an account?{" "}
+            <Link
+              to="/signup"
+              className="font-semibold text-pink-600 hover:text-purple-600 transition-colors"
+            >
+              Sign up
+            </Link>
+          </p>
         </div>
       </div>
     </div>

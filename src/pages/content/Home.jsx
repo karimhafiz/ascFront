@@ -342,9 +342,37 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ── Community Stats Strip ── */}
+      <div className="bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white py-8 px-4">
+        <div className="container mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          {[
+            { value: "500+", label: "Community Members" },
+            { value: "50+", label: "Events Hosted" },
+            { value: "20+", label: "Courses Offered" },
+            { value: "Leeds", label: "Based in" },
+          ].map(({ value, label }) => (
+            <div key={label} className="flex flex-col items-center gap-1">
+              <span className="text-3xl font-bold tracking-tight">{value}</span>
+              <span className="text-sm text-purple-200 font-medium">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ── Upcoming Events ── */}
       <div className="container mx-auto p-6">
-        <h1 className="text-3xl font-bold text-center mb-8 text-purple-700">Upcoming Events</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl font-bold text-purple-700">Upcoming Events</h2>
+          <Link
+            to="/events/asc"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-pink-600 hover:text-purple-700 transition-colors"
+          >
+            View all
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
         {upcomingEvents?.length === 0 ? (
           <div className="glass-card p-8 text-center rounded-xl backdrop-blur-md shadow-xl">
             <p className="text-purple-600">No upcoming events found.</p>
