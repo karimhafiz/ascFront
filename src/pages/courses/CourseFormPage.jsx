@@ -2,9 +2,11 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import CourseForm from "../../components/courses/CourseForm";
+import { slugToId } from "../../util/util";
 
 export default function CourseFormPage() {
-  const { courseId } = useParams();
+  const { courseSlug } = useParams();
+  const courseId = courseSlug ? slugToId(courseSlug) : null;
   const isEditing = !!courseId;
 
   const {

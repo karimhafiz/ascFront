@@ -153,12 +153,19 @@ const CourseForm = ({ method, course = {} }) => {
           <div className="form-control">
             <label className={labelClass}>Billing Type</label>
             <select
-              name="isSubscription"
+              name="billingType"
               className={selectClass}
-              defaultValue={course.isSubscription ? "true" : "false"}
+              defaultValue={
+                course.isSubscription
+                  ? course.billingInterval === "year"
+                    ? "year"
+                    : "month"
+                  : "one-time"
+              }
             >
-              <option value="false">One-time payment</option>
-              <option value="true">Monthly subscription (£/month)</option>
+              <option value="one-time">One-time payment</option>
+              <option value="month">Monthly subscription</option>
+              <option value="year">Yearly subscription</option>
             </select>
           </div>
 
