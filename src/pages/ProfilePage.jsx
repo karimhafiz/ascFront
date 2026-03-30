@@ -16,6 +16,8 @@ function formatCurrency(amount) {
   return "£" + Number(amount ?? 0).toFixed(2);
 }
 
+const INTERVAL_ADJ = { month: "Monthly", year: "Yearly" };
+
 const TABS = ["Orders", "Teams", "Courses"];
 
 export default function ProfilePage() {
@@ -451,8 +453,9 @@ function EnrollmentRow({ enrollment }) {
   const handleCancel = () => {
     setConfirm({
       title: "Cancel subscription",
-      message:
-        "Are you sure you want to cancel? You'll keep access until the end of your current billing period.",
+      message: periodEnd
+        ? `Are you sure you want to cancel? You'll keep access until ${periodEnd.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}.`
+        : "Are you sure you want to cancel? You'll keep access until the end of your current billing period.",
       confirmText: "Yes, cancel",
       variant: "danger",
       onConfirm: async () => {
@@ -554,7 +557,7 @@ function EnrollmentRow({ enrollment }) {
             {enrollment._id.slice(-8).toUpperCase()}
             {" · "}
             {participants.length} participant{participants.length !== 1 ? "s" : ""}
-            {isSubscription && " · Monthly"}
+            {isSubscription && ` · ${INTERVAL_ADJ[course.billingInterval] || "Monthly"}`}
           </p>
         </div>
         <div className="flex flex-col items-end justify-center px-5 gap-2 flex-shrink-0">
@@ -615,7 +618,7 @@ function EnrollmentRow({ enrollment }) {
               </span>
             ) : (
               <span className="text-blue-600">
-                🔄 Monthly subscription
+                🔄 {INTERVAL_ADJ[course.billingInterval] || "Monthly"} subscription
                 {periodEnd && (
                   <span className="text-blue-400 ml-1">
                     · renews{" "}

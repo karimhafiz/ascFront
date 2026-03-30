@@ -40,6 +40,12 @@ export default function CourseConfirmation() {
           <p className="text-purple-600 mt-2">
             {isFree ? "You've been enrolled for free." : "Payment received. You're now enrolled."}
           </p>
+          {!isLoading && course?.isSubscription && (
+            <p className="text-purple-500 text-sm mt-1">
+              Your {course.billingInterval === "year" ? "yearly" : "monthly"} subscription is now
+              active. Manage it anytime from your profile.
+            </p>
+          )}
         </div>
 
         {!isLoading && course && (

@@ -1,6 +1,7 @@
 import { redirect } from "react-router-dom";
 import { getAuthToken } from "../auth/auth";
 import { compressImage } from "../util/compressImage";
+import { slugToId } from "../util/util";
 
 export async function courseAction({ request, params }) {
   const method = request.method.toUpperCase();
@@ -21,7 +22,9 @@ export async function courseAction({ request, params }) {
     city: formData.get("city"),
     postCode: formData.get("postCode"),
     enrollmentOpen: formData.get("enrollmentOpen") === "true",
-    isSubscription: formData.get("isSubscription") === "true",
+    isSubscription: formData.get("billingType") !== "one-time",
+    billingInterval:
+      formData.get("billingType") !== "one-time" ? formData.get("billingType") : "month",
     featured: formData.get("featured") === "true",
   };
 
@@ -34,8 +37,9 @@ export async function courseAction({ request, params }) {
     body.append("image", compressed);
   }
 
-  const url = params.courseId
-    ? `${import.meta.env.VITE_DEV_URI}courses/${params.courseId}`
+  const courseId = params.courseSlug ? slugToId(params.courseSlug) : null;
+  const url = courseId
+    ? `${import.meta.env.VITE_DEV_URI}courses/${courseId}`
     : `${import.meta.env.VITE_DEV_URI}courses`;
 
   try {

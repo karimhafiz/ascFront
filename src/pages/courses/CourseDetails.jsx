@@ -6,6 +6,9 @@ import { getAuthToken, parseJwt, isAdmin, isModerator } from "../../auth/auth";
 import { Link } from "react-router-dom";
 import { slugToId } from "../../util/util";
 
+const INTERVAL_LABELS = { month: "month", year: "year" };
+const INTERVAL_ADJ = { month: "Monthly", year: "Yearly" };
+
 const CATEGORY_COLORS = {
   Language: "from-blue-500 to-indigo-600",
   Religious: "from-emerald-500 to-teal-600",
@@ -281,17 +284,20 @@ export default function CourseDetails() {
                 <h2 className="text-xl font-bold text-pink-700 mb-4">
                   {course.price > 0
                     ? course.isSubscription
-                      ? `Subscribe — £${course.price}/month`
+                      ? `Subscribe — £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "month"}`
                       : `Enroll — £${course.price}`
                     : "Free Enrollment"}
                 </h2>
                 {course.isSubscription && (
                   <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 text-xs text-blue-700">
-                    <p className="font-semibold mb-1">📅 Monthly Subscription</p>
+                    <p className="font-semibold mb-1">
+                      📅 {INTERVAL_ADJ[course.billingInterval] || "Monthly"} Subscription
+                    </p>
                     <p>
-                      You'll be charged £{course.price} every month. You can cancel anytime from
-                      your profile, and you'll keep access until the end of your current billing
-                      period — no partial refunds.
+                      You'll be charged £{course.price} every{" "}
+                      {INTERVAL_LABELS[course.billingInterval] || "month"}. You can cancel anytime
+                      from your profile, and you'll keep access until the end of your current
+                      billing period — no partial refunds.
                     </p>
                   </div>
                 )}
@@ -464,7 +470,7 @@ export default function CourseDetails() {
                         </span>
                       ) : course.price > 0 ? (
                         course.isSubscription ? (
-                          `Subscribe £${course.price}/month`
+                          `Subscribe £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "month"}`
                         ) : multiMode ? (
                           `Pay £${(course.price * participants.filter((p) => p.name.trim()).length).toFixed(2)} for ${participants.filter((p) => p.name.trim()).length} ${participants.filter((p) => p.name.trim()).length === 1 ? "person" : "people"}`
                         ) : (
