@@ -55,8 +55,7 @@ export default function Footer() {
           </h3>
           <ul className="space-y-2 text-sm text-slate-400">
             {[
-              { to: "/events/asc", label: "ASC Events" },
-              { to: "/events/sports", label: "Sports Events" },
+              { to: "/events", label: "Events" },
               { to: "/courses", label: "Courses" },
             ].map(({ to, label }) => (
               <li key={to}>
