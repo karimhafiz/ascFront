@@ -26,6 +26,7 @@ const Signup = lazy(() => import("./pages/auth/Signup"));
 const CancelPage = lazy(() => import("./pages/payments/CancelPage"));
 const TeamConfirmationPage = lazy(() => import("./pages/teams/TeamConfirmationPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const SportsPage = lazy(() => import("./pages/content/Sports"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const TicketPage = lazy(() => import("./pages/tickets/TicketPage"));
 const TicketVerify = lazy(() => import("./pages/tickets/TicketVerify"));
@@ -74,6 +75,8 @@ const router = createBrowserRouter([
         element: w(EventRoot),
         children: [
           { index: true, element: w(EventPage) },
+          { path: "asc", element: w(EventPage) },
+          { path: "sports", element: w(SportsPage) },
           {
             path: ":eventSlug",
             id: "event-detail",

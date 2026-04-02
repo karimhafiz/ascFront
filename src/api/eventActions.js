@@ -1,6 +1,7 @@
 import { redirect } from "react-router-dom";
 import { getAuthToken } from "../auth/auth";
 import { compressImage } from "../util/compressImage";
+import { slugToId } from "../util/util";
 
 export async function eventAction({ request, params }) {
   const method = request.method;
@@ -42,7 +43,8 @@ export async function eventAction({ request, params }) {
 
   let url = `${import.meta.env.VITE_DEV_URI}events`;
   if (method === "PUT" || method === "PATCH") {
-    const eventId = params.eventId;
+    const eventId = params.eventSlug ? slugToId(params.eventSlug) : null;
+    console.log("Updating event with ID:", eventId);
     url = `${import.meta.env.VITE_DEV_URI}events/${eventId}`;
   }
 

@@ -38,9 +38,16 @@ export default function TicketCard({ ticket, ticketsInGroup }) {
             </p>
             <h2 className="text-2xl font-bold leading-tight">{event?.title ?? "Event"}</h2>
           </div>
-          <span className="text-xs font-bold px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 shrink-0 ml-3">
-            ✓ Paid
-          </span>
+          <div className="flex flex-col gap-1.5 shrink-0 ml-3">
+            <span className="text-xs font-bold px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
+              ✓ Paid
+            </span>
+            {ticket.checkedIn && (
+              <span className="text-xs font-bold px-3 py-1.5 bg-green-400/30 backdrop-blur-sm rounded-full border border-green-300/40">
+                ✓ Checked In
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

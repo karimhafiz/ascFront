@@ -194,6 +194,14 @@ export default function TicketVerify() {
                   <p className="text-lg font-semibold text-purple-900">
                     {displayTicket?.user?.name || displayTicket?.buyerEmail || "—"}
                   </p>
+                  {displayTicket?.user?.email && (
+                    <p className="text-sm text-purple-600 mt-0.5">{displayTicket.user.email}</p>
+                  )}
+                  {!displayTicket?.user?.email &&
+                    displayTicket?.buyerEmail &&
+                    displayTicket?.user?.name && (
+                      <p className="text-sm text-purple-600 mt-0.5">{displayTicket.buyerEmail}</p>
+                    )}
                 </div>
 
                 {/* Already checked in warning */}
