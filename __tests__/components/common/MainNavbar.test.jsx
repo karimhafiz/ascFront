@@ -89,11 +89,14 @@ describe("MainNavbar", () => {
     parseJwt.mockReturnValue({ email: "alice@test.com" });
     getAuthToken.mockReturnValue("some-token");
 
+    // Profile dropdown uses onClick only on mobile (< 1024px)
+    Object.defineProperty(window, "innerWidth", { value: 500, writable: true });
     renderNavbar();
     await act(async () => {
       fireEvent.click(screen.getByText("alice@test.com"));
     });
     expect(screen.getByText("My Profile")).toBeInTheDocument();
+    Object.defineProperty(window, "innerWidth", { value: 1024, writable: true });
   });
 
   it("should show Log out button when authenticated", async () => {
@@ -101,10 +104,12 @@ describe("MainNavbar", () => {
     parseJwt.mockReturnValue({ email: "alice@test.com" });
     getAuthToken.mockReturnValue("some-token");
 
+    Object.defineProperty(window, "innerWidth", { value: 500, writable: true });
     renderNavbar();
     await act(async () => {
       fireEvent.click(screen.getByText("alice@test.com"));
     });
     expect(screen.getByText("Log out")).toBeInTheDocument();
+    Object.defineProperty(window, "innerWidth", { value: 1024, writable: true });
   });
 });
