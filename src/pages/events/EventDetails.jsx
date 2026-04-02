@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import TeamSignupForm from "../../components/teams/TeamSignupForm";
-import { parseJwt, getAuthToken } from "../../auth/auth";
+import { parseJwt, getAuthToken, fetchWithAuth } from "../../auth/auth";
 import { slugToId } from "../../util/util";
 
 export default function EventDetails() {
@@ -80,7 +80,7 @@ export default function EventDetails() {
 
     try {
       setIsProcessing(true);
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${import.meta.env.VITE_DEV_URI}payments/create-checkout-session`,
         {
           method: "POST",
