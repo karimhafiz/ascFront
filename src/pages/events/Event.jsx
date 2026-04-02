@@ -14,6 +14,7 @@ export default function EventPage() {
   const [view, setView] = useState("cards");
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState({ key: "date", dir: "asc" });
 
   const currentDate = new Date();
 
@@ -32,12 +33,41 @@ export default function EventPage() {
     );
   });
 
-  const upcomingEvents = filtered.filter(
-    (event) => event.isReoccurring || new Date(event.date) >= currentDate
-  );
-  const pastEvents = filtered.filter(
-    (event) => !event.isReoccurring && new Date(event.date) < currentDate
-  );
+  const sortFn = (a, b) => {
+    let va, vb;
+    if (sort.key === "date") {
+      va = new Date(a.date);
+      vb = new Date(b.date);
+    } else if (sort.key === "price") {
+      va = a.ticketPrice ?? 0;
+      vb = b.ticketPrice ?? 0;
+    } else if (sort.key === "tickets") {
+      va = a.ticketsAvailable ?? 0;
+      vb = b.ticketsAvailable ?? 0;
+    }
+    return sort.dir === "asc" ? va - vb : vb - va;
+  };
+
+  const upcomingEvents = [
+    ...filtered.filter((event) => event.isReoccurring || new Date(event.date) >= currentDate),
+  ].sort(sortFn);
+  const pastEvents = [
+    ...filtered.filter((event) => !event.isReoccurring && new Date(event.date) < currentDate),
+  ].sort(sortFn);
+
+  const SORT_OPTIONS = [
+    { key: "date", label: "Date" },
+    { key: "price", label: "Price" },
+    { key: "tickets", label: "Tickets" },
+  ];
+
+  const handleSort = (key) => {
+    if (sort.key === key) {
+      setSort({ key, dir: sort.dir === "asc" ? "desc" : "asc" });
+    } else {
+      setSort({ key, dir: "asc" });
+    }
+  };
 
   return (
     <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen">
@@ -109,29 +139,61 @@ export default function EventPage() {
             ))}
           </div>
 
-          {/* Search (cards view only) */}
+          {/* Search + Sort (cards view only) */}
           {view === "cards" && (
-            <div className="relative flex-1">
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            <div className="flex items-center gap-2 flex-1">
+              <div className="relative max-w-xs flex-1">
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search events..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="glass-input pl-9 py-2.5"
                 />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search events..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="glass-input pl-9 py-2.5"
-              />
+              </div>
+              <div className="flex bg-white/60 rounded-xl border border-white/40 p-1">
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => handleSort(opt.key)}
+                    className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                      sort.key === opt.key
+                        ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md"
+                        : "text-purple-700 hover:bg-white/80"
+                    }`}
+                  >
+                    {opt.label}
+                    {sort.key === opt.key && (
+                      <svg
+                        className={`w-3 h-3 transition-transform ${sort.dir === "desc" ? "rotate-180" : ""}`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 15l7-7 7 7"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>

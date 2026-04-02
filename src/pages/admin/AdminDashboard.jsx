@@ -17,6 +17,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 import { getAuthToken, getUserRole as getAuthRole } from "../../auth/auth";
+import SortableHeader from "../../components/common/SortableHeader";
 
 function getRole() {
   return getAuthRole();
@@ -33,6 +34,15 @@ function formatDate(d) {
 
 const TABS = ["Tickets", "Revenue", "Teams", "Courses", "Users"];
 
+const ENROLLMENT_STATUS = {
+  pending: { label: "Pending", classes: "bg-yellow-50 text-yellow-700 border-yellow-200" },
+  paid: { label: "Paid", classes: "bg-green-50 text-green-700 border-green-200" },
+  free: { label: "Free", classes: "bg-blue-50 text-blue-600 border-blue-200" },
+  active: { label: "Active", classes: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  cancelled: { label: "Cancelled", classes: "bg-red-50 text-red-600 border-red-200" },
+  past_due: { label: "Past Due", classes: "bg-orange-50 text-orange-600 border-orange-200" },
+};
+
 const roleBadgeClass = {
   admin: "bg-yellow-100 text-yellow-800 border-yellow-300",
   moderator: "bg-blue-100 text-blue-700 border-blue-200",
@@ -43,11 +53,29 @@ const roleBadgeClass = {
 
 function TicketsTab({ tickets }) {
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState({ key: null, dir: "asc" });
+
   const filtered = tickets.filter(
     (t) =>
       t.buyerEmail?.toLowerCase().includes(search.toLowerCase()) ||
       t.eventId?.title?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (!sort.key) return 0;
+    let va, vb;
+    if (sort.key === "date") {
+      va = new Date(a.createdAt);
+      vb = new Date(b.createdAt);
+    } else if (sort.key === "paid") {
+      va = (a.eventId?.ticketPrice ?? 0) * (a.quantity ?? 1);
+      vb = (b.eventId?.ticketPrice ?? 0) * (b.quantity ?? 1);
+    } else if (sort.key === "quantity") {
+      va = a.quantity ?? 1;
+      vb = b.quantity ?? 1;
+    }
+    return sort.dir === "asc" ? va - vb : vb - va;
+  });
 
   return (
     <div>
@@ -64,21 +92,21 @@ function TicketsTab({ tickets }) {
             <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
               <th className="px-4 py-3 font-semibold text-purple-700">Event</th>
               <th className="px-4 py-3 font-semibold text-purple-700">Buyer Email</th>
-              <th className="px-4 py-3 font-semibold text-purple-700">Qty</th>
-              <th className="px-4 py-3 font-semibold text-purple-700">Paid</th>
-              <th className="px-4 py-3 font-semibold text-purple-700">Date</th>
+              <SortableHeader label="Qty" sortKey="quantity" sort={sort} onSort={setSort} />
+              <SortableHeader label="Paid" sortKey="paid" sort={sort} onSort={setSort} />
+              <SortableHeader label="Date" sortKey="date" sort={sort} onSort={setSort} />
               <th className="px-4 py-3 font-semibold text-purple-700">Ref</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {filtered.length === 0 ? (
+            {sorted.length === 0 ? (
               <tr>
                 <td colSpan={6} className="text-center py-10 text-gray-400">
                   No tickets found
                 </td>
               </tr>
             ) : (
-              filtered.map((t) => (
+              sorted.map((t) => (
                 <tr key={t._id} className="bg-white hover:bg-pink-50/30 transition-colors">
                   <td className="px-4 py-3 font-medium text-gray-800">{t.eventId?.title ?? "—"}</td>
                   <td className="px-4 py-3 text-gray-600">{t.buyerEmail}</td>
@@ -106,6 +134,8 @@ function TicketsTab({ tickets }) {
 // ─── Tab: Revenue ─────────────────────────────────────────────────────────────
 
 function RevenueTab({ events }) {
+  const [sort, setSort] = useState({ key: null, dir: "asc" });
+
   const chartData = {
     labels: events.map((e) => e.title),
     datasets: [
@@ -121,6 +151,26 @@ function RevenueTab({ events }) {
   };
 
   const totalRevenue = events.reduce((sum, e) => sum + (e.totalRevenue ?? 0), 0);
+
+  const sorted = [...events].sort((a, b) => {
+    if (!sort.key) return 0;
+    let va, vb;
+    if (sort.key === "event")
+      return sort.dir === "asc"
+        ? (a.title ?? "").localeCompare(b.title ?? "")
+        : (b.title ?? "").localeCompare(a.title ?? "");
+    if (sort.key === "revenue") {
+      va = a.totalRevenue ?? 0;
+      vb = b.totalRevenue ?? 0;
+    } else if (sort.key === "tickets") {
+      va = a.ticketsAvailable ?? 0;
+      vb = b.ticketsAvailable ?? 0;
+    } else if (sort.key === "price") {
+      va = a.ticketPrice ?? 0;
+      vb = b.ticketPrice ?? 0;
+    }
+    return sort.dir === "asc" ? va - vb : vb - va;
+  });
 
   return (
     <div className="space-y-6">
@@ -159,14 +209,14 @@ function RevenueTab({ events }) {
         <table className="w-full text-sm min-w-[600px]">
           <thead>
             <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
-              <th className="px-4 py-3 font-semibold text-purple-700">Event</th>
-              <th className="px-4 py-3 font-semibold text-purple-700">Revenue</th>
-              <th className="px-4 py-3 font-semibold text-purple-700">Tickets Left</th>
-              <th className="px-4 py-3 font-semibold text-purple-700">Price/ticket</th>
+              <SortableHeader label="Event" sortKey="event" sort={sort} onSort={setSort} />
+              <SortableHeader label="Revenue" sortKey="revenue" sort={sort} onSort={setSort} />
+              <SortableHeader label="Tickets Left" sortKey="tickets" sort={sort} onSort={setSort} />
+              <SortableHeader label="Price/ticket" sortKey="price" sort={sort} onSort={setSort} />
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {events.map((e) => (
+            {sorted.map((e) => (
               <tr key={e._id} className="bg-white hover:bg-pink-50/30 transition-colors">
                 <td className="px-4 py-3 font-medium text-gray-800">{e.title}</td>
                 <td className="px-4 py-3 text-green-700 font-medium">
@@ -187,13 +237,93 @@ function RevenueTab({ events }) {
 
 function TeamsTab({ teams }) {
   const [expanded, setExpanded] = useState(null);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState({ key: null, dir: "asc" });
+
+  const handleTeamSort = (key) => {
+    if (sort.key === key) {
+      setSort({ key, dir: sort.dir === "asc" ? "desc" : "asc" });
+    } else {
+      setSort({ key, dir: "asc" });
+    }
+  };
+
+  const filtered = teams.filter((t) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      t.name?.toLowerCase().includes(q) ||
+      t.manager?.name?.toLowerCase().includes(q) ||
+      t.manager?.email?.toLowerCase().includes(q) ||
+      t.members?.some(
+        (m) => m.name?.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q)
+      )
+    );
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (!sort.key) return 0;
+    let va, vb;
+    if (sort.key === "members") {
+      va = a.members?.length ?? 0;
+      vb = b.members?.length ?? 0;
+    } else if (sort.key === "paid") {
+      va = a.paid ? 1 : 0;
+      vb = b.paid ? 1 : 0;
+    }
+    return sort.dir === "asc" ? va - vb : vb - va;
+  });
+
+  const TEAM_SORT_OPTIONS = [
+    { key: "members", label: "Members" },
+    { key: "paid", label: "Payment" },
+  ];
 
   return (
     <div className="space-y-3">
-      {teams.length === 0 && (
-        <p className="text-center text-gray-400 py-12">No team registrations yet</p>
+      <div className="flex items-center gap-2 mb-1">
+        <input
+          type="text"
+          placeholder="Search teams, members, or email…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="glass-input flex-1 max-w-xs"
+        />
+        <div className="flex bg-purple-50 rounded-xl p-1 gap-1">
+          {TEAM_SORT_OPTIONS.map((opt) => (
+            <button
+              key={opt.key}
+              onClick={() => handleTeamSort(opt.key)}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                sort.key === opt.key
+                  ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {opt.label}
+              {sort.key === opt.key && (
+                <svg
+                  className={`w-3 h-3 transition-transform ${sort.dir === "desc" ? "rotate-180" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 15l7-7 7 7"
+                  />
+                </svg>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+      {sorted.length === 0 && (
+        <p className="text-center text-gray-400 py-12">No team registrations found</p>
       )}
-      {teams.map((team) => (
+      {sorted.map((team) => (
         <div
           key={team._id}
           className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
@@ -270,17 +400,263 @@ function TeamsTab({ teams }) {
   );
 }
 
+// ─── Tab: Courses ─────────────────────────────────────────────────────────────
+
+function CoursesTab({ enrollments, courses }) {
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState("enrollments");
+  const [enrollSort, setEnrollSort] = useState({ key: null, dir: "asc" });
+  const [courseSort, setCourseSort] = useState({ key: null, dir: "asc" });
+
+  const filteredEnrollments = enrollments.filter(
+    (e) =>
+      e.buyerEmail?.toLowerCase().includes(search.toLowerCase()) ||
+      e.courseId?.title?.toLowerCase().includes(search.toLowerCase())
+  );
+  const filteredCourses = courses.filter(
+    (c) =>
+      c.title?.toLowerCase().includes(search.toLowerCase()) ||
+      c.instructor?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const ENROLL_STATUS_ORDER = {
+    active: 0,
+    paid: 1,
+    pending: 2,
+    free: 3,
+    past_due: 4,
+    cancelled: 5,
+  };
+
+  const sortedEnrollments = [...filteredEnrollments].sort((a, b) => {
+    if (!enrollSort.key) return 0;
+    let va, vb;
+    if (enrollSort.key === "status") {
+      va = ENROLL_STATUS_ORDER[a.status] ?? 6;
+      vb = ENROLL_STATUS_ORDER[b.status] ?? 6;
+    } else if (enrollSort.key === "date") {
+      va = new Date(a.createdAt);
+      vb = new Date(b.createdAt);
+    }
+    return enrollSort.dir === "asc" ? va - vb : vb - va;
+  });
+
+  const sortedCourses = [...filteredCourses].sort((a, b) => {
+    if (!courseSort.key) return 0;
+    if (courseSort.key === "category")
+      return courseSort.dir === "asc"
+        ? (a.category ?? "").localeCompare(b.category ?? "")
+        : (b.category ?? "").localeCompare(a.category ?? "");
+    let va, vb;
+    if (courseSort.key === "price") {
+      va = a.price ?? 0;
+      vb = b.price ?? 0;
+    } else if (courseSort.key === "enrolled") {
+      va = a.currentEnrollment ?? 0;
+      vb = b.currentEnrollment ?? 0;
+    } else if (courseSort.key === "status") {
+      va = a.enrollmentOpen ? 1 : 0;
+      vb = b.enrollmentOpen ? 1 : 0;
+    }
+    return courseSort.dir === "asc" ? va - vb : vb - va;
+  });
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Search courses or emails…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="glass-input flex-1"
+        />
+        <div className="flex bg-purple-50 rounded-xl p-1 gap-1">
+          {["enrollments", "courses"].map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize cursor-pointer ${view === v ? "bg-white shadow-sm text-purple-700" : "text-gray-500 hover:text-gray-700"}`}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {view === "enrollments" && (
+        <>
+          <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
+            <table className="w-full text-sm min-w-[600px]">
+              <thead>
+                <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
+                  <th className="px-4 py-3 font-semibold text-purple-700">Course</th>
+                  <th className="px-4 py-3 font-semibold text-purple-700">Buyer Email</th>
+                  <th className="px-4 py-3 font-semibold text-purple-700">Participants</th>
+                  <SortableHeader
+                    label="Status"
+                    sortKey="status"
+                    sort={enrollSort}
+                    onSort={setEnrollSort}
+                  />
+                  <SortableHeader
+                    label="Date"
+                    sortKey="date"
+                    sort={enrollSort}
+                    onSort={setEnrollSort}
+                  />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {sortedEnrollments.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-10 text-gray-400">
+                      No enrollments found
+                    </td>
+                  </tr>
+                ) : (
+                  sortedEnrollments.map((e) => (
+                    <tr key={e._id} className="bg-white hover:bg-pink-50/30 transition-colors">
+                      <td className="px-4 py-3 font-medium text-gray-800">
+                        {e.courseId?.title ?? "—"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">{e.buyerEmail}</td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {e.participants?.length > 0
+                          ? e.participants.map((p) => p.name).join(", ")
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {(() => {
+                          const st = ENROLLMENT_STATUS[e.status] ?? {
+                            label: e.status ?? "Unknown",
+                            classes: "bg-gray-50 text-gray-500 border-gray-200",
+                          };
+                          return (
+                            <span
+                              className={`text-xs font-medium px-2 py-0.5 rounded-full border ${st.classes}`}
+                            >
+                              {st.label}
+                            </span>
+                          );
+                        })()}
+                      </td>
+                      <td className="px-4 py-3 text-gray-500">{formatDate(e.createdAt)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-gray-400 mt-2">
+            {filteredEnrollments.length} enrollment{filteredEnrollments.length !== 1 ? "s" : ""}
+          </p>
+        </>
+      )}
+
+      {view === "courses" && (
+        <>
+          <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
+            <table className="w-full text-sm min-w-[600px]">
+              <thead>
+                <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
+                  <th className="px-4 py-3 font-semibold text-purple-700">Title</th>
+                  <th className="px-4 py-3 font-semibold text-purple-700">Instructor</th>
+                  <SortableHeader
+                    label="Category"
+                    sortKey="category"
+                    sort={courseSort}
+                    onSort={setCourseSort}
+                  />
+                  <SortableHeader
+                    label="Price"
+                    sortKey="price"
+                    sort={courseSort}
+                    onSort={setCourseSort}
+                  />
+                  <SortableHeader
+                    label="Enrolled"
+                    sortKey="enrolled"
+                    sort={courseSort}
+                    onSort={setCourseSort}
+                  />
+                  <SortableHeader
+                    label="Status"
+                    sortKey="status"
+                    sort={courseSort}
+                    onSort={setCourseSort}
+                  />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {sortedCourses.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-10 text-gray-400">
+                      No courses found
+                    </td>
+                  </tr>
+                ) : (
+                  sortedCourses.map((c) => (
+                    <tr key={c._id} className="bg-white hover:bg-pink-50/30 transition-colors">
+                      <td className="px-4 py-3 font-medium text-gray-800">{c.title}</td>
+                      <td className="px-4 py-3 text-gray-600">{c.instructor}</td>
+                      <td className="px-4 py-3 text-gray-600">{c.category}</td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {c.price > 0 ? `£${c.price}` : "Free"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {c.currentEnrollment}
+                        {c.maxEnrollment ? ` / ${c.maxEnrollment}` : ""}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full border ${c.enrollmentOpen ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-50 text-gray-500 border-gray-200"}`}
+                        >
+                          {c.enrollmentOpen ? "Open" : "Closed"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-gray-400 mt-2">
+            {filteredCourses.length} course{filteredCourses.length !== 1 ? "s" : ""}
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── Tab: Users (admin only) ──────────────────────────────────────────────────
+
+const ROLE_ORDER = { admin: 0, moderator: 1, user: 2 };
 
 function UsersTab({ users, currentUserId, onRoleChange }) {
   const [updating, setUpdating] = useState(null);
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState({ key: null, dir: "asc" });
 
   const filtered = users.filter(
     (u) =>
       u.name?.toLowerCase().includes(search.toLowerCase()) ||
       u.email?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (!sort.key) return 0;
+    let va, vb;
+    if (sort.key === "role") {
+      va = ROLE_ORDER[a.role] ?? 3;
+      vb = ROLE_ORDER[b.role] ?? 3;
+    } else if (sort.key === "joined") {
+      va = new Date(a.createdAt);
+      vb = new Date(b.createdAt);
+    }
+    return sort.dir === "asc" ? va - vb : vb - va;
+  });
 
   const handleRole = async (userId, newRole) => {
     setUpdating(userId);
@@ -319,20 +695,20 @@ function UsersTab({ users, currentUserId, onRoleChange }) {
             <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
               <th className="px-4 py-3 font-semibold text-purple-700">Name</th>
               <th className="px-4 py-3 font-semibold text-purple-700">Email</th>
-              <th className="px-4 py-3 font-semibold text-purple-700">Role</th>
-              <th className="px-4 py-3 font-semibold text-purple-700">Joined</th>
+              <SortableHeader label="Role" sortKey="role" sort={sort} onSort={setSort} />
+              <SortableHeader label="Joined" sortKey="joined" sort={sort} onSort={setSort} />
               <th className="px-4 py-3 font-semibold text-purple-700">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {filtered.length === 0 ? (
+            {sorted.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center py-10 text-gray-400">
                   No users found
                 </td>
               </tr>
             ) : (
-              filtered.map((u) => (
+              sorted.map((u) => (
                 <tr key={u._id} className="bg-white hover:bg-pink-50/30 transition-colors">
                   <td className="px-4 py-3 font-medium text-gray-800">{u.name}</td>
                   <td className="px-4 py-3 text-gray-600">{u.email}</td>
@@ -377,154 +753,6 @@ function UsersTab({ users, currentUserId, onRoleChange }) {
 }
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
-
-// ─── Tab: Courses ─────────────────────────────────────────────────────────────
-
-function CoursesTab({ enrollments, courses }) {
-  const [search, setSearch] = useState("");
-  const [view, setView] = useState("enrollments");
-
-  const filteredEnrollments = enrollments.filter(
-    (e) =>
-      e.buyerEmail?.toLowerCase().includes(search.toLowerCase()) ||
-      e.courseId?.title?.toLowerCase().includes(search.toLowerCase())
-  );
-  const filteredCourses = courses.filter(
-    (c) =>
-      c.title?.toLowerCase().includes(search.toLowerCase()) ||
-      c.instructor?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  return (
-    <div>
-      <div className="flex items-center gap-3 mb-4">
-        <input
-          type="text"
-          placeholder="Search courses or emails…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="glass-input flex-1"
-        />
-        <div className="flex bg-purple-50 rounded-xl p-1 gap-1">
-          {["enrollments", "courses"].map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize cursor-pointer ${view === v ? "bg-white shadow-sm text-purple-700" : "text-gray-500 hover:text-gray-700"}`}
-            >
-              {v}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {view === "enrollments" && (
-        <>
-          <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
-            <table className="w-full text-sm min-w-[600px]">
-              <thead>
-                <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
-                  <th className="px-4 py-3 font-semibold text-purple-700">Course</th>
-                  <th className="px-4 py-3 font-semibold text-purple-700">Buyer Email</th>
-                  <th className="px-4 py-3 font-semibold text-purple-700">Participants</th>
-                  <th className="px-4 py-3 font-semibold text-purple-700">Status</th>
-                  <th className="px-4 py-3 font-semibold text-purple-700">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {filteredEnrollments.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="text-center py-10 text-gray-400">
-                      No enrollments found
-                    </td>
-                  </tr>
-                ) : (
-                  filteredEnrollments.map((e) => (
-                    <tr key={e._id} className="bg-white hover:bg-pink-50/30 transition-colors">
-                      <td className="px-4 py-3 font-medium text-gray-800">
-                        {e.courseId?.title ?? "—"}
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">{e.buyerEmail}</td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {e.participants?.length > 0
-                          ? e.participants.map((p) => p.name).join(", ")
-                          : "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`text-xs font-medium px-2 py-0.5 rounded-full border ${e.status === "paid" ? "bg-green-50 text-green-700 border-green-200" : "bg-blue-50 text-blue-600 border-blue-200"}`}
-                        >
-                          {e.status === "paid" ? "✓ Paid" : "Free"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-gray-500">{formatDate(e.createdAt)}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-xs text-gray-400 mt-2">
-            {filteredEnrollments.length} enrollment{filteredEnrollments.length !== 1 ? "s" : ""}
-          </p>
-        </>
-      )}
-
-      {view === "courses" && (
-        <>
-          <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
-            <table className="w-full text-sm min-w-[600px]">
-              <thead>
-                <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
-                  <th className="px-4 py-3 font-semibold text-purple-700">Title</th>
-                  <th className="px-4 py-3 font-semibold text-purple-700">Instructor</th>
-                  <th className="px-4 py-3 font-semibold text-purple-700">Category</th>
-                  <th className="px-4 py-3 font-semibold text-purple-700">Price</th>
-                  <th className="px-4 py-3 font-semibold text-purple-700">Enrolled</th>
-                  <th className="px-4 py-3 font-semibold text-purple-700">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {filteredCourses.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="text-center py-10 text-gray-400">
-                      No courses found
-                    </td>
-                  </tr>
-                ) : (
-                  filteredCourses.map((c) => (
-                    <tr key={c._id} className="bg-white hover:bg-pink-50/30 transition-colors">
-                      <td className="px-4 py-3 font-medium text-gray-800">{c.title}</td>
-                      <td className="px-4 py-3 text-gray-600">{c.instructor}</td>
-                      <td className="px-4 py-3 text-gray-600">{c.category}</td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {c.price > 0 ? `£${c.price}` : "Free"}
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {c.currentEnrollment}
-                        {c.maxEnrollment ? ` / ${c.maxEnrollment}` : ""}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`text-xs font-medium px-2 py-0.5 rounded-full border ${c.enrollmentOpen ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-50 text-gray-500 border-gray-200"}`}
-                        >
-                          {c.enrollmentOpen ? "Open" : "Closed"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-xs text-gray-400 mt-2">
-            {filteredCourses.length} course{filteredCourses.length !== 1 ? "s" : ""}
-          </p>
-        </>
-      )}
-    </div>
-  );
-}
 
 export default function AdminDashboard() {
   const [data, setData] = useState(null);
@@ -626,7 +854,7 @@ export default function AdminDashboard() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={
-                "flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap " +
+                "flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap cursor-pointer " +
                 (activeTab === tab
                   ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")
