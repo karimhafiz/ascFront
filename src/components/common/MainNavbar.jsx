@@ -6,10 +6,8 @@ import { isAuthenticated, isAdmin, parseJwt, getAuthToken, clearAuth } from "../
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const menuRef = useRef(null);
-  const dropdownRef = useRef(null);
   const userDropdownRef = useRef(null);
   const userCloseTimer = useRef(null);
   const location = useLocation();
@@ -27,15 +25,8 @@ export default function Navbar() {
     }
   })();
 
-  const toggleDropdown = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDropdownOpen(!dropdownOpen);
-  };
-
   const closeMenu = () => {
     setIsMenuOpen(false);
-    setDropdownOpen(false);
     setUserDropdownOpen(false);
   };
 
@@ -78,10 +69,6 @@ export default function Navbar() {
       const isMenuToggleButton = event.target.closest('button[aria-label="Toggle menu"]');
       if (menuRef.current && !menuRef.current.contains(event.target) && !isMenuToggleButton) {
         setIsMenuOpen(false);
-        setDropdownOpen(false);
-      }
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false);
       }
       if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
         setUserDropdownOpen(false);
@@ -119,7 +106,6 @@ export default function Navbar() {
             if (isMenuOpen) {
               // If menu is open, explicitly close it
               setIsMenuOpen(false);
-              setDropdownOpen(false);
               setUserDropdownOpen(false);
             } else {
               // If menu is closed, open it
@@ -190,14 +176,15 @@ export default function Navbar() {
               <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
             </Link>
           </li>
-          <li ref={dropdownRef} className="relative" tabIndex={0}>
-            <div
-              onClick={toggleDropdown}
-              className={`relative flex items-center px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full cursor-pointer ${
+          <li>
+            <Link
+              to="/events"
+              className={`relative group flex items-center px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full ${
                 location.pathname.includes("/events")
                   ? "bg-gradient-to-r from-rose-500/30 to-fuchsia-500/30 text-rose-700 font-semibold shadow-sm"
                   : "text-rose-600 hover:bg-rose-200/60 hover:shadow-sm"
               } transition-all duration-300`}
+              onClick={closeMenu}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -212,66 +199,11 @@ export default function Navbar() {
                 />
               </svg>
               Events
-              <svg
-                className={`ml-1 w-3.5 h-3.5 transition-transform duration-300 ${
-                  dropdownOpen ? "rotate-180" : ""
-                }`}
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.085l3.71-3.855a.75.75 0 1 1 1.08 1.04l-4.24 4.4a.75.75 0 0 1-1.08 0l-4.24-4.4a.75.75 0 0 1 .02-1.06z" />
-              </svg>
               {location.pathname.includes("/events") && (
                 <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-rose-500 to-fuchsia-500 rounded-full"></span>
               )}
-            </div>
-            <ul
-              className={`absolute left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl z-50 border border-white/30 overflow-hidden lg:left-1/2 lg:-translate-x-1/2 transition-all duration-300 ${
-                dropdownOpen
-                  ? "opacity-100 translate-y-0 pointer-events-auto"
-                  : "opacity-0 -translate-y-2 pointer-events-none"
-              }`}
-            >
-              <li>
-                <Link
-                  to="/events/asc"
-                  className="flex items-center px-5 py-3 hover:bg-gradient-to-r from-rose-100/60 to-pink-100/60 hover:shadow-inner text-rose-600 hover:text-rose-700 transition-all duration-300"
-                  onClick={closeMenu}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 mr-2"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-                  </svg>
-                  Ayendah Sazan Events
-                </Link>
-              </li>
-              <div className="h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent"></div>
-              <li>
-                <Link
-                  to="/events/sports"
-                  className="flex items-center px-5 py-3 hover:bg-gradient-to-r from-fuchsia-100/60 to-purple-100/60 hover:shadow-inner text-fuchsia-600 hover:text-fuchsia-700 transition-all duration-300"
-                  onClick={closeMenu}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 mr-2"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Sports Events
-                </Link>
-              </li>
-            </ul>
+              <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-rose-500 to-fuchsia-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+            </Link>
           </li>
           <li>
             <Link
@@ -425,7 +357,11 @@ export default function Navbar() {
               }}
             >
               <div
-                onClick={() => setUserDropdownOpen((prev) => !prev)}
+                onClick={() => {
+                  if (window.innerWidth < 1024) {
+                    setUserDropdownOpen((prev) => !prev);
+                  }
+                }}
                 className={`flex items-center gap-2 px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full cursor-pointer transition-all duration-300 ${
                   userDropdownOpen
                     ? "bg-gradient-to-r from-indigo-500/30 to-purple-500/30 shadow-sm"
