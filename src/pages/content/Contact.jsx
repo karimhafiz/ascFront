@@ -28,8 +28,8 @@ export default function Contact() {
 
     emailjs
       .send(
-        "your_service_id", // Replace with your EmailJS Service ID
-        "your_template_id", // Replace with your EmailJS Template ID
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
         {
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -37,7 +37,7 @@ export default function Contact() {
           subject: formData.subject,
           message: formData.message,
         },
-        "your_public_key" // Replace with your EmailJS Public Key
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       )
       .then(
         () => {
