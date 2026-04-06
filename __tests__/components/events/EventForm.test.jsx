@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
-import EventForm, { action as eventFormAction } from "../../../src/components/events/EventForm";
+import EventForm from "../../../src/components/events/EventForm";
 import "@testing-library/jest-dom";
 
 jest.mock("../../../src/auth/auth", () => ({ getAuthToken: jest.fn() }));
@@ -25,7 +25,7 @@ describe("EventForm Component", () => {
         {
           path: route,
           element: ui,
-          action: eventFormAction, // Provide the action for useActionData
+          action: async () => null,
         },
       ],
       {

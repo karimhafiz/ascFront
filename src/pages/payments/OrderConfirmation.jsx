@@ -128,7 +128,8 @@ export default function OrderConfirmation() {
           </div>
           <h2 className="text-2xl font-bold text-green-600 mb-2">Payment Successful!</h2>
           <p className="text-base-content/50 text-sm mb-6">
-            Your payment was processed. Your ticket will appear in your profile shortly.
+            Your payment was processed. Your ticket will appear in your profile shortly. A
+            confirmation email with your QR code has been sent to your inbox.
           </p>
           {receipt && (
             <div className="bg-base-100 rounded-xl p-4 mb-6 text-left text-sm space-y-1">
@@ -178,7 +179,8 @@ export default function OrderConfirmation() {
           </div>
           <h1 className="text-2xl font-bold text-green-600 mb-1">Payment Successful!</h1>
           <p className="text-sm text-base-content/50">
-            Your ticket is confirmed. See details below.
+            Your ticket is confirmed. A confirmation email with your QR code has been sent to your
+            inbox. See details below.
           </p>
         </div>
 

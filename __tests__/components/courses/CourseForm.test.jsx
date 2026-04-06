@@ -16,7 +16,13 @@ jest.mock("react-router-dom", () => {
 
 function renderForm(props = {}) {
   const router = createMemoryRouter(
-    [{ path: "/", element: <CourseForm method="POST" course={{}} {...props} /> }],
+    [
+      {
+        path: "/",
+        element: <CourseForm method="POST" course={{}} {...props} />,
+        action: async () => null,
+      },
+    ],
     { initialEntries: ["/"] }
   );
   return render(<RouterProvider router={router} />);

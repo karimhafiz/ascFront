@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function Spinner({ size = "md", className = "" }) {
   const sizes = {
     sm: "loading-sm",

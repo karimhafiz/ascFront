@@ -1,3 +1,5 @@
+import React from "react";
+
 const presets = {
   primary: "badge badge-primary",
   secondary: "badge badge-secondary",
