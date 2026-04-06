@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isAuthenticated, getAuthToken } from "../auth/auth";
 import { optimizeCloudinaryUrl, toSlug } from "../util/util";
@@ -46,6 +46,19 @@ export default function ProfilePage() {
       .finally(() => setLoading(false));
   }, [navigate]);
 
+  // Group tickets by paymentId so bulk purchases show as one order
+  // Hooks must be called before any early returns
+  const orders = useMemo(() => {
+    if (!data) return [];
+    const groups = {};
+    for (const ticket of data.tickets) {
+      const key = ticket.paymentId || ticket._id;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(ticket);
+    }
+    return Object.values(groups);
+  }, [data]);
+
   if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-200 via-white to-base-200">
@@ -68,7 +81,7 @@ export default function ProfilePage() {
       </div>
     );
 
-  const { user, tickets, teams, enrollments = [] } = data;
+  const { user, teams, enrollments = [] } = data;
   const initials = user.name
     ? user.name
         .split(" ")
@@ -103,8 +116,8 @@ export default function ProfilePage() {
             </div>
             <div className="flex gap-4 mt-1 text-sm text-base-content/50">
               <span>
-                <strong className="text-base-content">{tickets.length}</strong> order
-                {tickets.length !== 1 ? "s" : ""}
+                <strong className="text-base-content">{orders.length}</strong> order
+                {orders.length !== 1 ? "s" : ""}
               </span>
               <span>·</span>
               <span>
@@ -142,7 +155,7 @@ export default function ProfilePage() {
                   }`}
                 >
                   {tab === "Orders"
-                    ? tickets.length
+                    ? orders.length
                     : tab === "Teams"
                       ? teams.length
                       : enrollments.length}
@@ -155,7 +168,7 @@ export default function ProfilePage() {
         {/* ── Tab Content ── */}
         <div className="pb-16">
           {activeTab === "Orders" &&
-            (tickets.length === 0 ? (
+            (orders.length === 0 ? (
               <div className="text-center py-20">
                 <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-4">
                   <svg
@@ -179,8 +192,8 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {tickets.map((ticket) => (
-                  <TicketRow key={ticket._id} ticket={ticket} />
+                {orders.map((group) => (
+                  <OrderRow key={group[0].paymentId || group[0]._id} tickets={group} />
                 ))}
               </div>
             ))}
@@ -249,88 +262,162 @@ export default function ProfilePage() {
   );
 }
 
-function TicketRow({ ticket }) {
-  const event = ticket.eventId;
-  const paid = (event?.ticketPrice ?? 0) * (ticket.quantity || 1);
+function OrderRow({ tickets }) {
+  const [expanded, setExpanded] = useState(false);
+  const firstTicket = tickets[0];
+  const event = firstTicket.eventId;
+  const qty = tickets.length;
+  const totalPaid = (event?.ticketPrice ?? 0) * qty;
 
   return (
-    <Link
-      to={`/tickets/${ticket.ticketCode}`}
-      className="bg-white rounded-2xl border border-base-300 shadow-sm hover:shadow-md hover:border-base-300 transition-all duration-200 overflow-hidden flex group"
-    >
-      {/* Date block */}
-      <div className="w-16 flex-shrink-0 bg-gradient-to-b from-primary to-primary/70 flex flex-col items-center justify-center text-white py-4">
-        <span className="text-xs font-semibold uppercase opacity-80">
-          {event?.date ? new Date(event.date).toLocaleString("en-GB", { month: "short" }) : "—"}
-        </span>
-        <span className="text-2xl font-bold leading-tight">
-          {event?.date ? new Date(event.date).getDate() : "—"}
-        </span>
+    <div className="bg-white rounded-2xl border border-base-300 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+      {/* Main row */}
+      <div className="flex">
+        {/* Date block */}
+        <div className="w-16 flex-shrink-0 bg-gradient-to-b from-primary to-primary/70 flex flex-col items-center justify-center text-white py-4">
+          <span className="text-xs font-semibold uppercase opacity-80">
+            {event?.date ? new Date(event.date).toLocaleString("en-GB", { month: "short" }) : "—"}
+          </span>
+          <span className="text-2xl font-bold leading-tight">
+            {event?.date ? new Date(event.date).getDate() : "—"}
+          </span>
+        </div>
+
+        {/* Event image */}
+        {event?.images?.[0] ? (
+          <img
+            src={optimizeCloudinaryUrl(event.images[0])}
+            alt={event.title}
+            className="w-28 object-cover flex-shrink-0"
+            width="112"
+            height="88"
+          />
+        ) : (
+          <div className="w-28 bg-gradient-to-br from-base-200 to-base-200 flex items-center justify-center flex-shrink-0">
+            <svg
+              className="w-8 h-8 text-base-content/30"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+        )}
+
+        {/* Info */}
+        <div className="flex-1 px-5 py-4 flex flex-col justify-center min-w-0">
+          <p className="font-semibold text-base-content truncate text-base">
+            {event?.title ?? "Unknown Event"}
+          </p>
+          <p className="text-sm text-base-content/50 mt-0.5">
+            {formatDate(event?.date)}
+            {event?.city && <span> · {event.city}</span>}
+          </p>
+          <p className="text-xs text-base-content/50 mt-1 font-mono">
+            {qty} ticket{qty !== 1 ? "s" : ""}
+          </p>
+        </div>
+
+        {/* Price + status */}
+        <div className="flex flex-col items-end justify-center px-5 gap-2 flex-shrink-0">
+          <span className="text-sm font-semibold text-base-content">
+            {formatCurrency(totalPaid)}
+          </span>
+          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+            ✓ Paid
+          </span>
+        </div>
       </div>
 
-      {/* Event image */}
-      {event?.images?.[0] ? (
-        <img
-          src={optimizeCloudinaryUrl(event.images[0])}
-          alt={event.title}
-          className="w-28 h-full object-fill flex-shrink-0"
-          width="112"
-          height="88"
-        />
-      ) : (
-        <div className="w-28 bg-gradient-to-br from-base-200 to-base-200 flex items-center justify-center flex-shrink-0">
+      {/* Expand toggle for individual tickets */}
+      <div className="border-t border-base-100 px-5 py-2.5 flex items-center justify-between">
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="flex items-center gap-1.5 text-xs font-medium text-base-content/70 hover:text-base-content transition-colors cursor-pointer"
+        >
           <svg
-            className="w-8 h-8 text-base-content/30"
+            className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
+          {expanded ? "Hide tickets" : `View ${qty} ticket${qty !== 1 ? "s" : ""}`}
+        </button>
+        <Link
+          to={`/tickets/${firstTicket.ticketCode}`}
+          className="text-xs font-medium text-base-content/70 hover:text-base-content flex items-center gap-1 transition-colors"
+        >
+          View Order
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+      </div>
+
+      {/* Expanded ticket list */}
+      {expanded && (
+        <div className="px-5 pb-4 space-y-2">
+          {tickets.map((ticket) => (
+            <Link
+              key={ticket._id}
+              to={`/tickets/${ticket.ticketCode}`}
+              className="flex items-center gap-3 bg-base-100 rounded-xl px-4 py-3 hover:bg-base-200/60 transition-colors group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
+                <svg
+                  className="w-4 h-4 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
+                  />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-base-content font-mono">
+                  {ticket.ticketCode}
+                </p>
+                <p className="text-[10px] text-base-content/50">
+                  {formatCurrency(event?.ticketPrice ?? 0)}
+                  {ticket.checkedIn && " · Checked in"}
+                </p>
+              </div>
+              {ticket.checkedIn && (
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                  ✓ Checked In
+                </span>
+              )}
+              <svg
+                className="w-3.5 h-3.5 text-base-content/30 group-hover:text-base-content/50 transition-colors flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </Link>
+          ))}
         </div>
       )}
-
-      {/* Info */}
-      <div className="flex-1 px-5 py-4 flex flex-col justify-center min-w-0">
-        <p className="font-semibold text-base-content truncate text-base group-hover:text-base-content transition-colors">
-          {event?.title ?? "Unknown Event"}
-        </p>
-        <p className="text-sm text-base-content/50 mt-0.5">
-          {formatDate(event?.date)}
-          {event?.city && <span> · {event.city}</span>}
-        </p>
-        <p className="text-xs text-base-content/50 mt-1 font-mono">
-          {ticket.ticketCode ?? "—"} · {ticket.quantity || 1} ticket
-          {(ticket.quantity || 1) !== 1 ? "s" : ""}
-        </p>
-      </div>
-
-      {/* Price + status + arrow */}
-      <div className="flex flex-col items-end justify-center px-5 gap-2 flex-shrink-0">
-        <span className="text-sm font-semibold text-base-content">{formatCurrency(paid)}</span>
-        <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
-          ✓ Paid
-        </span>
-        {ticket.checkedIn && (
-          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-            ✓ Checked In
-          </span>
-        )}
-        <svg
-          className="w-4 h-4 text-base-content/40 group-hover:text-base-content/50 transition-colors"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </div>
-    </Link>
+    </div>
   );
 }
 

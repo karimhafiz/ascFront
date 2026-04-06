@@ -19,6 +19,8 @@ export default function EventCard({ event }) {
 
   const colors = TYPE_COLORS[event.typeOfEvent] || TYPE_COLORS.ASC;
   const slug = toSlug(event.title, event._id);
+  const endDate = event.isReoccurring ? event.reoccurringEndDate : event.date;
+  const isPast = endDate ? new Date(endDate) < new Date() : false;
 
   const handleEditEvent = () => {
     navigate(`/events/${slug}/edit`, { state: { event } });
@@ -85,10 +87,12 @@ export default function EventCard({ event }) {
               </div>
             )}
 
-            <div className="p-5 flex-1 flex flex-col">
-              {/* Type badge + recurring badge */}
-              <div className="flex items-center justify-between mb-2">
+            <div className="p-5">
+              {/* Badges */}
+              <div className="flex items-center flex-wrap gap-1.5 mb-2">
                 <Badge color={colors.badge}>{event.typeOfEvent}</Badge>
+                {isPast && <Badge color="error">Past</Badge>}
+                {event.featured && <Badge color="info">★ Featured</Badge>}
                 {event.isReoccurring && <Badge color="secondary">↻ Recurring</Badge>}
               </div>
 
@@ -201,11 +205,6 @@ export default function EventCard({ event }) {
                   ))}
                 </div>
               )}
-
-              {/* Featured badge — spacer always present to push buttons down */}
-              <div className="mt-auto pt-4 min-h-[2rem]">
-                {event.featured && <Badge color="info">★ Featured</Badge>}
-              </div>
             </div>
           </Link>
 

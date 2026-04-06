@@ -38,7 +38,7 @@ export async function eventAction({ request, params }) {
   const imageFile = data.get("image");
   if (imageFile && imageFile instanceof File && imageFile.size > 0) {
     const compressed = await compressImage(imageFile);
-    formData.append("image", compressed);
+    formData.append("image", compressed, imageFile.name);
   }
 
   let url = `${import.meta.env.VITE_DEV_URI}events`;
