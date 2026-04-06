@@ -1,3 +1,5 @@
+import React from "react";
+
 const variants = {
   primary: "btn btn-primary",
   secondary: "btn btn-soft",
