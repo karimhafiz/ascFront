@@ -1,17 +1,21 @@
 import React from "react";
 import Navbar from "./MainNavbar";
-
 import Footer from "./Footer";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+
+const NO_FOOTER = ["/login", "/signup"];
 
 export default function Main() {
+  const { pathname } = useLocation();
+  const hideFooter = NO_FOOTER.includes(pathname);
+
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">
+    <div className="min-h-[calc(100vh-64px)]">
       <Navbar />
       <main>
         <Outlet />
       </main>
-      <Footer />
+      {!hideFooter && <Footer />}
     </div>
   );
 }

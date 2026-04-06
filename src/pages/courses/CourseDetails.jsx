@@ -3,18 +3,18 @@ import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAuthToken, parseJwt, isAdmin, isModerator } from "../../auth/auth";
-import { Link } from "react-router-dom";
 import { slugToId } from "../../util/util";
+import { PageContainer, Button, GlassCard } from "../../components/ui";
 
 const INTERVAL_LABELS = { month: "month", year: "year" };
 const INTERVAL_ADJ = { month: "Monthly", year: "Yearly" };
 
 const CATEGORY_COLORS = {
-  Language: "from-blue-500 to-indigo-600",
-  Religious: "from-emerald-500 to-teal-600",
-  Academic: "from-purple-500 to-violet-600",
-  Arts: "from-pink-500 to-rose-600",
-  Other: "from-amber-500 to-orange-600",
+  Language: "from-primary to-secondary",
+  Religious: "from-success to-accent",
+  Academic: "from-primary to-secondary",
+  Arts: "from-secondary to-primary",
+  Other: "from-warning to-warning/70",
 };
 
 export default function CourseDetails() {
@@ -88,7 +88,7 @@ export default function CourseDetails() {
     }
   };
 
-  if (isLoading) return <p className="text-center text-gray-500 mt-20">Loading...</p>;
+  if (isLoading) return <p className="text-center text-base-content/50 mt-20">Loading...</p>;
   if (error) return <p className="text-center text-red-500 mt-20">Error: {error.message}</p>;
 
   const gradient = CATEGORY_COLORS[course.category] || CATEGORY_COLORS.Other;
@@ -96,7 +96,7 @@ export default function CourseDetails() {
   const isFull = spotsLeft !== null && spotsLeft <= 0;
 
   return (
-    <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen">
+    <PageContainer>
       <Helmet>
         <title>{course.title} | ASC Courses</title>
         <meta
@@ -118,12 +118,9 @@ export default function CourseDetails() {
       <div className="container mx-auto p-6">
         {canManage && (
           <div className="flex gap-3 mb-6">
-            <Link
-              to={`/courses/${courseSlug}/edit`}
-              className="btn btn-sm bg-white/60 border border-purple-200 text-purple-700 rounded-xl hover:bg-white/80"
-            >
+            <Button variant="ghost" size="sm" to={`/courses/${courseSlug}/edit`}>
               Edit Course
-            </Link>
+            </Button>
           </div>
         )}
 
@@ -138,11 +135,11 @@ export default function CourseDetails() {
               />
             )}
 
-            <div className="glass-card rounded-2xl shadow-xl border border-white/30 backdrop-blur-md p-6">
-              <h2 className="text-xl font-bold text-pink-700 mb-4">Course Details</h2>
+            <GlassCard className="p-6">
+              <h2 className="text-xl font-bold text-base-content mb-4">Course Details</h2>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0\">
                     <svg
                       className="w-5 h-5 text-white"
                       fill="none"
@@ -158,14 +155,14 @@ export default function CourseDetails() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs text-purple-500 font-medium">Instructor</p>
-                    <p className="text-purple-900 font-semibold">{course.instructor}</p>
+                    <p className="text-xs text-base-content/50 font-medium">Instructor</p>
+                    <p className="text-base-content font-semibold">{course.instructor}</p>
                   </div>
                 </div>
 
                 {course.schedule && (
                   <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
                       <svg
                         className="w-5 h-5 text-white"
                         fill="none"
@@ -181,15 +178,15 @@ export default function CourseDetails() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-xs text-purple-500 font-medium">Schedule</p>
-                      <p className="text-purple-900 font-semibold">{course.schedule}</p>
+                      <p className="text-xs text-base-content/50 font-medium">Schedule</p>
+                      <p className="text-base-content font-semibold">{course.schedule}</p>
                     </div>
                   </div>
                 )}
 
                 {(course.street || course.city) && (
                   <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
                       <svg
                         className="w-5 h-5 text-white"
                         fill="none"
@@ -211,8 +208,8 @@ export default function CourseDetails() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-xs text-purple-500 font-medium">Location</p>
-                      <p className="text-purple-900 font-semibold">
+                      <p className="text-xs text-base-content/50 font-medium">Location</p>
+                      <p className="text-base-content font-semibold">
                         {[course.street, course.city, course.postCode].filter(Boolean).join(", ")}
                       </p>
                     </div>
@@ -237,8 +234,8 @@ export default function CourseDetails() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-xs text-purple-500 font-medium">Price</p>
-                      <p className="text-purple-900 font-semibold">£{course.price}</p>
+                      <p className="text-xs text-base-content/50 font-medium">Price</p>
+                      <p className="text-base-content font-semibold">£{course.price}</p>
                     </div>
                   </div>
                 )}
@@ -261,27 +258,29 @@ export default function CourseDetails() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-xs text-purple-500 font-medium">Availability</p>
-                      <p className={`font-semibold ${isFull ? "text-red-600" : "text-purple-900"}`}>
+                      <p className="text-xs text-base-content/50 font-medium">Availability</p>
+                      <p
+                        className={`font-semibold ${isFull ? "text-red-600" : "text-base-content"}`}
+                      >
                         {isFull ? "Full" : `${spotsLeft} spots remaining`}
                       </p>
                     </div>
                   </div>
                 )}
               </div>
-            </div>
+            </GlassCard>
 
-            <div className="glass-card rounded-2xl shadow-xl border border-white/30 backdrop-blur-md p-6">
-              <h2 className="text-xl font-bold text-indigo-700 mb-3">About This Course</h2>
-              <p className="text-purple-900 leading-relaxed">{course.description}</p>
-            </div>
+            <GlassCard className="p-6">
+              <h2 className="text-xl font-bold text-base-content mb-3">About This Course</h2>
+              <p className="text-base-content/80 leading-relaxed">{course.description}</p>
+            </GlassCard>
           </div>
 
           {/* Right — enrollment */}
           <div className="md:col-span-1">
-            <div className="glass-card shadow-xl border border-white/30 backdrop-blur-md rounded-2xl md:sticky md:top-20">
+            <GlassCard className="md:sticky md:top-20">
               <div className="p-6">
-                <h2 className="text-xl font-bold text-pink-700 mb-4">
+                <h2 className="text-xl font-bold text-base-content mb-4">
                   {course.price > 0
                     ? course.isSubscription
                       ? `Subscribe — £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "month"}`
@@ -303,13 +302,13 @@ export default function CourseDetails() {
                 )}
 
                 {!course.enrollmentOpen || isFull ? (
-                  <div className="bg-purple-50 rounded-xl p-4 text-center text-purple-400 text-sm">
+                  <div className="bg-base-200 rounded-xl p-4 text-center text-base-content/50 text-sm">
                     {isFull ? "This course is currently full." : "Enrollment is currently closed."}
                   </div>
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-purple-700 mb-1.5">
+                      <label className="block text-sm font-medium text-base-content mb-1.5">
                         Your Email
                       </label>
                       <input
@@ -323,8 +322,8 @@ export default function CourseDetails() {
 
                     {/* Participant details — always shown */}
                     {!multiMode && (
-                      <div className="bg-purple-50/50 rounded-xl p-3 space-y-2">
-                        <p className="text-xs font-medium text-purple-600">Your Details</p>
+                      <div className="bg-base-200/50 rounded-xl p-3 space-y-2">
+                        <p className="text-xs font-medium text-base-content/50">Your Details</p>
                         <input
                           type="text"
                           placeholder="Your name *"
@@ -347,7 +346,7 @@ export default function CourseDetails() {
                     <button
                       type="button"
                       onClick={() => setMultiMode((m) => !m)}
-                      className="w-full text-xs text-purple-500 hover:text-purple-700 flex items-center justify-center gap-1.5 py-1.5 rounded-xl border border-purple-200/60 hover:bg-purple-50/50 transition-all"
+                      className="w-full text-xs text-base-content/50 hover:text-base-content flex items-center justify-center gap-1.5 py-1.5 rounded-xl border border-base-300/60 hover:bg-base-200/50 transition-all"
                     >
                       <svg
                         className="w-3.5 h-3.5"
@@ -368,11 +367,11 @@ export default function CourseDetails() {
                     {/* Multi-person form */}
                     {multiMode && (
                       <div className="space-y-2">
-                        <p className="text-xs font-medium text-purple-600">Participants</p>
+                        <p className="text-xs font-medium text-base-content/50">Participants</p>
                         {participants.map((p, i) => (
                           <div
                             key={i}
-                            className="flex gap-2 items-start bg-purple-50/50 rounded-xl p-2.5"
+                            className="flex gap-2 items-start bg-base-200/50 rounded-xl p-2.5"
                           >
                             <div className="flex-1 space-y-1.5">
                               <input
@@ -422,12 +421,12 @@ export default function CourseDetails() {
                         ))}
                         <button
                           onClick={addParticipant}
-                          className="w-full text-xs py-1.5 rounded-xl border border-purple-200 text-purple-600 hover:bg-purple-50 transition-all"
+                          className="w-full text-xs py-1.5 rounded-xl border border-base-300 text-base-content/70 hover:bg-base-200 transition-all"
                         >
                           + Add another person
                         </button>
                         {course.price > 0 && (
-                          <p className="text-xs text-purple-500 text-center font-medium">
+                          <p className="text-xs text-base-content/50 text-center font-medium">
                             Total: £
                             {(
                               course.price * participants.filter((p) => p.name.trim()).length
@@ -444,10 +443,11 @@ export default function CourseDetails() {
                       </p>
                     )}
 
-                    <button
+                    <Button
+                      variant="primary"
                       onClick={handleEnroll}
                       disabled={isProcessing}
-                      className="btn bg-gradient-to-r from-pink-500 to-purple-600 w-full border-none text-white transition-all duration-300 shadow-md rounded-xl"
+                      className="w-full"
                     >
                       {isProcessing ? (
                         <span className="flex items-center justify-center gap-2">
@@ -479,25 +479,22 @@ export default function CourseDetails() {
                       ) : (
                         "Enroll for Free"
                       )}
-                    </button>
+                    </Button>
 
                     {course.price > 0 && (
-                      <p className="text-xs text-center text-gray-400">
+                      <p className="text-xs text-center text-base-content/50">
                         🔒 Secure payment via Stripe
                       </p>
                     )}
                   </div>
                 )}
               </div>
-            </div>
+            </GlassCard>
           </div>
         </div>
 
         <div className="mt-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="btn glass border border-purple-300 text-purple-700 hover:bg-purple-100/30 transition-all duration-300 rounded-xl"
-          >
+          <Button variant="ghost" onClick={() => navigate(-1)}>
             <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 strokeLinecap="round"
@@ -507,9 +504,9 @@ export default function CourseDetails() {
               />
             </svg>
             Back to Courses
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Form, useNavigate, useNavigation, useActionData } from "react-router-dom";
+import { Button } from "../ui";
 
 const EventForm = ({ method, event = {} }) => {
   const [base64Image, setBase64Image] = useState(event.image || null); // Pre-fill with existing image if editing
@@ -438,23 +439,17 @@ const EventForm = ({ method, event = {} }) => {
 
         {/* Form Actions */}
         <div className="form-actions flex justify-end space-x-4 mt-6">
-          <button
-            type="button"
-            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-            onClick={cancelHandler}
-            disabled={isSubmitting}
-          >
+          <Button type="button" variant="ghost" onClick={cancelHandler} disabled={isSubmitting}>
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
-            className={`rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 px-5 py-2.5 font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer ${
-              isSubmitting ? "loading" : ""
-            }`}
+            variant="primary"
             disabled={isSubmitting}
+            className={isSubmitting ? "loading" : ""}
           >
             {isSubmitting ? "Submitting..." : "Save"}
-          </button>
+          </Button>
         </div>
       </Form>
     </div>

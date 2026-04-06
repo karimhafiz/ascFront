@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Form, useNavigate, useNavigation, useActionData } from "react-router-dom";
+import { Button } from "../ui";
 
 const CATEGORIES = ["Language", "Religious", "Academic", "Arts", "Other"];
 
@@ -268,21 +269,17 @@ const CourseForm = ({ method, course = {} }) => {
         </div>
 
         <div className="flex justify-end gap-4 mt-6">
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={() => navigate(-1)}
             disabled={isSubmitting}
-            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-60 cursor-pointer"
           >
             Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 px-5 py-2.5 font-medium text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
-          >
+          </Button>
+          <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : "Save Course"}
-          </button>
+          </Button>
         </div>
       </Form>
     </div>

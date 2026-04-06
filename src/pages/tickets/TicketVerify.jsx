@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAuthToken } from "../../auth/auth";
+import { Button, PageContainer, Spinner, GlassCard } from "../../components/ui";
 
 const TICKET_CODE_RE = /^TKT-[A-Z2-9]{6}$/;
 
@@ -113,17 +114,17 @@ export default function TicketVerify() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 px-4 py-6 flex items-center justify-center">
+    <PageContainer center>
       <div className="w-full max-w-md">
         {isLoading ? (
-          <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-8 text-center border border-white/30">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-pink-200 border-t-purple-500"></div>
-            <p className="mt-4 text-purple-500">Loading ticket...</p>
-          </div>
+          <GlassCard className="p-8 text-center">
+            <Spinner size="lg" />
+            <p className="mt-4 text-base-content/70">Loading ticket...</p>
+          </GlassCard>
         ) : (
           <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden border border-white/30">
             {/* Header */}
-            <div className="bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-6 text-white text-center">
+            <div className="bg-gradient-to-r from-primary to-primary/70 px-6 py-6 text-white text-center">
               <p className="text-sm font-semibold uppercase tracking-widest opacity-75 mb-2">
                 Ticket Verification
               </p>
@@ -138,24 +139,24 @@ export default function TicketVerify() {
             {/* Content */}
             {invalidFormat ? (
               <div className="px-6 py-8 text-center">
-                <p className="text-lg font-semibold text-purple-900 mb-2">Invalid Code Format</p>
-                <p className="text-purple-600">
+                <p className="text-lg font-semibold text-base-content mb-2">Invalid Code Format</p>
+                <p className="text-base-content/70">
                   Ticket codes must follow the format <span className="font-mono">TKT-XXXXXX</span>.
                 </p>
               </div>
             ) : isAuthError ? (
               <div className="px-6 py-8 text-center">
-                <p className="text-lg font-semibold text-purple-900 mb-2">
+                <p className="text-lg font-semibold text-base-content mb-2">
                   Authentication Required
                 </p>
-                <p className="text-purple-600">
+                <p className="text-base-content/70">
                   Please log in as staff (admin or moderator) to verify tickets.
                 </p>
               </div>
             ) : status === "invalid" ? (
               <div className="px-6 py-8 text-center">
-                <p className="text-lg font-semibold text-purple-900 mb-2">Ticket Not Found</p>
-                <p className="text-purple-600">
+                <p className="text-lg font-semibold text-base-content mb-2">Ticket Not Found</p>
+                <p className="text-base-content/70">
                   The ticket code &quot;{ticketCode}&quot; could not be found in the system.
                 </p>
               </div>
@@ -163,44 +164,48 @@ export default function TicketVerify() {
               <div className="px-6 py-8 space-y-6">
                 {/* Event Info */}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-purple-400 mb-2">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-base-content/50 mb-2">
                     Event
                   </p>
-                  <h1 className="text-2xl font-bold text-purple-900">
+                  <h1 className="text-2xl font-bold text-base-content">
                     {displayTicket?.eventId?.title || "—"}
                   </h1>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-base-content/70 mt-1">
                     {formatDate(displayTicket?.eventId?.date)}
                   </p>
                   {displayTicket?.eventId?.openingTime && (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-base-content/70">
                       Opens at {displayTicket.eventId.openingTime}
                     </p>
                   )}
                   {displayTicket?.eventId?.street && (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-base-content/70 mt-1">
                       📍 {displayTicket.eventId.street}, {displayTicket.eventId.city}
                     </p>
                   )}
                 </div>
 
-                <hr className="border-purple-100" />
+                <hr className="border-base-200" />
 
                 {/* Attendee */}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-purple-400 mb-2">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-base-content/50 mb-2">
                     Attendee
                   </p>
-                  <p className="text-lg font-semibold text-purple-900">
+                  <p className="text-lg font-semibold text-base-content">
                     {displayTicket?.user?.name || displayTicket?.buyerEmail || "—"}
                   </p>
                   {displayTicket?.user?.email && (
-                    <p className="text-sm text-purple-600 mt-0.5">{displayTicket.user.email}</p>
+                    <p className="text-sm text-base-content/70 mt-0.5">
+                      {displayTicket.user.email}
+                    </p>
                   )}
                   {!displayTicket?.user?.email &&
                     displayTicket?.buyerEmail &&
                     displayTicket?.user?.name && (
-                      <p className="text-sm text-purple-600 mt-0.5">{displayTicket.buyerEmail}</p>
+                      <p className="text-sm text-base-content/70 mt-0.5">
+                        {displayTicket.buyerEmail}
+                      </p>
                     )}
                 </div>
 
@@ -219,7 +224,7 @@ export default function TicketVerify() {
                 {/* Just checked in success */}
                 {status === "just-checked-in" && (
                   <>
-                    <hr className="border-purple-100" />
+                    <hr className="border-base-200" />
                     <div className="bg-green-50 border border-green-200 rounded-2xl p-5 text-center">
                       <p className="text-4xl mb-2">🎉</p>
                       <p className="text-lg font-bold text-green-800">Welcome!</p>
@@ -234,14 +239,16 @@ export default function TicketVerify() {
                 {/* Check in button */}
                 {status === "valid" && (
                   <>
-                    <hr className="border-purple-100" />
-                    <button
+                    <hr className="border-base-200" />
+                    <Button
+                      variant="primary"
+                      size="lg"
                       onClick={() => checkInMutation.mutate()}
                       disabled={checkInMutation.isPending}
-                      className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-2xl text-lg shadow-lg transition-all duration-200 active:scale-95"
+                      className="w-full py-4 text-lg"
                     >
                       {checkInMutation.isPending ? "Checking In..." : "✓ Check In"}
-                    </button>
+                    </Button>
                   </>
                 )}
 
@@ -255,13 +262,13 @@ export default function TicketVerify() {
           </div>
         )}
 
-        <div className="text-center mt-6 text-sm text-purple-500">
+        <div className="text-center mt-6 text-sm text-base-content/70">
           <p>
             Ticket Code:{" "}
-            <span className="font-mono font-semibold text-purple-700">{ticketCode}</span>
+            <span className="font-mono font-semibold text-base-content">{ticketCode}</span>
           </p>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

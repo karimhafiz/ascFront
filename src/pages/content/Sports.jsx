@@ -33,14 +33,14 @@ export default function SportsPage() {
 
       {/* Tournaments Section */}
       <div className="mb-10">
-        <h1 className="text-3xl font-bold text-center mb-6 text-purple-700">
+        <h1 className="text-3xl font-bold text-center mb-6 text-base-content">
           Upcoming Tournaments
         </h1>
         {successMsg && (
           <div className="alert alert-success text-center mb-4 glass-card">{successMsg}</div>
         )}
         {upcomingTournaments.length === 0 ? (
-          <p className="text-center text-gray-500">No upcoming tournaments found.</p>
+          <p className="text-center text-base-content/50">No upcoming tournaments found.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {upcomingTournaments.map((event) => (
@@ -53,9 +53,9 @@ export default function SportsPage() {
       </div>
 
       <div>
-        <h1 className="text-3xl font-bold text-center mb-6 text-purple-700">Past Tournaments</h1>
+        <h1 className="text-3xl font-bold text-center mb-6 text-base-content">Past Tournaments</h1>
         {pastTournaments.length === 0 ? (
-          <p className="text-center text-gray-500">No past tournaments found.</p>
+          <p className="text-center text-base-content/50">No past tournaments found.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pastTournaments.map((event) => (

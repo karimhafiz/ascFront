@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import EventCard from "../../components/events/EventCard";
+import Button from "../../components/ui/Button";
 import { isAdmin, isModerator, getAuthToken } from "../../auth/auth";
 import { compressImage } from "../../util/compressImage";
 import ConfirmModal from "../../components/common/ConfirmModal";
@@ -142,7 +143,7 @@ export default function Home() {
   const heroImage = heroImagePreview || pageContent.heroImage;
 
   return (
-    <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen">
+    <div className="min-h-screen">
       <ConfirmModal
         isOpen={confirmOpen}
         title="Reset to Defaults?"
@@ -162,7 +163,7 @@ export default function Home() {
           {!editing ? (
             <button
               onClick={handleEdit}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 transition-all cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-medium shadow-primary/20 transition-all cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -178,7 +179,7 @@ export default function Home() {
             <>
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 rounded-full bg-white border border-purple-200 text-purple-600 text-sm font-medium shadow hover:bg-purple-50 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer"
+                className="px-4 py-2 rounded-full bg-white border border-base-300 text-primary text-sm font-medium shadow hover:bg-base-200 hover:border-base-300 hover:shadow-md transition-all cursor-pointer"
               >
                 Cancel
               </button>
@@ -192,7 +193,7 @@ export default function Home() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 transition-all disabled:opacity-60 cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-medium shadow-primary/20 transition-all disabled:opacity-60 cursor-pointer"
               >
                 {saving ? "Saving…" : "Save Changes"}
               </button>
@@ -239,16 +240,16 @@ export default function Home() {
       )}
 
       {/* ── Hero ── */}
-      <div className="hero bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 py-16">
-        <div className="hero-content flex flex-col-reverse lg:flex-row items-center gap-6 sm:gap-12 px-4">
+      <div className="hero py-16">
+        <div className="flex flex-col-reverse lg:flex-row items-center gap-6 sm:gap-12 px-4">
           {/* Text card */}
           <div
-            className={`text-center lg:text-left md:max-w-lg glass-card p-5 sm:p-8 rounded-2xl backdrop-blur-md border shadow-xl transition-all duration-500 ${editing ? "border-purple-300 ring-2 ring-purple-200" : "border-white/30 hover:shadow-2xl"}`}
+            className={`text-center lg:text-left md:max-w-3xl glass-card p-5 sm:p-8 rounded-2xl backdrop-blur-md border shadow-xl transition-all duration-500 ${editing ? "border-primary/30 ring-2 ring-primary/20" : "border-white/30 hover:shadow-2xl"}`}
           >
             {editing ? (
               <>
                 <input
-                  className="glass-input text-3xl font-bold text-purple-700 mb-3"
+                  className="glass-input text-3xl font-bold text-primary mb-3"
                   value={draft.heroTitle}
                   onChange={(e) => setDraft({ ...draft, heroTitle: e.target.value })}
                   placeholder="Hero title"
@@ -263,21 +264,21 @@ export default function Home() {
               </>
             ) : (
               <>
-                <h1 className="text-3xl md:text-4xl xl:text-5xl font-bold text-purple-700 mb-4">
+                <h1 className="text-3xl md:text-4xl xl:text-5xl font-bold text-base-content mb-4">
                   {pageContent.heroTitle}
                 </h1>
-                <p className="text-sm md:text-base xl:text-lg text-indigo-700 mb-6">
+                <p className="text-sm md:text-base xl:text-lg text-base-content/80 mb-6">
                   {pageContent.heroDescription}
                 </p>
               </>
             )}
-            <Link
-              to="/about"
-              aria-label="Learn more about Ayendah Sazan"
-              className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-full font-semibold shadow-lg shadow-pink-200 transition-all"
+            <Button
+              variant="primary"
+              onClick={() => (window.location.href = "/about")}
+              className="rounded-full font-semibold"
             >
               Learn More
-            </Link>
+            </Button>
           </div>
           <div
             className={`relative w-full max-w-sm md:max-w-md lg:max-w-lg transition-all duration-500 ${!editing ? "transform hover:rotate-1" : ""}`}
@@ -285,12 +286,12 @@ export default function Home() {
             <img
               src={heroImage}
               alt="Community Event"
-              className={`rounded-2xl shadow-xl object-cover w-full h-auto ring-4 ${editing ? "ring-purple-300" : "ring-white/50"}`}
+              className={`rounded-2xl shadow-xl object-cover w-full h-auto ring-4 ${editing ? "ring-primary/30" : "ring-white/50"}`}
               fetchpriority="high"
               width="500"
               height="375"
             />
-            <div className="absolute bottom-4 left-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm px-4 py-2 rounded-xl shadow-lg backdrop-blur-sm">
+            <div className="absolute bottom-4 left-4 bg-gradient-to-r from-primary to-secondary text-white text-sm px-4 py-2 rounded-xl shadow-lg backdrop-blur-sm">
               {editing ? (
                 <input
                   className="bg-transparent border-b border-white/60 text-white text-sm focus:outline-none w-28 sm:w-36"
@@ -306,7 +307,7 @@ export default function Home() {
               <>
                 <button
                   onClick={() => heroImageInputRef.current?.click()}
-                  className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 rounded-full text-xs font-medium text-purple-700 shadow hover:bg-white transition-all"
+                  className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 rounded-full text-xs font-medium text-primary shadow hover:bg-white transition-all"
                 >
                   <svg
                     className="w-3.5 h-3.5"
@@ -343,7 +344,7 @@ export default function Home() {
       </div>
 
       {/* ── Community Stats Strip ── */}
-      <div className="bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white py-8 px-4">
+      <div className="bg-secondary text-white py-8 px-4">
         <div className="container mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
             { value: "500+", label: "Community Members" },
@@ -353,7 +354,7 @@ export default function Home() {
           ].map(({ value, label }) => (
             <div key={label} className="flex flex-col items-center gap-1">
               <span className="text-3xl font-bold tracking-tight">{value}</span>
-              <span className="text-sm text-purple-200 font-medium">{label}</span>
+              <span className="text-sm text-neutral-content font-medium">{label}</span>
             </div>
           ))}
         </div>
@@ -362,10 +363,10 @@ export default function Home() {
       {/* ── Upcoming Events ── */}
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-purple-700">Upcoming Events</h2>
+          <h2 className="text-3xl font-bold text-base-content">Upcoming Events</h2>
           <Link
             to="/events/asc"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-pink-600 hover:text-purple-700 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral hover:text-primary transition-colors"
           >
             View all
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -375,7 +376,7 @@ export default function Home() {
         </div>
         {upcomingEvents?.length === 0 ? (
           <div className="glass-card p-8 text-center rounded-xl backdrop-blur-md shadow-xl">
-            <p className="text-purple-600">No upcoming events found.</p>
+            <p className="text-base-content/70">No upcoming events found.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

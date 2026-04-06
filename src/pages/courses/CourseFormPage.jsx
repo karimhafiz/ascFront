@@ -25,20 +25,20 @@ export default function CourseFormPage() {
 
   if (isEditing && isLoading)
     return (
-      <div className="min-h-screen bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 flex items-center justify-center">
-        <p className="text-purple-600">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-base-content/70">Loading...</p>
       </div>
     );
 
   if (isEditing && error)
     return (
-      <div className="min-h-screen bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <p className="text-red-500">{error.message}</p>
       </div>
     );
 
   return (
-    <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen py-10 px-4">
+    <div className="min-h-screen py-10 px-4">
       <CourseForm method={isEditing ? "PUT" : "POST"} course={course} key={course?._id || "new"} />
     </div>
   );

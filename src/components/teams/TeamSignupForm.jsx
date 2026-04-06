@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getAuthToken } from "../../auth/auth";
+import { Button, Spinner } from "../ui";
 
 export default function TeamSignupForm({ eventId, managerId, onClose }) {
   const [name, setName] = useState("");
@@ -87,18 +88,20 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-gradient-to-br from-white/80 to-purple-100/80 rounded-2xl shadow-xl border border-white/50 backdrop-blur-md p-5 sm:p-8 relative w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-        <button
-          className="absolute top-3 right-3 btn btn-sm btn-circle bg-white/50 hover:bg-white/70 border-none text-purple-700 hover:scale-110 transition-all duration-300"
+      <div className="bg-gradient-to-br from-white/80 to-base-200/80 rounded-2xl shadow-xl border border-white/50 backdrop-blur-md p-5 sm:p-8 relative w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+        <Button
+          variant="circle"
+          size="sm"
+          className="absolute top-3 right-3"
           onClick={onClose}
           aria-label="Close"
         >
           ✕
-        </button>
+        </Button>
 
         <div className="text-center mb-4">
-          <h2 className="text-2xl font-bold text-purple-700">Team Sign Up</h2>
-          <div className="h-1 w-24 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full mx-auto mt-2"></div>
+          <h2 className="text-2xl font-bold text-base-content">Team Sign Up</h2>
+          <div className="h-1 w-24 bg-gradient-to-r from-primary to-primary/70 rounded-full mx-auto mt-2"></div>
         </div>
 
         {error && (
@@ -134,8 +137,8 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
                     className="flex items-center justify-between bg-white/70 rounded-lg px-3 py-2 border border-amber-100"
                   >
                     <div>
-                      <p className="font-medium text-purple-800 text-sm">{team.name}</p>
-                      <p className="text-xs text-purple-500">
+                      <p className="font-medium text-base-content text-sm">{team.name}</p>
+                      <p className="text-xs text-base-content/50">
                         {team.members.length} player{team.members.length !== 1 ? "s" : ""}
                       </p>
                     </div>
@@ -158,7 +161,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block font-medium text-purple-700 mb-1">Team Name</label>
+            <label className="block font-medium text-base-content mb-1">Team Name</label>
             <input
               className="glass-input py-2.5"
               placeholder="Team Name"
@@ -169,7 +172,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
           </div>
 
           <div>
-            <label className="block font-medium text-purple-700 mb-1">Manager Name</label>
+            <label className="block font-medium text-base-content mb-1">Manager Name</label>
             <input
               className="glass-input py-2.5"
               placeholder="Manager Name"
@@ -180,7 +183,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
           </div>
 
           <div>
-            <label className="block font-medium text-purple-700 mb-1">Manager Email</label>
+            <label className="block font-medium text-base-content mb-1">Manager Email</label>
             <input
               className="glass-input py-2.5"
               placeholder="Manager Email"
@@ -193,8 +196,8 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="block font-medium text-purple-700">Team Members</label>
-              <span className="text-xs text-purple-500 bg-purple-100/50 px-2 py-0.5 rounded-full">
+              <label className="block font-medium text-base-content">Team Members</label>
+              <span className="text-xs text-base-content/50 bg-base-200/50 px-2 py-0.5 rounded-full">
                 {members.length} member{members.length !== 1 && "s"}
               </span>
             </div>
@@ -247,7 +250,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
             </div>
             <button
               type="button"
-              className="btn btn-sm bg-purple-100/60 hover:bg-purple-200/60 border border-purple-200/60 text-purple-700 transition-all duration-300 rounded-lg"
+              className="btn btn-sm bg-base-200/60 hover:bg-base-300/60 border border-base-300/60 text-base-content transition-all duration-300 rounded-lg"
               onClick={addMember}
             >
               <svg
@@ -268,14 +271,10 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
             </button>
           </div>
 
-          <button
-            className="btn bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white border-none transition-all duration-300 shadow-md w-full rounded-xl py-3"
-            type="submit"
-            disabled={loading}
-          >
+          <Button variant="primary" className="w-full py-3" type="submit" disabled={loading}>
             {loading ? (
               <div className="flex items-center justify-center gap-2">
-                <div className="w-5 h-5 border-2 border-t-white/80 border-white/30 rounded-full animate-spin"></div>
+                <Spinner size="sm" />
                 <span>Processing Payment...</span>
               </div>
             ) : (
@@ -297,7 +296,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
                 Pay & Register Team
               </div>
             )}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

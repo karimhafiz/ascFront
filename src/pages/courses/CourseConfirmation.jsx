@@ -18,7 +18,7 @@ export default function CourseConfirmation() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 py-12 px-4">
+    <div className="min-h-screen py-12 px-4">
       <div className="max-w-lg mx-auto">
         <div className="text-center mb-8">
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -36,12 +36,12 @@ export default function CourseConfirmation() {
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-purple-900">Enrollment Confirmed!</h1>
-          <p className="text-purple-600 mt-2">
+          <h1 className="text-3xl font-bold text-base-content">Enrollment Confirmed!</h1>
+          <p className="text-base-content/70 mt-2">
             {isFree ? "You've been enrolled for free." : "Payment received. You're now enrolled."}
           </p>
           {!isLoading && course?.isSubscription && (
-            <p className="text-purple-500 text-sm mt-1">
+            <p className="text-base-content/50 text-sm mt-1">
               Your {course.billingInterval === "year" ? "yearly" : "monthly"} subscription is now
               active. Manage it anytime from your profile.
             </p>
@@ -50,8 +50,8 @@ export default function CourseConfirmation() {
 
         {!isLoading && course && (
           <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-lg border border-white/50 p-6 mb-6">
-            <h2 className="text-lg font-bold text-purple-900 mb-3">{course.title}</h2>
-            <div className="space-y-1.5 text-sm text-purple-700">
+            <h2 className="text-lg font-bold text-base-content mb-3">{course.title}</h2>
+            <div className="space-y-1.5 text-sm text-base-content/70">
               {course.instructor && (
                 <p>
                   <span className="font-semibold">Instructor:</span> {course.instructor}
@@ -73,18 +73,18 @@ export default function CourseConfirmation() {
         )}
 
         <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-lg border border-white/50 p-6 mb-6">
-          <h2 className="text-lg font-bold text-purple-900 mb-3">What's Next?</h2>
-          <ul className="space-y-2 text-sm text-purple-700">
+          <h2 className="text-lg font-bold text-base-content mb-3">What's Next?</h2>
+          <ul className="space-y-2 text-sm text-base-content/70">
             <li className="flex items-start gap-2">
-              <span className="text-purple-400 mt-0.5">•</span> Check your email for confirmation
-              details
+              <span className="text-base-content/50 mt-0.5">•</span> Check your email for
+              confirmation details
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-purple-400 mt-0.5">•</span> Arrive a few minutes early on your
-              first session
+              <span className="text-base-content/50 mt-0.5">•</span> Arrive a few minutes early on
+              your first session
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-purple-400 mt-0.5">•</span> Bring any required materials
+              <span className="text-base-content/50 mt-0.5">•</span> Bring any required materials
               mentioned by the instructor
             </li>
           </ul>
@@ -93,13 +93,13 @@ export default function CourseConfirmation() {
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             to="/profile"
-            className="flex-1 btn bg-gradient-to-r from-purple-500 to-pink-500 border-none text-white transition-all rounded-xl shadow-md"
+            className="flex-1 btn bg-gradient-to-r from-primary to-secondary border-none text-white transition-all rounded-xl shadow-md"
           >
             View My Profile
           </Link>
           <Link
             to="/courses"
-            className="flex-1 btn bg-white/60 border border-purple-200 text-purple-700 hover:bg-white/80 rounded-xl"
+            className="flex-1 btn bg-white/60 border border-base-300 text-base-content hover:bg-white/80 rounded-xl"
           >
             Back to Courses
           </Link>

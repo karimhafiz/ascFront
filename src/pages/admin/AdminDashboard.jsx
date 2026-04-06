@@ -18,6 +18,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 import { getAuthToken, getUserRole as getAuthRole } from "../../auth/auth";
 import SortableHeader from "../../components/common/SortableHeader";
+import { PageContainer, Spinner } from "../../components/ui";
 
 function getRole() {
   return getAuthRole();
@@ -46,7 +47,7 @@ const ENROLLMENT_STATUS = {
 const roleBadgeClass = {
   admin: "bg-yellow-100 text-yellow-800 border-yellow-300",
   moderator: "bg-blue-100 text-blue-700 border-blue-200",
-  user: "bg-gray-100 text-gray-600 border-gray-200",
+  user: "bg-base-200 text-base-content/70 border-base-300",
 };
 
 // ─── Tab: Tickets ─────────────────────────────────────────────────────────────
@@ -86,36 +87,38 @@ function TicketsTab({ tickets }) {
         onChange={(e) => setSearch(e.target.value)}
         className="glass-input mb-4"
       />
-      <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
+      <div className="overflow-x-auto rounded-2xl border border-base-300 shadow-sm">
         <table className="w-full text-sm min-w-[600px]">
           <thead>
-            <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
-              <th className="px-4 py-3 font-semibold text-purple-700">Event</th>
-              <th className="px-4 py-3 font-semibold text-purple-700">Buyer Email</th>
+            <tr className="bg-gradient-to-r from-base-200 to-base-200 text-left">
+              <th className="px-4 py-3 font-semibold text-base-content">Event</th>
+              <th className="px-4 py-3 font-semibold text-base-content">Buyer Email</th>
               <SortableHeader label="Qty" sortKey="quantity" sort={sort} onSort={setSort} />
               <SortableHeader label="Paid" sortKey="paid" sort={sort} onSort={setSort} />
               <SortableHeader label="Date" sortKey="date" sort={sort} onSort={setSort} />
-              <th className="px-4 py-3 font-semibold text-purple-700">Ref</th>
+              <th className="px-4 py-3 font-semibold text-base-content">Ref</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-base-100">
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center py-10 text-gray-400">
+                <td colSpan={6} className="text-center py-10 text-base-content/50">
                   No tickets found
                 </td>
               </tr>
             ) : (
               sorted.map((t) => (
-                <tr key={t._id} className="bg-white hover:bg-pink-50/30 transition-colors">
-                  <td className="px-4 py-3 font-medium text-gray-800">{t.eventId?.title ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-600">{t.buyerEmail}</td>
-                  <td className="px-4 py-3 text-gray-600">{t.quantity ?? 1}</td>
+                <tr key={t._id} className="bg-white hover:bg-base-200/30 transition-colors">
+                  <td className="px-4 py-3 font-medium text-base-content">
+                    {t.eventId?.title ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-base-content/70">{t.buyerEmail}</td>
+                  <td className="px-4 py-3 text-base-content/70">{t.quantity ?? 1}</td>
                   <td className="px-4 py-3 text-green-700 font-medium">
                     £{((t.eventId?.ticketPrice ?? 0) * (t.quantity ?? 1)).toFixed(2)}
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{formatDate(t.createdAt)}</td>
-                  <td className="px-4 py-3 font-mono text-[11px] text-gray-300">
+                  <td className="px-4 py-3 text-base-content/50">{formatDate(t.createdAt)}</td>
+                  <td className="px-4 py-3 font-mono text-[11px] text-base-content/40">
                     {t.paymentId ? "…" + t.paymentId.slice(-8) : "—"}
                   </td>
                 </tr>
@@ -124,7 +127,7 @@ function TicketsTab({ tickets }) {
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-gray-400 mt-2">
+      <p className="text-xs text-base-content/50 mt-2">
         {filtered.length} ticket{filtered.length !== 1 ? "s" : ""}
       </p>
     </div>
@@ -142,8 +145,8 @@ function RevenueTab({ events }) {
       {
         label: "Revenue (£)",
         data: events.map((e) => e.totalRevenue ?? 0),
-        backgroundColor: "rgba(147, 51, 234, 0.6)",
-        borderColor: "rgba(147, 51, 234, 1)",
+        backgroundColor: "rgba(59, 130, 172, 0.6)",
+        borderColor: "rgba(59, 130, 172, 1)",
         borderWidth: 1,
         borderRadius: 6,
       },
@@ -175,23 +178,23 @@ function RevenueTab({ events }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <p className="text-xs text-gray-500 mb-1">Total Revenue</p>
-          <p className="text-2xl font-bold text-purple-700">£{totalRevenue.toFixed(2)}</p>
+        <div className="bg-white rounded-2xl border border-base-300 shadow-sm p-5">
+          <p className="text-xs text-base-content/50 mb-1">Total Revenue</p>
+          <p className="text-2xl font-bold text-base-content">£{totalRevenue.toFixed(2)}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <p className="text-xs text-gray-500 mb-1">Events with Sales</p>
-          <p className="text-2xl font-bold text-pink-600">
+        <div className="bg-white rounded-2xl border border-base-300 shadow-sm p-5">
+          <p className="text-xs text-base-content/50 mb-1">Events with Sales</p>
+          <p className="text-2xl font-bold text-base-content">
             {events.filter((e) => (e.totalRevenue ?? 0) > 0).length}
           </p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <p className="text-xs text-gray-500 mb-1">Total Events</p>
-          <p className="text-2xl font-bold text-indigo-600">{events.length}</p>
+        <div className="bg-white rounded-2xl border border-base-300 shadow-sm p-5">
+          <p className="text-xs text-base-content/50 mb-1">Total Events</p>
+          <p className="text-2xl font-bold text-base-content">{events.length}</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <div className="bg-white rounded-2xl border border-base-300 shadow-sm p-5">
         <div className="h-72">
           <Bar
             data={chartData}
@@ -205,25 +208,27 @@ function RevenueTab({ events }) {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
+      <div className="overflow-x-auto rounded-2xl border border-base-300 shadow-sm">
         <table className="w-full text-sm min-w-[600px]">
           <thead>
-            <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
+            <tr className="bg-gradient-to-r from-base-200 to-base-200 text-left">
               <SortableHeader label="Event" sortKey="event" sort={sort} onSort={setSort} />
               <SortableHeader label="Revenue" sortKey="revenue" sort={sort} onSort={setSort} />
               <SortableHeader label="Tickets Left" sortKey="tickets" sort={sort} onSort={setSort} />
               <SortableHeader label="Price/ticket" sortKey="price" sort={sort} onSort={setSort} />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-base-100">
             {sorted.map((e) => (
-              <tr key={e._id} className="bg-white hover:bg-pink-50/30 transition-colors">
-                <td className="px-4 py-3 font-medium text-gray-800">{e.title}</td>
+              <tr key={e._id} className="bg-white hover:bg-base-200/30 transition-colors">
+                <td className="px-4 py-3 font-medium text-base-content">{e.title}</td>
                 <td className="px-4 py-3 text-green-700 font-medium">
                   £{(e.totalRevenue ?? 0).toFixed(2)}
                 </td>
-                <td className="px-4 py-3 text-gray-600">{e.ticketsAvailable ?? "—"}</td>
-                <td className="px-4 py-3 text-gray-600">£{(e.ticketPrice ?? 0).toFixed(2)}</td>
+                <td className="px-4 py-3 text-base-content/70">{e.ticketsAvailable ?? "—"}</td>
+                <td className="px-4 py-3 text-base-content/70">
+                  £{(e.ticketPrice ?? 0).toFixed(2)}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -289,15 +294,15 @@ function TeamsTab({ teams }) {
           onChange={(e) => setSearch(e.target.value)}
           className="glass-input flex-1 max-w-xs"
         />
-        <div className="flex bg-purple-50 rounded-xl p-1 gap-1">
+        <div className="flex bg-base-200 rounded-xl p-1 gap-1">
           {TEAM_SORT_OPTIONS.map((opt) => (
             <button
               key={opt.key}
               onClick={() => handleTeamSort(opt.key)}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 sort.key === opt.key
-                  ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "bg-gradient-to-r from-primary to-primary/70 text-white shadow-sm"
+                  : "text-base-content/50 hover:text-base-content"
               }`}
             >
               {opt.label}
@@ -321,21 +326,21 @@ function TeamsTab({ teams }) {
         </div>
       </div>
       {sorted.length === 0 && (
-        <p className="text-center text-gray-400 py-12">No team registrations found</p>
+        <p className="text-center text-base-content/50 py-12">No team registrations found</p>
       )}
       {sorted.map((team) => (
         <div
           key={team._id}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+          className="bg-white rounded-2xl border border-base-300 shadow-sm overflow-hidden"
         >
           <div className="px-5 py-4 flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-gray-800">{team.name}</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="font-semibold text-base-content">{team.name}</p>
+              <p className="text-xs text-base-content/50 mt-0.5">
                 {team.event?.title ?? "Unknown event"}
                 {team.event?.date && <span> · {formatDate(team.event.date)}</span>}
               </p>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-base-content/50 mt-0.5">
                 Manager: {team.manager?.name} · {team.manager?.email}
               </p>
             </div>
@@ -350,14 +355,16 @@ function TeamsTab({ teams }) {
               >
                 {team.paid ? "✓ Paid" : "Pending"}
               </span>
-              <span className="text-xs text-gray-400">{team.members?.length ?? 0} members</span>
+              <span className="text-xs text-base-content/50">
+                {team.members?.length ?? 0} members
+              </span>
             </div>
           </div>
           {team.members?.length > 0 && (
             <div className="px-5 pb-4">
               <button
                 onClick={() => setExpanded(expanded === team._id ? null : team._id)}
-                className="text-xs text-purple-500 hover:text-purple-700 font-medium flex items-center gap-1 cursor-pointer"
+                className="text-xs text-base-content/70 hover:text-base-content font-medium flex items-center gap-1 cursor-pointer"
               >
                 {expanded === team._id ? "Hide members" : "Show members"}
                 <svg
@@ -381,13 +388,13 @@ function TeamsTab({ teams }) {
                   {team.members.map((m, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-2 text-xs text-purple-600 bg-purple-50/50 rounded-lg px-3 py-1.5"
+                      className="flex items-center gap-2 text-xs text-base-content/70 bg-base-200/50 rounded-lg px-3 py-1.5"
                     >
-                      <span className="w-5 h-5 rounded-full bg-purple-100 text-purple-600 font-bold flex items-center justify-center text-[10px]">
+                      <span className="w-5 h-5 rounded-full bg-base-200 text-base-content/70 font-bold flex items-center justify-center text-[10px]">
                         {m.name?.[0]?.toUpperCase() ?? "?"}
                       </span>
                       <span>{m.name}</span>
-                      {m.email && <span className="text-gray-400">· {m.email}</span>}
+                      {m.email && <span className="text-base-content/50">· {m.email}</span>}
                     </div>
                   ))}
                 </div>
@@ -471,12 +478,12 @@ function CoursesTab({ enrollments, courses }) {
           onChange={(e) => setSearch(e.target.value)}
           className="glass-input flex-1"
         />
-        <div className="flex bg-purple-50 rounded-xl p-1 gap-1">
+        <div className="flex bg-base-200 rounded-xl p-1 gap-1">
           {["enrollments", "courses"].map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize cursor-pointer ${view === v ? "bg-white shadow-sm text-purple-700" : "text-gray-500 hover:text-gray-700"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize cursor-pointer ${view === v ? "bg-white shadow-sm text-base-content" : "text-base-content/50 hover:text-base-content"}`}
             >
               {v}
             </button>
@@ -486,13 +493,13 @@ function CoursesTab({ enrollments, courses }) {
 
       {view === "enrollments" && (
         <>
-          <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
+          <div className="overflow-x-auto rounded-2xl border border-base-300 shadow-sm">
             <table className="w-full text-sm min-w-[600px]">
               <thead>
-                <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
-                  <th className="px-4 py-3 font-semibold text-purple-700">Course</th>
-                  <th className="px-4 py-3 font-semibold text-purple-700">Buyer Email</th>
-                  <th className="px-4 py-3 font-semibold text-purple-700">Participants</th>
+                <tr className="bg-gradient-to-r from-base-200 to-base-200 text-left">
+                  <th className="px-4 py-3 font-semibold text-base-content">Course</th>
+                  <th className="px-4 py-3 font-semibold text-base-content">Buyer Email</th>
+                  <th className="px-4 py-3 font-semibold text-base-content">Participants</th>
                   <SortableHeader
                     label="Status"
                     sortKey="status"
@@ -507,21 +514,21 @@ function CoursesTab({ enrollments, courses }) {
                   />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-base-100">
                 {sortedEnrollments.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="text-center py-10 text-gray-400">
+                    <td colSpan={5} className="text-center py-10 text-base-content/50">
                       No enrollments found
                     </td>
                   </tr>
                 ) : (
                   sortedEnrollments.map((e) => (
-                    <tr key={e._id} className="bg-white hover:bg-pink-50/30 transition-colors">
-                      <td className="px-4 py-3 font-medium text-gray-800">
+                    <tr key={e._id} className="bg-white hover:bg-base-200/30 transition-colors">
+                      <td className="px-4 py-3 font-medium text-base-content">
                         {e.courseId?.title ?? "—"}
                       </td>
-                      <td className="px-4 py-3 text-gray-600">{e.buyerEmail}</td>
-                      <td className="px-4 py-3 text-gray-600">
+                      <td className="px-4 py-3 text-base-content/70">{e.buyerEmail}</td>
+                      <td className="px-4 py-3 text-base-content/70">
                         {e.participants?.length > 0
                           ? e.participants.map((p) => p.name).join(", ")
                           : "—"}
@@ -530,7 +537,7 @@ function CoursesTab({ enrollments, courses }) {
                         {(() => {
                           const st = ENROLLMENT_STATUS[e.status] ?? {
                             label: e.status ?? "Unknown",
-                            classes: "bg-gray-50 text-gray-500 border-gray-200",
+                            classes: "bg-base-100 text-base-content/50 border-base-300",
                           };
                           return (
                             <span
@@ -541,14 +548,14 @@ function CoursesTab({ enrollments, courses }) {
                           );
                         })()}
                       </td>
-                      <td className="px-4 py-3 text-gray-500">{formatDate(e.createdAt)}</td>
+                      <td className="px-4 py-3 text-base-content/50">{formatDate(e.createdAt)}</td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-base-content/50 mt-2">
             {filteredEnrollments.length} enrollment{filteredEnrollments.length !== 1 ? "s" : ""}
           </p>
         </>
@@ -556,12 +563,12 @@ function CoursesTab({ enrollments, courses }) {
 
       {view === "courses" && (
         <>
-          <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
+          <div className="overflow-x-auto rounded-2xl border border-base-300 shadow-sm">
             <table className="w-full text-sm min-w-[600px]">
               <thead>
-                <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
-                  <th className="px-4 py-3 font-semibold text-purple-700">Title</th>
-                  <th className="px-4 py-3 font-semibold text-purple-700">Instructor</th>
+                <tr className="bg-gradient-to-r from-base-200 to-base-200 text-left">
+                  <th className="px-4 py-3 font-semibold text-base-content">Title</th>
+                  <th className="px-4 py-3 font-semibold text-base-content">Instructor</th>
                   <SortableHeader
                     label="Category"
                     sortKey="category"
@@ -588,29 +595,29 @@ function CoursesTab({ enrollments, courses }) {
                   />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-base-100">
                 {sortedCourses.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-10 text-gray-400">
+                    <td colSpan={6} className="text-center py-10 text-base-content/50">
                       No courses found
                     </td>
                   </tr>
                 ) : (
                   sortedCourses.map((c) => (
-                    <tr key={c._id} className="bg-white hover:bg-pink-50/30 transition-colors">
-                      <td className="px-4 py-3 font-medium text-gray-800">{c.title}</td>
-                      <td className="px-4 py-3 text-gray-600">{c.instructor}</td>
-                      <td className="px-4 py-3 text-gray-600">{c.category}</td>
-                      <td className="px-4 py-3 text-gray-600">
+                    <tr key={c._id} className="bg-white hover:bg-base-200/30 transition-colors">
+                      <td className="px-4 py-3 font-medium text-base-content">{c.title}</td>
+                      <td className="px-4 py-3 text-base-content/70">{c.instructor}</td>
+                      <td className="px-4 py-3 text-base-content/70">{c.category}</td>
+                      <td className="px-4 py-3 text-base-content/70">
                         {c.price > 0 ? `£${c.price}` : "Free"}
                       </td>
-                      <td className="px-4 py-3 text-gray-600">
+                      <td className="px-4 py-3 text-base-content/70">
                         {c.currentEnrollment}
                         {c.maxEnrollment ? ` / ${c.maxEnrollment}` : ""}
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`text-xs font-medium px-2 py-0.5 rounded-full border ${c.enrollmentOpen ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-50 text-gray-500 border-gray-200"}`}
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full border ${c.enrollmentOpen ? "bg-green-50 text-green-700 border-green-200" : "bg-base-100 text-base-content/50 border-base-300"}`}
                         >
                           {c.enrollmentOpen ? "Open" : "Closed"}
                         </span>
@@ -621,7 +628,7 @@ function CoursesTab({ enrollments, courses }) {
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-base-content/50 mt-2">
             {filteredCourses.length} course{filteredCourses.length !== 1 ? "s" : ""}
           </p>
         </>
@@ -689,29 +696,29 @@ function UsersTab({ users, currentUserId, onRoleChange }) {
         onChange={(e) => setSearch(e.target.value)}
         className="glass-input mb-4"
       />
-      <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
+      <div className="overflow-x-auto rounded-2xl border border-base-300 shadow-sm">
         <table className="w-full text-sm min-w-[600px]">
           <thead>
-            <tr className="bg-gradient-to-r from-pink-50 to-purple-50 text-left">
-              <th className="px-4 py-3 font-semibold text-purple-700">Name</th>
-              <th className="px-4 py-3 font-semibold text-purple-700">Email</th>
+            <tr className="bg-gradient-to-r from-base-200 to-base-200 text-left">
+              <th className="px-4 py-3 font-semibold text-base-content">Name</th>
+              <th className="px-4 py-3 font-semibold text-base-content">Email</th>
               <SortableHeader label="Role" sortKey="role" sort={sort} onSort={setSort} />
               <SortableHeader label="Joined" sortKey="joined" sort={sort} onSort={setSort} />
-              <th className="px-4 py-3 font-semibold text-purple-700">Actions</th>
+              <th className="px-4 py-3 font-semibold text-base-content">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-base-100">
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-10 text-gray-400">
+                <td colSpan={5} className="text-center py-10 text-base-content/50">
                   No users found
                 </td>
               </tr>
             ) : (
               sorted.map((u) => (
-                <tr key={u._id} className="bg-white hover:bg-pink-50/30 transition-colors">
-                  <td className="px-4 py-3 font-medium text-gray-800">{u.name}</td>
-                  <td className="px-4 py-3 text-gray-600">{u.email}</td>
+                <tr key={u._id} className="bg-white hover:bg-base-200/30 transition-colors">
+                  <td className="px-4 py-3 font-medium text-base-content">{u.name}</td>
+                  <td className="px-4 py-3 text-base-content/70">{u.email}</td>
                   <td className="px-4 py-3">
                     <span
                       className={
@@ -722,10 +729,10 @@ function UsersTab({ users, currentUserId, onRoleChange }) {
                       {u.role}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{formatDate(u.createdAt)}</td>
+                  <td className="px-4 py-3 text-base-content/50">{formatDate(u.createdAt)}</td>
                   <td className="px-4 py-3">
                     {u._id === currentUserId ? (
-                      <span className="text-xs text-gray-400 italic">you</span>
+                      <span className="text-xs text-base-content/50 italic">you</span>
                     ) : (
                       <select
                         value={u.role}
@@ -745,7 +752,7 @@ function UsersTab({ users, currentUserId, onRoleChange }) {
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-gray-400 mt-2">
+      <p className="text-xs text-base-content/50 mt-2">
         {filtered.length} user{filtered.length !== 1 ? "s" : ""}
       </p>
     </div>
@@ -803,35 +810,35 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">
+      <PageContainer center>
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-4 border-pink-200 border-t-purple-500 animate-spin" />
-          <p className="text-sm text-purple-600">Loading dashboard…</p>
+          <Spinner />
+          <p className="text-sm text-base-content/70">Loading dashboard…</p>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">
+      <PageContainer center>
         <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
           <p className="text-red-500 font-medium">{error}</p>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-pink-50 via-white to-purple-50 py-10 px-4">
+    <div className="min-h-screen bg-gradient-to-tr from-base-200 via-white to-base-200 py-10 px-4">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+            <h1 className="text-xl sm:text-2xl font-bold text-base-content">
               {isAdmin ? "Admin Dashboard" : "Moderator Dashboard"}
             </h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-base-content/50 mt-0.5">
               {isAdmin
                 ? "Full access — manage events, users, and view all data"
                 : "View-only access to tickets, revenue, and teams"}
@@ -848,7 +855,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-white/70 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-1.5 overflow-x-auto">
+        <div className="flex gap-1 bg-white/70 backdrop-blur-sm rounded-2xl border border-base-300 shadow-sm p-1.5 overflow-x-auto">
           {visibleTabs.map((tab) => (
             <button
               key={tab}
@@ -856,8 +863,8 @@ export default function AdminDashboard() {
               className={
                 "flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap cursor-pointer " +
                 (activeTab === tab
-                  ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-sm"
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50")
+                  ? "bg-gradient-to-r from-primary to-primary/70 text-white shadow-sm"
+                  : "text-base-content/50 hover:text-base-content hover:bg-base-100")
               }
             >
               {tab}
@@ -865,7 +872,7 @@ export default function AdminDashboard() {
                 <span
                   className={
                     "ml-1.5 text-xs px-1.5 py-0.5 rounded-full " +
-                    (activeTab === tab ? "bg-white/20" : "bg-gray-100 text-gray-500")
+                    (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
                   }
                 >
                   {data.tickets.length}
@@ -875,7 +882,7 @@ export default function AdminDashboard() {
                 <span
                   className={
                     "ml-1.5 text-xs px-1.5 py-0.5 rounded-full " +
-                    (activeTab === tab ? "bg-white/20" : "bg-gray-100 text-gray-500")
+                    (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
                   }
                 >
                   {data.teams.length}
@@ -885,7 +892,7 @@ export default function AdminDashboard() {
                 <span
                   className={
                     "ml-1.5 text-xs px-1.5 py-0.5 rounded-full " +
-                    (activeTab === tab ? "bg-white/20" : "bg-gray-100 text-gray-500")
+                    (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
                   }
                 >
                   {data.enrollments.length}
@@ -895,7 +902,7 @@ export default function AdminDashboard() {
                 <span
                   className={
                     "ml-1.5 text-xs px-1.5 py-0.5 rounded-full " +
-                    (activeTab === tab ? "bg-white/20" : "bg-gray-100 text-gray-500")
+                    (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
                   }
                 >
                   {data.users.length}
@@ -906,7 +913,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Tab content */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm p-3 sm:p-6">
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl sm:rounded-3xl border border-base-300 shadow-sm p-3 sm:p-6">
           {activeTab === "Tickets" && <TicketsTab tickets={data.tickets} />}
           {activeTab === "Revenue" && <RevenueTab events={data.events} />}
           {activeTab === "Teams" && <TeamsTab teams={data.teams} />}

@@ -13,16 +13,16 @@ const Signup = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">
+    <div className="flex items-center justify-center min-h-[calc(100vh-64px)] py-8">
       <div
-        className="relative w-full max-w-md p-8 md:p-12 rounded-2xl overflow-hidden backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.1)]"
-        style={{ background: "rgba(255, 255, 255, 0.25)" }}
+        className="relative w-full max-w-md p-8 md:p-12 rounded-2xl overflow-hidden backdrop-blur-xl border border-base-300/40 shadow-[0_8px_32px_rgba(0,0,0,0.08)]"
+        style={{ background: "rgba(255, 255, 255, 0.35)" }}
       >
         {/* Decorative glass elements */}
-        <div className="absolute -top-20 -left-20 w-40 h-40 rounded-full bg-pink-300/30 blur-3xl"></div>
-        <div className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full bg-purple-300/30 blur-3xl"></div>
+        <div className="absolute -top-20 -left-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl"></div>
+        <div className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full bg-secondary/10 blur-3xl"></div>
 
-        <h1 className="text-3xl font-bold text-center text-pink-700 mb-8 relative z-10">
+        <h1 className="text-3xl font-bold text-center text-base-content mb-8 relative z-10">
           Create Account
         </h1>
 
@@ -72,7 +72,7 @@ const Signup = () => {
 
           <button
             type="submit"
-            className={`btn w-full text-base font-medium py-3 mt-6 rounded-xl bg-gradient-to-r from-pink-400 to-purple-400 text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] hover:border-2 hover:border-white transition-all ${
+            className={`btn w-full text-base font-medium py-3 mt-6 rounded-xl btn-primary border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] hover:border-2 hover:border-white transition-all ${
               isSubmitting ? "opacity-70" : ""
             }`}
             disabled={isSubmitting}
@@ -129,13 +129,13 @@ const Signup = () => {
         )}
 
         <div className="relative z-10">
-          <p className="text-center text-gray-600 mt-4">or</p>
+          <p className="text-center text-base-content/70 mt-4">or</p>
           <GoogleLogin />
-          <p className="text-center text-sm text-gray-500 mt-6">
+          <p className="text-center text-sm text-base-content/50 mt-6">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="font-semibold text-pink-600 hover:text-purple-600 transition-colors"
+              className="font-semibold text-primary hover:text-secondary transition-colors"
             >
               Log in
             </Link>

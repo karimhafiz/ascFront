@@ -3,6 +3,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAuthToken } from "../../auth/auth";
 import TicketCard from "../../components/tickets/TicketCard";
+import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
 
 export default function OrderConfirmation() {
   const [searchParams] = useSearchParams();
@@ -97,18 +98,18 @@ export default function OrderConfirmation() {
 
   if (ticketLoading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-purple-50">
+      <PageContainer center>
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-4 border-pink-200 border-t-purple-500 animate-spin" />
-          <p className="text-sm text-gray-400">Loading your ticket…</p>
+          <Spinner />
+          <p className="text-sm text-base-content/50">Loading your ticket…</p>
         </div>
-      </div>
+      </PageContainer>
     );
 
   // Fallback — payment confirmed but ticket couldn't load
   if (ticketError || !ticket)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-purple-50 p-4">
+      <PageContainer center>
         <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-sm border border-green-100 text-center">
           <div className="w-16 h-16 rounded-full bg-green-100/50 flex items-center justify-center mx-auto mb-4">
             <svg
@@ -126,44 +127,38 @@ export default function OrderConfirmation() {
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-green-600 mb-2">Payment Successful!</h2>
-          <p className="text-gray-500 text-sm mb-6">
+          <p className="text-base-content/50 text-sm mb-6">
             Your payment was processed. Your ticket will appear in your profile shortly.
           </p>
           {receipt && (
-            <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left text-sm space-y-1">
-              <p className="text-gray-700">
+            <div className="bg-base-100 rounded-xl p-4 mb-6 text-left text-sm space-y-1">
+              <p className="text-base-content">
                 <span className="font-medium">Amount:</span> £{receipt.amountTotal}
               </p>
-              <p className="text-gray-700">
+              <p className="text-base-content">
                 <span className="font-medium">Quantity:</span> {receipt.quantity} ticket
                 {receipt.quantity !== "1" ? "s" : ""}
               </p>
-              <p className="text-gray-700">
+              <p className="text-base-content">
                 <span className="font-medium">Email:</span> {receipt.customerEmail}
               </p>
             </div>
           )}
           <div className="space-y-3">
-            <Link
-              to="/profile"
-              className="block w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl transition-all font-medium"
-            >
+            <Button variant="primary" to="/profile" className="w-full">
               View My Tickets
-            </Link>
-            <Link
-              to="/events"
-              className="block w-full px-6 py-3 glass border border-purple-300 text-purple-700 rounded-xl hover:bg-purple-100/30 transition-all font-medium"
-            >
+            </Button>
+            <Button variant="ghost" to="/events" className="w-full">
               Browse More Events
-            </Link>
+            </Button>
           </div>
         </div>
-      </div>
+      </PageContainer>
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 py-10 px-4">
-      <div className="max-w-lg mx-auto">
+    <PageContainer>
+      <div className="max-w-lg mx-auto py-10 px-4">
         {/* Success banner */}
         <div className="mb-6 bg-white rounded-2xl shadow-sm border border-green-100 p-6 text-center">
           <div className="w-12 h-12 rounded-full bg-green-100/50 flex items-center justify-center mx-auto mb-3">
@@ -182,20 +177,22 @@ export default function OrderConfirmation() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-green-600 mb-1">Payment Successful!</h1>
-          <p className="text-sm text-gray-500">Your ticket is confirmed. See details below.</p>
+          <p className="text-sm text-base-content/50">
+            Your ticket is confirmed. See details below.
+          </p>
         </div>
 
         <div className="mb-6">
           <TicketCard ticket={ticket} />
           {groupCount > 1 && (
             <div className="mt-3 text-center">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-base-content/50">
                 This is{" "}
-                <span className="font-semibold text-purple-600">ticket 1 of {groupCount}</span> from
-                this order.{" "}
+                <span className="font-semibold text-base-content/70">ticket 1 of {groupCount}</span>{" "}
+                from this order.{" "}
                 <Link
                   to="/profile"
-                  className="text-purple-600 underline underline-offset-2 hover:text-purple-800"
+                  className="text-base-content/70 underline underline-offset-2 hover:text-base-content"
                 >
                   View all tickets →
                 </Link>
@@ -206,10 +203,7 @@ export default function OrderConfirmation() {
 
         {/* Actions */}
         <div className="space-y-3">
-          <button
-            onClick={() => window.print()}
-            className="w-full btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none transition-all duration-300 shadow-md"
-          >
+          <Button variant="primary" onClick={() => window.print()} className="w-full">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 mr-2"
@@ -225,11 +219,8 @@ export default function OrderConfirmation() {
               />
             </svg>
             Print Ticket
-          </button>
-          <button
-            onClick={handleAddToCalendar}
-            className="w-full btn glass border border-purple-300 text-purple-700 hover:bg-purple-100/30 transition-all duration-300"
-          >
+          </Button>
+          <Button variant="ghost" onClick={handleAddToCalendar} className="w-full">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 mr-2"
@@ -245,15 +236,12 @@ export default function OrderConfirmation() {
               />
             </svg>
             Add to Calendar
-          </button>
-          <Link
-            to="/profile"
-            className="block text-center w-full btn glass border border-gray-300 text-gray-700 hover:bg-gray-100/30 transition-all duration-300"
-          >
+          </Button>
+          <Button variant="ghost" to="/profile" className="w-full">
             View All Tickets
-          </Link>
+          </Button>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

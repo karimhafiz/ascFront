@@ -27,7 +27,7 @@ const CustomToolbar = (toolbar) => {
       <div className="flex items-center gap-2">
         <button
           onClick={goToBack}
-          className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 transition-all shadow-sm cursor-pointer"
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-base-200 border border-base-300 text-base-content hover:text-base-content/70 transition-all shadow-sm cursor-pointer"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -44,13 +44,13 @@ const CustomToolbar = (toolbar) => {
         </button>
         <button
           onClick={goToCurrent}
-          className="px-4 h-9 rounded-xl bg-white/60 hover:bg-purple-50 border border-purple-200/50 text-purple-600 text-sm font-medium transition-all shadow-sm cursor-pointer"
+          className="px-4 h-9 rounded-xl bg-white/60 hover:bg-base-200 border border-base-300 text-base-content text-sm font-medium transition-all shadow-sm cursor-pointer"
         >
           Today
         </button>
         <button
           onClick={goToNext}
-          className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-pink-50 border border-pink-200/50 text-pink-500 hover:text-pink-600 transition-all shadow-sm cursor-pointer"
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 hover:bg-base-200 border border-base-300 text-base-content hover:text-base-content/70 transition-all shadow-sm cursor-pointer"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +67,7 @@ const CustomToolbar = (toolbar) => {
         </button>
       </div>
 
-      <span className="font-bold text-purple-800 text-sm sm:text-lg">
+      <span className="font-bold text-base-content text-sm sm:text-lg">
         {toolbar.view === "day" ? (
           moment(toolbar.date).format("ddd, D MMMM YYYY")
         ) : toolbar.view === "week" ? (
@@ -75,7 +75,7 @@ const CustomToolbar = (toolbar) => {
         ) : (
           <>
             {moment(toolbar.date).format("MMMM ")}
-            <span className="font-normal text-purple-500">
+            <span className="font-normal text-base-content/50">
               {moment(toolbar.date).format("YYYY")}
             </span>
           </>
@@ -89,8 +89,8 @@ const CustomToolbar = (toolbar) => {
             onClick={() => toolbar.onView(view)}
             className={`px-3 h-7 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
               view === toolbar.view
-                ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-sm"
-                : "text-purple-600 hover:bg-white/60"
+                ? "bg-gradient-to-r from-primary to-secondary text-white shadow-sm"
+                : "text-base-content hover:bg-white/60"
             }`}
           >
             {view.charAt(0).toUpperCase() + view.slice(1)}
@@ -105,12 +105,12 @@ moment.updateLocale("en", { week: { dow: 1 } });
 const localizer = momentLocalizer(moment);
 
 const EVENT_COLORS = [
-  { bg: "#ec4899", light: "#fce7f3", shadow: "rgba(236,72,153,0.35)" },
-  { bg: "#9333ea", light: "#f3e8ff", shadow: "rgba(147,51,234,0.35)" },
-  { bg: "#4f46e5", light: "#e0e7ff", shadow: "rgba(79,70,229,0.35)" },
-  { bg: "#0ea5e9", light: "#e0f2fe", shadow: "rgba(14,165,233,0.35)" },
-  { bg: "#10b981", light: "#d1fae5", shadow: "rgba(16,185,129,0.35)" },
-  { bg: "#f59e0b", light: "#fef3c7", shadow: "rgba(245,158,11,0.35)" },
+  { bg: "#2563EB", light: "#DBEAFE", shadow: "rgba(37,99,235,0.35)" },
+  { bg: "#3B82F6", light: "#EFF6FF", shadow: "rgba(59,130,246,0.35)" },
+  { bg: "#10B981", light: "#D1FAE5", shadow: "rgba(16,185,129,0.35)" },
+  { bg: "#F59E0B", light: "#FEF3C7", shadow: "rgba(245,158,11,0.35)" },
+  { bg: "#EF4444", light: "#FEE2E2", shadow: "rgba(239,68,68,0.35)" },
+  { bg: "#8B5CF6", light: "#EDE9FE", shadow: "rgba(139,92,246,0.35)" },
 ];
 
 function getEventColor(title) {
@@ -159,14 +159,14 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
     if (isToday)
       return {
         style: {
-          backgroundColor: "rgba(253, 220, 235, 0.85)",
-          boxShadow: "inset 0 0 0 2px rgba(236, 72, 153, 0.7)",
+          backgroundColor: "rgba(37, 99, 235, 0.1)",
+          boxShadow: "inset 0 0 0 2px rgba(37, 99, 235, 0.5)",
         },
       };
     if (hasEvent)
       return {
         style: {
-          backgroundColor: "rgba(196, 181, 253, 0.15)",
+          backgroundColor: "rgba(59, 130, 246, 0.08)",
         },
       };
     if (!isCurrentMonth)
@@ -206,16 +206,16 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 px-2 gap-2">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-purple-800">{title}</h2>
-          <div className="h-1 w-16 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full mt-1.5"></div>
+          <h2 className="text-xl sm:text-2xl font-bold text-base-content">{title}</h2>
+          <div className="h-1 w-16 bg-gradient-to-r from-primary to-secondary rounded-full mt-1.5"></div>
         </div>
-        <div className="flex items-center gap-3 sm:gap-4 text-xs text-purple-500">
+        <div className="flex items-center gap-3 sm:gap-4 text-xs text-base-content/50">
           <span className="flex items-center gap-1.5">
-            <span className="w-3.5 h-3.5 rounded-full bg-pink-200 border-2 border-pink-500 inline-block"></span>
+            <span className="w-3.5 h-3.5 rounded-full bg-primary/20 border-2 border-primary inline-block"></span>
             Today
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3.5 h-3.5 rounded-full bg-purple-300 border border-purple-500 inline-block"></span>
+            <span className="w-3.5 h-3.5 rounded-full bg-secondary/30 border border-secondary inline-block"></span>
             Has event
           </span>
         </div>
@@ -278,16 +278,16 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-purple-900">{selectedEvent.title}</h3>
+                  <h3 className="text-lg font-bold text-base-content">{selectedEvent.title}</h3>
                   {selectedEvent.isReoccurring && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-600 font-medium mt-1 inline-block">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-base-200 text-primary font-medium mt-1 inline-block">
                       🔁 Recurring
                     </span>
                   )}
                 </div>
                 <button
                   onClick={() => setSelectedEvent(null)}
-                  className="text-gray-400 hover:text-gray-600 ml-2 transition-colors cursor-pointer"
+                  className="text-base-content/50 hover:text-base-content/70 ml-2 transition-colors cursor-pointer"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
@@ -300,10 +300,10 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
                 </button>
               </div>
 
-              <div className="space-y-2.5 text-sm text-purple-700 mb-5">
+              <div className="space-y-2.5 text-sm text-base-content/70 mb-5">
                 <div className="flex items-center gap-2.5">
                   <svg
-                    className="w-4 h-4 text-pink-400 flex-shrink-0"
+                    className="w-4 h-4 text-primary flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -320,7 +320,7 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
                 {selectedEvent.openingTime && (
                   <div className="flex items-center gap-2.5">
                     <svg
-                      className="w-4 h-4 text-purple-400 flex-shrink-0"
+                      className="w-4 h-4 text-secondary flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -338,7 +338,7 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
                 {(selectedEvent.street || selectedEvent.city) && (
                   <div className="flex items-center gap-2.5">
                     <svg
-                      className="w-4 h-4 text-indigo-400 flex-shrink-0"
+                      className="w-4 h-4 text-info flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -364,7 +364,7 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
                 {selectedEvent.ticketPrice > 0 && (
                   <div className="flex items-center gap-2.5">
                     <svg
-                      className="w-4 h-4 text-green-400 flex-shrink-0"
+                      className="w-4 h-4 text-accent flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -387,13 +387,13 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
               <div className="flex gap-2">
                 <button
                   onClick={() => setSelectedEvent(null)}
-                  className="flex-1 py-2 rounded-xl border border-purple-200 text-purple-600 text-sm hover:bg-purple-50 transition-all cursor-pointer"
+                  className="flex-1 py-2 rounded-xl border border-base-300 text-base-content/70 text-sm hover:bg-base-200 transition-all cursor-pointer"
                 >
                   Close
                 </button>
                 <button
                   onClick={handleConfirmNavigate}
-                  className="flex-1 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium transition-all shadow-sm cursor-pointer"
+                  className="flex-1 py-2 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-medium transition-all shadow-sm cursor-pointer"
                 >
                   View Details →
                 </button>

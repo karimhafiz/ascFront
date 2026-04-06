@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import TeamSignupForm from "../../components/teams/TeamSignupForm";
 import { parseJwt, getAuthToken, fetchWithAuth } from "../../auth/auth";
 import { slugToId } from "../../util/util";
+import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
 
 export default function EventDetails() {
   const { eventSlug } = useParams();
@@ -44,12 +45,6 @@ export default function EventDetails() {
   const isTournament = event && event.isTournament;
 
   // ─── Stripe Checkout ──────────────────────────────────────────────────────
-  // Calls our backend to create a Stripe Checkout Session.
-  // The backend talks to Stripe using the secret key and returns a hosted
-  // payment page URL. We then redirect the user there.
-  // After payment, Stripe redirects to our backend /payments/success which
-  // creates the ticket and redirects to /order-confirmation.
-  // ─────────────────────────────────────────────────────────────────────────
   const handleBuyTickets = async () => {
     setBuyError("");
     setAwaitingConfirm(false);
@@ -114,26 +109,26 @@ export default function EventDetails() {
 
   if (isLoading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">
+      <PageContainer center>
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-4 border-pink-200 border-t-purple-500 animate-spin" />
-          <p className="text-sm text-purple-400">Loading event details…</p>
+          <Spinner />
+          <p className="text-sm text-base-content/50">Loading event details...</p>
         </div>
-      </div>
+      </PageContainer>
     );
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100">
+      <PageContainer center>
         <div className="bg-white/90 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-red-100 text-center max-w-sm">
           <p className="text-red-500 font-medium mb-4">{error.message}</p>
         </div>
-      </div>
+      </PageContainer>
     );
 
   const isEventInPast = new Date(event.date) < new Date();
 
   return (
-    <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen">
+    <PageContainer>
       <Helmet>
         <title>{event.title} | ASC Events</title>
         <meta
@@ -142,7 +137,7 @@ export default function EventDetails() {
         />
       </Helmet>
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white p-6 md:p-12 shadow-lg backdrop-blur-sm">
+      <div className="bg-gradient-to-r from-primary to-secondary text-white p-6 md:p-12 shadow-lg backdrop-blur-sm">
         <div className="container mx-auto">
           <h1 className="text-3xl md:text-5xl font-bold text-center mb-2">{event.title}</h1>
           {event.organizer && (
@@ -172,9 +167,10 @@ export default function EventDetails() {
       <div className="container mx-auto p-4">
         {/* Social Share */}
         <div className="flex justify-end gap-2 mb-6">
-          <button
+          <Button
+            variant="circle"
             onClick={handleShare}
-            className="btn btn-circle glass bg-gradient-to-br from-pink-400 to-purple-500 text-white hover:scale-110 transition-all duration-300 border-none shadow-md cursor-pointer"
+            className="bg-gradient-to-br from-primary to-secondary text-white hover:scale-110 border-none shadow-md"
             aria-label="Share on Facebook"
           >
             <svg
@@ -186,7 +182,7 @@ export default function EventDetails() {
             >
               <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
             </svg>
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -199,12 +195,12 @@ export default function EventDetails() {
                 className="w-full h-auto object-cover rounded-2xl shadow-xl"
               />
             )}
-            <div className="glass-card rounded-2xl shadow-xl border border-white/30 backdrop-blur-md">
+            <GlassCard className="shadow-xl">
               <div className="card-body">
-                <h2 className="card-title text-xl text-pink-700">Event Details:</h2>
+                <h2 className="card-title text-xl text-base-content">Event Details:</h2>
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <div className="bg-gradient-to-br from-pink-500 to-purple-600 text-white p-3 rounded-xl mr-4 shadow-md">
+                    <div className="bg-gradient-to-br from-primary to-secondary text-white p-3 rounded-xl mr-4 shadow-md">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-6 w-6"
@@ -221,15 +217,15 @@ export default function EventDetails() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg text-purple-900">Date & Time</h3>
-                      <p className="text-purple-800">
+                      <h3 className="font-bold text-lg text-base-content">Date & Time</h3>
+                      <p className="text-base-content/70">
                         {new Date(event.date).toLocaleDateString()}, {event.openingTime}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start">
-                    <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-3 rounded-xl mr-4 shadow-md">
+                    <div className="bg-gradient-to-br from-primary to-secondary text-white p-3 rounded-xl mr-4 shadow-md">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-6 w-6"
@@ -252,8 +248,8 @@ export default function EventDetails() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg text-purple-900">Location</h3>
-                      <p className="text-purple-800">
+                      <h3 className="font-bold text-lg text-base-content">Location</h3>
+                      <p className="text-base-content/70">
                         {event.street}, {event.city}, {event.postCode}
                       </p>
                     </div>
@@ -261,7 +257,7 @@ export default function EventDetails() {
 
                   {event.ticketPrice > 0 && (
                     <div className="flex items-start">
-                      <div className="bg-gradient-to-br from-purple-500 to-pink-600 text-white p-3 rounded-xl mr-4 shadow-md">
+                      <div className="bg-gradient-to-br from-secondary to-primary text-white p-3 rounded-xl mr-4 shadow-md">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-6 w-6"
@@ -278,12 +274,12 @@ export default function EventDetails() {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg text-purple-900">
+                        <h3 className="font-bold text-lg text-base-content">
                           {event.isTournament ? "Tournament Fee" : "Ticket Price"}
                         </h3>
-                        <p className="text-purple-800">£{event.ticketPrice}</p>
+                        <p className="text-base-content/70">£{event.ticketPrice}</p>
                         {event.isTournament && (
-                          <p className="text-xs text-purple-500 mt-0.5">
+                          <p className="text-xs text-base-content/50 mt-0.5">
                             Per player — spectators enter free
                           </p>
                         )}
@@ -310,8 +306,8 @@ export default function EventDetails() {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg text-purple-900">Availability</h3>
-                        <p className="text-purple-800">
+                        <h3 className="font-bold text-lg text-base-content">Availability</h3>
+                        <p className="text-base-content/70">
                           {event.ticketsAvailable > 0
                             ? `${event.ticketsAvailable} tickets remaining`
                             : "Sold out"}
@@ -321,22 +317,22 @@ export default function EventDetails() {
                   )}
                 </div>
               </div>
-            </div>
+            </GlassCard>
 
-            <div className="glass-card rounded-2xl shadow-xl border border-white/30 backdrop-blur-md">
+            <GlassCard className="shadow-xl">
               <div className="card-body">
-                <h2 className="card-title text-xl text-indigo-700">About This Event</h2>
-                <div className="prose max-w-none text-purple-900">
+                <h2 className="card-title text-xl text-base-content">About This Event</h2>
+                <div className="prose max-w-none text-base-content/80">
                   <p>{event.longDescription}</p>
                 </div>
               </div>
-            </div>
+            </GlassCard>
           </div>
 
           {/* Right column: Ticket Purchase */}
           <div className="md:col-span-1">
             {!isEventInPast && event.ticketPrice === 0 && !event.isTournament ? (
-              <div className="glass-card shadow-xl border border-white/30 backdrop-blur-md rounded-2xl">
+              <GlassCard className="shadow-xl">
                 <div className="card-body text-center">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center mx-auto mb-3">
                     <svg
@@ -354,26 +350,26 @@ export default function EventDetails() {
                     </svg>
                   </div>
                   <h2 className="card-title text-xl text-green-700 justify-center">Free Entry</h2>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-base-content/50 text-sm">
                     This event is free to attend. Just show up!
                   </p>
                 </div>
-              </div>
+              </GlassCard>
             ) : !isEventInPast ? (
-              <div className="glass-card shadow-xl border border-white/30 backdrop-blur-md rounded-2xl md:sticky md:top-20 hover:shadow-2xl transition-all duration-300">
+              <GlassCard className="shadow-xl md:sticky md:top-20 hover:shadow-2xl transition-all duration-300">
                 <div className="card-body">
-                  <h2 className="card-title text-xl text-pink-700">
+                  <h2 className="card-title text-xl text-base-content">
                     {event.isTournament ? "Team Registration" : "Purchase Tickets"}
                   </h2>
                   <div className="space-y-4">
                     {event.isTournament && (
                       <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
-                        💡 The tournament fee is charged <strong>per player</strong>. Spectators and
+                        The tournament fee is charged <strong>per player</strong>. Spectators and
                         supporters are welcome to attend for free.
                       </div>
                     )}
                     <div>
-                      <label className="block text-md font-medium mb-2 text-purple-700">
+                      <label className="block text-md font-medium mb-2 text-base-content">
                         Your Email:
                       </label>
                       <input
@@ -388,7 +384,7 @@ export default function EventDetails() {
 
                     {!event.isTournament && (
                       <div>
-                        <label className="block text-md font-medium mb-2 text-purple-700">
+                        <label className="block text-md font-medium mb-2 text-base-content">
                           Ticket Quantity:
                         </label>
                         <input
@@ -407,14 +403,14 @@ export default function EventDetails() {
                           className="glass-input"
                         />
                         {event.ticketPrice > 0 && (
-                          <p className="text-sm text-purple-600 mt-1">
+                          <p className="text-sm text-base-content/70 mt-1">
                             Total: £{(event.ticketPrice * (parseInt(quantity) || 1)).toFixed(2)}
                           </p>
                         )}
                         {awaitingConfirm && (
                           <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-3">
                             <p className="text-sm font-medium text-amber-700 mb-2">
-                              ⚠️ You're buying {quantity} tickets — are you sure?
+                              You're buying {quantity} tickets — are you sure?
                             </p>
                             <div className="flex gap-2">
                               <button
@@ -443,34 +439,16 @@ export default function EventDetails() {
                     )}
 
                     <div className="pt-2">
-                      <button
-                        className="btn bg-gradient-to-r from-pink-500 to-purple-600 w-full border-none text-white transition-all duration-300 shadow-md rounded-xl"
+                      <Button
+                        variant="primary"
+                        className="w-full"
                         onClick={handleBuyTickets}
                         disabled={isProcessing || event.ticketsAvailable === 0}
                       >
                         {isProcessing ? (
                           <span className="flex items-center justify-center">
-                            <svg
-                              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              ></circle>
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              ></path>
-                            </svg>
-                            Redirecting to payment...
+                            <Spinner size="sm" />
+                            <span className="ml-3">Redirecting to payment...</span>
                           </span>
                         ) : event.ticketsAvailable === 0 ? (
                           "Sold Out"
@@ -479,27 +457,27 @@ export default function EventDetails() {
                         ) : (
                           "Buy Tickets"
                         )}
-                      </button>
+                      </Button>
                     </div>
 
                     {/* Stripe badge */}
                     {!event.isTournament && (
-                      <p className="text-xs text-center text-gray-400 mt-2">
-                        🔒 Secure payment via Stripe
+                      <p className="text-xs text-center text-base-content/50 mt-2">
+                        Secure payment via Stripe
                       </p>
                     )}
                   </div>
                 </div>
-              </div>
+              </GlassCard>
             ) : (
-              <div className="glass-card bg-red-100/30 shadow-xl border border-red-300/50 rounded-2xl">
+              <GlassCard className="bg-red-100/30 shadow-xl border-red-300/50">
                 <div className="card-body">
                   <h2 className="card-title text-xl text-red-600">Event Has Ended</h2>
                   <p className="text-red-500">
                     This event has already occurred. Ticket purchases are no longer available.
                   </p>
                 </div>
-              </div>
+              </GlassCard>
             )}
           </div>
         </div>
@@ -518,10 +496,7 @@ export default function EventDetails() {
 
         {/* Back Button */}
         <div className="mt-8 mb-4">
-          <button
-            className="btn glass border border-purple-300 text-purple-700 hover:bg-purple-100/30 transition-all duration-300"
-            onClick={handleBack}
-          >
+          <Button variant="secondary" onClick={handleBack}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 mr-2"
@@ -537,9 +512,9 @@ export default function EventDetails() {
               />
             </svg>
             Back to Events
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

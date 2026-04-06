@@ -28,9 +28,9 @@ export default function TicketCard({ ticket, ticketsInGroup }) {
   const buyerName = ticket.user?.name ?? null;
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+    <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-base-300">
       {/* Header */}
-      <div className="bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-5 text-white">
+      <div className="bg-gradient-to-r from-primary to-primary/70 px-6 py-5 text-white">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest opacity-75 mb-1">
@@ -63,57 +63,61 @@ export default function TicketCard({ ticket, ticketsInGroup }) {
       )}
 
       {/* Ticket code + QR */}
-      <div className="px-6 py-6 flex items-center justify-between border-b border-dashed border-gray-200">
+      <div className="px-6 py-6 flex items-center justify-between border-b border-dashed border-base-300">
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Ticket ID</p>
-          <p className="text-lg sm:text-2xl font-bold text-gray-900 tracking-widest font-mono">
+          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Ticket ID</p>
+          <p className="text-lg sm:text-2xl font-bold text-base-content tracking-widest font-mono">
             {ticket.ticketCode ?? "—"}
           </p>
         </div>
-        <div className="p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
-          <QRCodeSVG value={qrValue} size={80} fgColor="#7c3aed" level="M" />
+        <div className="p-3 bg-white rounded-2xl shadow-sm border border-base-300">
+          <QRCodeSVG value={qrValue} size={80} fgColor="#2563EB" level="M" />
         </div>
       </div>
 
       {/* Tear line */}
       <div className="relative flex items-center">
-        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-50 via-white to-purple-50 border border-gray-100 -ml-3 shrink-0" />
-        <div className="flex-1 border-t-2 border-dashed border-gray-100 mx-2" />
-        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-50 via-white to-purple-50 border border-gray-100 -mr-3 shrink-0" />
+        <div className="w-6 h-6 rounded-full bg-base-100 border border-base-300 -ml-3 shrink-0" />
+        <div className="flex-1 border-t-2 border-dashed border-base-300 mx-2" />
+        <div className="w-6 h-6 rounded-full bg-base-100 border border-base-300 -mr-3 shrink-0" />
       </div>
 
       {/* Details grid */}
       <div className="px-6 py-6 grid grid-cols-2 gap-x-6 gap-y-5">
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Date</p>
-          <p className="text-sm font-semibold text-gray-800">{formatDate(event?.date)}</p>
+          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Date</p>
+          <p className="text-sm font-semibold text-base-content">{formatDate(event?.date)}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Time</p>
-          <p className="text-sm font-semibold text-gray-800">{event?.openingTime ?? "—"}</p>
+          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Time</p>
+          <p className="text-sm font-semibold text-base-content">{event?.openingTime ?? "—"}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Venue</p>
-          <p className="text-sm font-semibold text-gray-800">
+          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Venue</p>
+          <p className="text-sm font-semibold text-base-content">
             {event?.street ? `${event.street}, ${event.city}` : (event?.city ?? "—")}
           </p>
-          {event?.postCode && <p className="text-xs text-gray-400">{event.postCode}</p>}
+          {event?.postCode && <p className="text-xs text-base-content/50">{event.postCode}</p>}
         </div>
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">
             {buyerName ? "Name" : "Email"}
           </p>
-          <p className="text-sm font-semibold text-gray-800">{buyerName ?? ticket.buyerEmail}</p>
-          {buyerName && <p className="text-xs text-gray-400 truncate">{ticket.buyerEmail}</p>}
+          <p className="text-sm font-semibold text-base-content">
+            {buyerName ?? ticket.buyerEmail}
+          </p>
+          {buyerName && (
+            <p className="text-xs text-base-content/50 truncate">{ticket.buyerEmail}</p>
+          )}
         </div>
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Amount Paid</p>
-          <p className="text-sm font-bold text-purple-700">£{amountPaid}</p>
+          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Amount Paid</p>
+          <p className="text-sm font-bold text-base-content">£{amountPaid}</p>
         </div>
         {ticketsInGroup && (
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Quantity</p>
-            <p className="text-sm font-semibold text-gray-800">
+            <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Quantity</p>
+            <p className="text-sm font-semibold text-base-content">
               {ticketsInGroup} ticket{ticketsInGroup !== 1 ? "s" : ""}
             </p>
           </div>
@@ -122,9 +126,9 @@ export default function TicketCard({ ticket, ticketsInGroup }) {
 
       {/* Footer */}
       <div className="px-6 pb-6">
-        <div className="bg-purple-50 rounded-2xl px-4 py-3 flex items-center gap-3">
+        <div className="bg-base-200 rounded-2xl px-4 py-3 flex items-center gap-3">
           <svg
-            className="w-4 h-4 text-purple-400 shrink-0"
+            className="w-4 h-4 text-base-content/50 shrink-0"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -136,7 +140,7 @@ export default function TicketCard({ ticket, ticketsInGroup }) {
               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <p className="text-xs text-purple-600">
+          <p className="text-xs text-base-content/70">
             Present this QR code at the entrance. Screenshot or print for offline access.
           </p>
         </div>

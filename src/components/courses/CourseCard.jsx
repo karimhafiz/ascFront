@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { isAdmin, isModerator, getAuthToken } from "../../auth/auth";
 import { optimizeCloudinaryUrl, toSlug } from "../../util/util";
+import { Badge, GlassCard } from "../ui";
 
 const CATEGORY_COLORS = {
-  Language: { bg: "from-blue-500 to-indigo-600", badge: "bg-blue-100 text-blue-700" },
-  Religious: { bg: "from-emerald-500 to-teal-600", badge: "bg-emerald-100 text-emerald-700" },
-  Academic: { bg: "from-purple-500 to-violet-600", badge: "bg-purple-100 text-purple-700" },
-  Arts: { bg: "from-pink-500 to-rose-600", badge: "bg-pink-100 text-pink-700" },
-  Other: { bg: "from-amber-500 to-orange-600", badge: "bg-amber-100 text-amber-700" },
+  Language: { bg: "from-primary to-secondary", badge: "primary" },
+  Religious: { bg: "from-accent to-success", badge: "accent" },
+  Academic: { bg: "from-info to-info/70", badge: "info" },
+  Arts: { bg: "from-secondary to-primary", badge: "secondary" },
+  Other: { bg: "from-warning to-warning/70", badge: "warning" },
 };
 
 export default function CourseCard({ course }) {
@@ -36,7 +37,7 @@ export default function CourseCard({ course }) {
 
   return (
     <div className="group">
-      <div className="glass-card rounded-2xl shadow-lg border border-white/30 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <GlassCard className="overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
         <Link to={`/courses/${toSlug(course.title, course._id)}`} className="block">
           {/* Image or gradient banner */}
           {course.images && course.images.length > 0 ? (
@@ -69,22 +70,20 @@ export default function CourseCard({ course }) {
 
           <div className="p-5">
             <div className="flex items-center justify-between mb-2">
-              <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${colors.badge}`}>
-                {course.category}
-              </span>
-              <span className="text-sm font-bold text-purple-700">
+              <Badge color={colors.badge}>{course.category}</Badge>
+              <span className="text-sm font-bold text-base-content">
                 {course.price > 0 ? `£${course.price}` : "Free"}
               </span>
             </div>
 
-            <h3 className="text-lg font-bold text-purple-900 mb-1 group-hover:text-pink-600 transition-colors">
+            <h3 className="text-lg font-bold text-base-content mb-1 group-hover:text-primary transition-colors">
               {course.title}
             </h3>
-            <p className="text-sm text-purple-600 mb-3 line-clamp-2">
+            <p className="text-sm text-base-content/70 mb-3 line-clamp-2">
               {course.shortDescription || course.description}
             </p>
 
-            <div className="space-y-1.5 text-xs text-purple-600">
+            <div className="space-y-1.5 text-xs text-base-content/70">
               {course.instructor && (
                 <div className="flex items-center gap-1.5">
                   <svg
@@ -149,16 +148,16 @@ export default function CourseCard({ course }) {
 
             <div className="mt-4 flex items-center justify-between">
               {spotsLeft !== null ? (
-                <span
-                  className={`text-xs font-medium px-2 py-0.5 rounded-full ${isFull ? "bg-red-100 text-red-600" : "bg-green-100 text-green-700"}`}
-                >
+                <Badge color={isFull ? "error" : "success"}>
                   {isFull ? "Full" : `${spotsLeft} spots left`}
-                </span>
+                </Badge>
               ) : (
-                <span className="text-xs text-purple-400">{course.currentEnrollment} enrolled</span>
+                <span className="text-xs text-base-content/50">
+                  {course.currentEnrollment} enrolled
+                </span>
               )}
               {!course.enrollmentOpen && (
-                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                <span className="text-xs bg-base-200 text-base-content/70 px-2 py-0.5 rounded-full">
                   Enrollment closed
                 </span>
               )}
@@ -168,10 +167,10 @@ export default function CourseCard({ course }) {
 
         {/* Admin/mod action bar */}
         {canManage && (
-          <div className="flex gap-2 p-3 bg-gray-50/80 border-t border-gray-100">
+          <div className="flex gap-2 p-3 bg-base-100/50 border-t border-base-300">
             <Link
               to={`/courses/${toSlug(course.title, course._id)}/edit`}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs font-semibold transition-all"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-base-200 hover:bg-base-300 text-base-content text-xs font-semibold transition-all"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -200,7 +199,7 @@ export default function CourseCard({ course }) {
             </button>
           </div>
         )}
-      </div>
+      </GlassCard>
     </div>
   );
 }

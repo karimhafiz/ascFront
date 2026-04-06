@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isAuthenticated, getAuthToken } from "../auth/auth";
 import { optimizeCloudinaryUrl, toSlug } from "../util/util";
+import { Button, Spinner } from "../components/ui";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
@@ -47,20 +48,20 @@ export default function ProfilePage() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-purple-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-200 via-white to-base-200">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-4 border-pink-200 border-t-pink-500 animate-spin" />
-          <p className="text-sm text-gray-400">Loading your profile…</p>
+          <Spinner />
+          <p className="text-sm text-base-content/50">Loading your profile…</p>
         </div>
       </div>
     );
 
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-purple-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-200 via-white to-base-200">
         <div className="bg-white rounded-2xl p-8 shadow-sm border border-red-100 text-center max-w-sm">
           <p className="text-red-500 font-medium mb-4">{error}</p>
-          <Link to="/" className="text-sm text-purple-600 hover:underline">
+          <Link to="/" className="text-sm text-base-content/70 hover:underline">
             Go home
           </Link>
         </div>
@@ -78,41 +79,41 @@ export default function ProfilePage() {
     : "?";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-base-200 via-white to-base-200">
       <div className="max-w-4xl mx-auto px-4 pt-8">
         <div className="mb-6 flex items-center gap-5">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-md shadow-pink-200 flex-shrink-0">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white text-2xl font-bold shadow-md shadow-primary/20 flex-shrink-0">
             {initials}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+              <h1 className="text-2xl font-bold text-base-content">{user.name}</h1>
               <span
                 className={`text-xs font-semibold px-2.5 py-0.5 rounded-full capitalize ${
                   user.role === "admin"
                     ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
                     : user.role === "moderator"
-                      ? "bg-purple-100 text-purple-700 border border-purple-200"
-                      : "bg-gray-100 text-gray-500 border border-gray-200"
+                      ? "bg-base-200 text-base-content border border-base-300"
+                      : "bg-base-200 text-base-content/50 border border-base-300"
                 }`}
               >
                 {user.role}
               </span>
             </div>
-            <div className="flex gap-4 mt-1 text-sm text-gray-500">
+            <div className="flex gap-4 mt-1 text-sm text-base-content/50">
               <span>
-                <strong className="text-gray-800">{tickets.length}</strong> order
+                <strong className="text-base-content">{tickets.length}</strong> order
                 {tickets.length !== 1 ? "s" : ""}
               </span>
               <span>·</span>
               <span>
-                <strong className="text-gray-800">{teams.length}</strong> team
+                <strong className="text-base-content">{teams.length}</strong> team
                 {teams.length !== 1 ? "s" : ""}
               </span>
               <span>·</span>
               <span>
-                <strong className="text-gray-800">{enrollments.length}</strong> course
+                <strong className="text-base-content">{enrollments.length}</strong> course
                 {enrollments.length !== 1 ? "s" : ""}
               </span>
             </div>
@@ -120,7 +121,7 @@ export default function ProfilePage() {
         </div>
 
         {/* ── Tabs ── */}
-        <div className="border-b border-gray-200 mb-6">
+        <div className="border-b border-base-300 mb-6">
           <div className="flex gap-1">
             {TABS.map((tab) => (
               <button
@@ -128,14 +129,16 @@ export default function ProfilePage() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 cursor-pointer ${
                   activeTab === tab
-                    ? "border-pink-500 text-pink-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-base-content/50 hover:text-base-content hover:border-base-300"
                 }`}
               >
                 {tab}
                 <span
                   className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
-                    activeTab === tab ? "bg-pink-100 text-pink-600" : "bg-gray-100 text-gray-500"
+                    activeTab === tab
+                      ? "bg-base-200 text-primary"
+                      : "bg-base-200 text-base-content/50"
                   }`}
                 >
                   {tab === "Orders"
@@ -154,9 +157,9 @@ export default function ProfilePage() {
           {activeTab === "Orders" &&
             (tickets.length === 0 ? (
               <div className="text-center py-20">
-                <div className="w-16 h-16 rounded-full bg-pink-50 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-4">
                   <svg
-                    className="w-7 h-7 text-pink-300"
+                    className="w-7 h-7 text-primary/30"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -169,13 +172,10 @@ export default function ProfilePage() {
                     />
                   </svg>
                 </div>
-                <p className="text-gray-500 mb-4">No ticket orders yet.</p>
-                <Link
-                  to="/events/asc"
-                  className="inline-block px-6 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium hover:from-pink-600 hover:to-purple-700 transition-all shadow-sm shadow-pink-200"
-                >
+                <p className="text-base-content/50 mb-4">No ticket orders yet.</p>
+                <Button variant="primary" size="sm" to="/events/asc">
                   Browse events
-                </Link>
+                </Button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -188,9 +188,9 @@ export default function ProfilePage() {
           {activeTab === "Courses" &&
             (enrollments.length === 0 ? (
               <div className="text-center py-20">
-                <div className="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-4">
                   <svg
-                    className="w-7 h-7 text-purple-300"
+                    className="w-7 h-7 text-base-content/30"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -203,13 +203,10 @@ export default function ProfilePage() {
                     />
                   </svg>
                 </div>
-                <p className="text-gray-500 mb-4">No course enrollments yet.</p>
-                <Link
-                  to="/courses"
-                  className="inline-block px-6 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium hover:from-pink-600 hover:to-purple-700 transition-all shadow-sm shadow-pink-200"
-                >
+                <p className="text-base-content/50 mb-4">No course enrollments yet.</p>
+                <Button variant="primary" size="sm" to="/courses">
                   Browse courses
-                </Link>
+                </Button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -222,9 +219,9 @@ export default function ProfilePage() {
           {activeTab === "Teams" &&
             (teams.length === 0 ? (
               <div className="text-center py-20">
-                <div className="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-4">
                   <svg
-                    className="w-7 h-7 text-purple-300"
+                    className="w-7 h-7 text-base-content/30"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -237,7 +234,7 @@ export default function ProfilePage() {
                     />
                   </svg>
                 </div>
-                <p className="text-gray-500">No team registrations yet.</p>
+                <p className="text-base-content/50">No team registrations yet.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -259,10 +256,10 @@ function TicketRow({ ticket }) {
   return (
     <Link
       to={`/tickets/${ticket.ticketCode}`}
-      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200 overflow-hidden flex group"
+      className="bg-white rounded-2xl border border-base-300 shadow-sm hover:shadow-md hover:border-base-300 transition-all duration-200 overflow-hidden flex group"
     >
       {/* Date block */}
-      <div className="w-16 flex-shrink-0 bg-gradient-to-b from-pink-500 to-purple-600 flex flex-col items-center justify-center text-white py-4">
+      <div className="w-16 flex-shrink-0 bg-gradient-to-b from-primary to-primary/70 flex flex-col items-center justify-center text-white py-4">
         <span className="text-xs font-semibold uppercase opacity-80">
           {event?.date ? new Date(event.date).toLocaleString("en-GB", { month: "short" }) : "—"}
         </span>
@@ -281,9 +278,9 @@ function TicketRow({ ticket }) {
           height="88"
         />
       ) : (
-        <div className="w-28 bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+        <div className="w-28 bg-gradient-to-br from-base-200 to-base-200 flex items-center justify-center flex-shrink-0">
           <svg
-            className="w-8 h-8 text-purple-300"
+            className="w-8 h-8 text-base-content/30"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -300,14 +297,14 @@ function TicketRow({ ticket }) {
 
       {/* Info */}
       <div className="flex-1 px-5 py-4 flex flex-col justify-center min-w-0">
-        <p className="font-semibold text-gray-900 truncate text-base group-hover:text-purple-700 transition-colors">
+        <p className="font-semibold text-base-content truncate text-base group-hover:text-base-content transition-colors">
           {event?.title ?? "Unknown Event"}
         </p>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <p className="text-sm text-base-content/50 mt-0.5">
           {formatDate(event?.date)}
           {event?.city && <span> · {event.city}</span>}
         </p>
-        <p className="text-xs text-gray-400 mt-1 font-mono">
+        <p className="text-xs text-base-content/50 mt-1 font-mono">
           {ticket.ticketCode ?? "—"} · {ticket.quantity || 1} ticket
           {(ticket.quantity || 1) !== 1 ? "s" : ""}
         </p>
@@ -315,7 +312,7 @@ function TicketRow({ ticket }) {
 
       {/* Price + status + arrow */}
       <div className="flex flex-col items-end justify-center px-5 gap-2 flex-shrink-0">
-        <span className="text-sm font-semibold text-gray-800">{formatCurrency(paid)}</span>
+        <span className="text-sm font-semibold text-base-content">{formatCurrency(paid)}</span>
         <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
           ✓ Paid
         </span>
@@ -325,7 +322,7 @@ function TicketRow({ ticket }) {
           </span>
         )}
         <svg
-          className="w-4 h-4 text-gray-300 group-hover:text-purple-400 transition-colors"
+          className="w-4 h-4 text-base-content/40 group-hover:text-base-content/50 transition-colors"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -342,15 +339,15 @@ function TeamRow({ team }) {
   const event = team.event;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-base-300 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
       <div
         onClick={() => team.members?.length > 0 && setExpanded((v) => !v)}
-        className={`flex items-center px-5 py-4 gap-4 transition-colors ${team.members?.length > 0 ? "cursor-pointer hover:bg-purple-50/30" : ""}`}
+        className={`flex items-center px-5 py-4 gap-4 transition-colors ${team.members?.length > 0 ? "cursor-pointer hover:bg-base-200/30" : ""}`}
       >
         {/* Icon */}
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-base-200 to-base-200 flex items-center justify-center flex-shrink-0">
           <svg
-            className="w-6 h-6 text-purple-400"
+            className="w-6 h-6 text-base-content/50"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -366,8 +363,8 @@ function TeamRow({ team }) {
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-900 truncate">{team.name}</p>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="font-semibold text-base-content truncate">{team.name}</p>
+          <p className="text-sm text-base-content/50 mt-0.5">
             {event?.title ?? "Unknown Event"}
             {event?.date && <span> · {formatDate(event.date)}</span>}
           </p>
@@ -385,13 +382,13 @@ function TeamRow({ team }) {
             >
               {team.paid ? "✓ Paid" : "Pending"}
             </span>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-base-content/50">
               {team.members?.length ?? 0} member{team.members?.length !== 1 ? "s" : ""}
             </span>
           </div>
           {team.members?.length > 0 && (
             <svg
-              className={`w-4 h-4 text-purple-400 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+              className={`w-4 h-4 text-base-content/50 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -409,15 +406,15 @@ function TeamRow({ team }) {
 
       {/* Members list */}
       {team.members?.length > 0 && expanded && (
-        <div className="px-5 pb-4 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-gray-50">
+        <div className="px-5 pb-4 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-base-100">
           {team.members.map((m, i) => (
-            <div key={i} className="flex items-center gap-2.5 bg-purple-50/40 rounded-xl px-3 py-2">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+            <div key={i} className="flex items-center gap-2.5 bg-base-200/40 rounded-xl px-3 py-2">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                 {m.name?.[0]?.toUpperCase() ?? "?"}
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-medium text-gray-700 truncate">{m.name}</p>
-                {m.email && <p className="text-[10px] text-gray-400 truncate">{m.email}</p>}
+                <p className="text-xs font-medium text-base-content truncate">{m.name}</p>
+                {m.email && <p className="text-[10px] text-base-content/50 truncate">{m.email}</p>}
               </div>
             </div>
           ))}
@@ -428,10 +425,10 @@ function TeamRow({ team }) {
 }
 
 const CATEGORY_COLORS = {
-  Language: "from-blue-500 to-indigo-600",
+  Language: "from-blue-500 to-primary/70",
   Religious: "from-emerald-500 to-teal-600",
-  Academic: "from-purple-500 to-violet-600",
-  Arts: "from-pink-500 to-rose-600",
+  Academic: "from-primary to-primary/70",
+  Arts: "from-primary to-primary/70",
   Other: "from-amber-500 to-orange-600",
 };
 
@@ -521,7 +518,7 @@ function EnrollmentRow({ enrollment }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-base-300 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
       <div className="flex items-center">
         {course.images?.[0] ? (
           <img
@@ -552,13 +549,15 @@ function EnrollmentRow({ enrollment }) {
           </div>
         )}
         <div className="flex-1 px-5 py-4 flex flex-col justify-center min-w-0">
-          <p className="font-semibold text-gray-900 truncate text-base">{course.title}</p>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="font-semibold text-base-content truncate text-base">{course.title}</p>
+          <p className="text-sm text-base-content/50 mt-0.5">
             {course.instructor && <span>{course.instructor}</span>}
             {course.city && <span> · {course.city}</span>}
           </p>
-          {course.schedule && <p className="text-xs text-gray-400 mt-1">{course.schedule}</p>}
-          <p className="text-xs text-gray-400 mt-1 font-mono">
+          {course.schedule && (
+            <p className="text-xs text-base-content/50 mt-1">{course.schedule}</p>
+          )}
+          <p className="text-xs text-base-content/50 mt-1 font-mono">
             {enrollment._id.slice(-8).toUpperCase()}
             {" · "}
             {participants.length} participant{participants.length !== 1 ? "s" : ""}
@@ -566,11 +565,11 @@ function EnrollmentRow({ enrollment }) {
           </p>
         </div>
         <div className="flex flex-col items-end justify-center px-5 gap-2 flex-shrink-0">
-          <span className="text-sm font-semibold text-gray-800">
+          <span className="text-sm font-semibold text-base-content">
             {course.price > 0 ? formatCurrency(course.price * participants.length) : "Free"}
           </span>
           {course.price > 0 && participants.length > 1 && (
-            <span className="text-[10px] text-gray-400">
+            <span className="text-[10px] text-base-content/50">
               {formatCurrency(course.price)} x {participants.length}
             </span>
           )}
@@ -586,7 +585,7 @@ function EnrollmentRow({ enrollment }) {
                       ? "bg-orange-50 text-orange-600 border-orange-200"
                       : enrollment.status === "past_due"
                         ? "bg-red-50 text-red-600 border-red-200"
-                        : "bg-gray-50 text-gray-500 border-gray-200"
+                        : "bg-base-100 text-base-content/50 border-base-300"
             }`}
           >
             {enrollment.status === "active"
@@ -646,11 +645,11 @@ function EnrollmentRow({ enrollment }) {
       )}
 
       {/* Footer — participants toggle + view course */}
-      <div className="flex items-center justify-between border-t border-gray-50 px-5 py-2.5">
+      <div className="flex items-center justify-between border-t border-base-100 px-5 py-2.5">
         {hasParticipants ? (
           <button
             onClick={() => setExpanded((v) => !v)}
-            className="flex items-center gap-1.5 text-xs font-medium text-purple-500 hover:text-purple-700 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-medium text-base-content/70 hover:text-base-content transition-colors"
           >
             <svg
               className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`}
@@ -670,12 +669,12 @@ function EnrollmentRow({ enrollment }) {
               : `${participants.length} participant${participants.length !== 1 ? "s" : ""}`}
           </button>
         ) : (
-          <span className="text-xs text-gray-400">No participants recorded</span>
+          <span className="text-xs text-base-content/50">No participants recorded</span>
         )}
         <Link
           to={`/courses/${toSlug(course.title, course._id)}`}
           aria-label={`View ${course.title} course`}
-          className="text-xs font-medium text-purple-600 hover:text-purple-800 flex items-center gap-1 transition-colors"
+          className="text-xs font-medium text-base-content/70 hover:text-base-content flex items-center gap-1 transition-colors"
         >
           View Course
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -690,14 +689,14 @@ function EnrollmentRow({ enrollment }) {
           {participants.map((p, i) => (
             <div
               key={i}
-              className="flex items-center gap-2.5 bg-gray-50 rounded-xl px-3 py-2 group/participant"
+              className="flex items-center gap-2.5 bg-base-100 rounded-xl px-3 py-2 group/participant"
             >
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                 {p.name?.[0]?.toUpperCase() ?? "?"}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-gray-700 truncate">{p.name}</p>
-                <div className="flex gap-2 text-[10px] text-gray-400">
+                <p className="text-xs font-medium text-base-content truncate">{p.name}</p>
+                <div className="flex gap-2 text-[10px] text-base-content/50">
                   {p.age && <span>Age {p.age}</span>}
                   {p.email && <span className="truncate">{p.email}</span>}
                 </div>
@@ -735,13 +734,13 @@ function EnrollmentRow({ enrollment }) {
           onClick={() => setConfirm(null)}
         >
           <div
-            className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full mx-4 p-6 animate-[scaleIn_0.15s_ease-out]"
+            className="bg-white rounded-2xl shadow-xl border border-base-300 max-w-sm w-full mx-4 p-6 animate-[scaleIn_0.15s_ease-out]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 mb-3">
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  confirm.variant === "danger" ? "bg-red-50" : "bg-purple-50"
+                  confirm.variant === "danger" ? "bg-red-50" : "bg-base-200"
                 }`}
               >
                 {confirm.variant === "danger" ? (
@@ -760,7 +759,7 @@ function EnrollmentRow({ enrollment }) {
                   </svg>
                 ) : (
                   <svg
-                    className="w-5 h-5 text-purple-500"
+                    className="w-5 h-5 text-base-content/70"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -774,13 +773,13 @@ function EnrollmentRow({ enrollment }) {
                   </svg>
                 )}
               </div>
-              <h3 className="text-base font-semibold text-gray-900">{confirm.title}</h3>
+              <h3 className="text-base font-semibold text-base-content">{confirm.title}</h3>
             </div>
-            <p className="text-sm text-gray-500 mb-6 ml-[52px]">{confirm.message}</p>
+            <p className="text-sm text-base-content/50 mb-6 ml-[52px]">{confirm.message}</p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setConfirm(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2 text-sm font-medium text-base-content/70 bg-base-200 hover:bg-base-300 rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -789,7 +788,7 @@ function EnrollmentRow({ enrollment }) {
                 className={`px-4 py-2 text-sm font-medium text-white rounded-xl transition-colors cursor-pointer ${
                   confirm.variant === "danger"
                     ? "bg-red-500 hover:bg-red-600"
-                    : "bg-purple-500 hover:bg-purple-600"
+                    : "bg-primary hover:bg-primary/80"
                 }`}
               >
                 {confirm.confirmText || "Confirm"}

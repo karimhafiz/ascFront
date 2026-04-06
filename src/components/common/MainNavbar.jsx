@@ -79,6 +79,22 @@ export default function Navbar() {
   }, []);
   const menuClasses = isMenuOpen ? "block" : "hidden";
 
+  const linkClass = (active) =>
+    `relative group flex items-center px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full transition-all duration-300 ${
+      active
+        ? "bg-primary/15 text-primary font-semibold shadow-sm"
+        : "text-base-content/70 hover:bg-base-200 hover:shadow-sm"
+    }`;
+
+  const indicator = (active) => (
+    <>
+      {active && (
+        <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-primary rounded-full"></span>
+      )}
+      <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-primary rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+    </>
+  );
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -90,16 +106,16 @@ export default function Navbar() {
       <div className="flex justify-between items-center px-4 lg:px-4 xl:px-8">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 group shrink-0">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-pink-500/20 group-hover:scale-110 transition-transform duration-300">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
             ASC
           </div>
-          <span className="text-lg lg:text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-700 bg-clip-text text-transparent drop-shadow-sm group-hover:tracking-wider transition-all duration-300  sm:inline">
+          <span className="text-lg lg:text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent drop-shadow-sm group-hover:tracking-wider transition-all duration-300  sm:inline">
             Ayendah Sazan
           </span>
         </Link>{" "}
         {/* Hamburger Menu for Mobile */}{" "}
         <button
-          className="block lg:hidden text-pink-600 focus:outline-none bg-white/60 hover:bg-pink-100/80 rounded-full p-2 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+          className="block lg:hidden text-base-content/70 focus:outline-none bg-white/60 hover:bg-base-200 rounded-full p-2 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
           onClick={(e) => {
             e.stopPropagation(); // Prevent event bubbling
 
@@ -152,15 +168,7 @@ export default function Navbar() {
           className={`${menuClasses} lg:flex lg:items-center space-y-6 lg:space-y-0 lg:space-x-2 xl:space-x-5 absolute lg:static top-full left-0 w-full lg:w-auto bg-white/95 lg:bg-transparent backdrop-blur-xl p-6 lg:p-0 rounded-b-2xl shadow-xl lg:shadow-none border-x border-b border-white/30 lg:border-none transition-all duration-300 animate-fadeIn`}
         >
           <li>
-            <Link
-              to="/"
-              className={`relative group flex items-center px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full  ${
-                isActive("/")
-                  ? "bg-gradient-to-r from-pink-500/30 to-rose-500/30 text-pink-700 font-semibold shadow-sm"
-                  : "text-pink-600 hover:bg-pink-200/60 hover:shadow-sm"
-              } transition-all duration-300`}
-              onClick={closeMenu}
-            >
+            <Link to="/" className={linkClass(isActive("/"))} onClick={closeMenu}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4 xl:h-5 xl:w-5 mr-1.5"
@@ -170,20 +178,13 @@ export default function Navbar() {
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
               </svg>
               Home
-              {isActive("/") && (
-                <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></span>
-              )}
-              <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+              {indicator(isActive("/"))}
             </Link>
           </li>
           <li>
             <Link
               to="/events"
-              className={`relative group flex items-center px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full ${
-                location.pathname.includes("/events")
-                  ? "bg-gradient-to-r from-rose-500/30 to-fuchsia-500/30 text-rose-700 font-semibold shadow-sm"
-                  : "text-rose-600 hover:bg-rose-200/60 hover:shadow-sm"
-              } transition-all duration-300`}
+              className={linkClass(location.pathname.includes("/events"))}
               onClick={closeMenu}
             >
               <svg
@@ -199,18 +200,11 @@ export default function Navbar() {
                 />
               </svg>
               Events
-              {location.pathname.includes("/events") && (
-                <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-rose-500 to-fuchsia-500 rounded-full"></span>
-              )}
-              <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-rose-500 to-fuchsia-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+              {indicator(location.pathname.includes("/events"))}
             </Link>
           </li>
           <li>
-            <Link
-              to="/courses"
-              className={`relative group flex items-center px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full ${isActive("/courses") ? "bg-gradient-to-r from-fuchsia-500/30 to-purple-500/30 text-fuchsia-700 font-semibold shadow-sm" : "text-fuchsia-600 hover:bg-fuchsia-200/60 hover:shadow-sm"} transition-all duration-300`}
-              onClick={closeMenu}
-            >
+            <Link to="/courses" className={linkClass(isActive("/courses"))} onClick={closeMenu}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4 xl:h-5 xl:w-5 mr-1.5 shrink-0"
@@ -220,22 +214,11 @@ export default function Navbar() {
                 <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
               </svg>
               Courses
-              {isActive("/courses") && (
-                <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-fuchsia-500 to-purple-500 rounded-full"></span>
-              )}
-              <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-purple-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+              {indicator(isActive("/courses"))}
             </Link>
           </li>
           <li>
-            <Link
-              to="/about"
-              className={`relative group flex items-center px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full ${
-                isActive("/about")
-                  ? "bg-gradient-to-r from-purple-500/30 to-violet-500/30 text-purple-700 font-semibold shadow-sm"
-                  : "text-purple-600 hover:bg-purple-200/60 hover:shadow-sm"
-              } transition-all duration-300`}
-              onClick={closeMenu}
-            >
+            <Link to="/about" className={linkClass(isActive("/about"))} onClick={closeMenu}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4 xl:h-5 xl:w-5 mr-1.5 shrink-0"
@@ -249,22 +232,11 @@ export default function Navbar() {
                 />
               </svg>
               About
-              {isActive("/about") && (
-                <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full"></span>
-              )}
-              <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+              {indicator(isActive("/about"))}
             </Link>
           </li>
           <li>
-            <Link
-              to="/contact"
-              className={`relative group flex items-center px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full ${
-                isActive("/contact")
-                  ? "bg-gradient-to-r from-violet-500/30 to-indigo-500/30 text-violet-700 font-semibold shadow-sm"
-                  : "text-violet-600 hover:bg-violet-200/60 hover:shadow-sm"
-              } transition-all duration-300`}
-              onClick={closeMenu}
-            >
+            <Link to="/contact" className={linkClass(isActive("/contact"))} onClick={closeMenu}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4 xl:h-5 xl:w-5 mr-1.5"
@@ -275,67 +247,31 @@ export default function Navbar() {
                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
               </svg>
               Contact
-              {isActive("/contact") && (
-                <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full"></span>
-              )}
-              <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+              {indicator(isActive("/contact"))}
             </Link>
           </li>
           {/* authentication links */}
           {!authenticated && (
             <>
               <li>
-                <Link
-                  to="/login"
-                  className={`relative group flex items-center px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full ${
-                    isActive("/login")
-                      ? "bg-gradient-to-r from-pink-500/30 to-purple-500/30 text-pink-700 font-semibold shadow-sm"
-                      : "text-pink-600 hover:bg-pink-200/60 hover:shadow-sm"
-                  } transition-all duration-300`}
-                  onClick={closeMenu}
-                >
+                <Link to="/login" className={linkClass(isActive("/login"))} onClick={closeMenu}>
                   Login
-                  {isActive("/login") && (
-                    <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></span>
-                  )}
-                  <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+                  {indicator(isActive("/login"))}
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/signup"
-                  className={`relative group flex items-center px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full ${
-                    isActive("/signup")
-                      ? "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-purple-700 font-semibold shadow-sm"
-                      : "text-purple-600 hover:bg-purple-200/60 hover:shadow-sm"
-                  } transition-all duration-300`}
-                  onClick={closeMenu}
-                >
+                <Link to="/signup" className={linkClass(isActive("/signup"))} onClick={closeMenu}>
                   Sign Up
-                  {isActive("/signup") && (
-                    <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></span>
-                  )}
-                  <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+                  {indicator(isActive("/signup"))}
                 </Link>
               </li>
             </>
           )}
           {admin && (
             <li>
-              <Link
-                to="/admin"
-                className={`relative group flex items-center px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full ${
-                  isActive("/admin")
-                    ? "bg-gradient-to-r from-indigo-500/30 to-purple-500/30 text-indigo-700 font-semibold shadow-sm"
-                    : "text-indigo-600 hover:bg-indigo-200/60 hover:shadow-sm"
-                } transition-all duration-300`}
-                onClick={closeMenu}
-              >
+              <Link to="/admin" className={linkClass(isActive("/admin"))} onClick={closeMenu}>
                 Dashboard
-                {isActive("/admin") && (
-                  <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></span>
-                )}
-                <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+                {indicator(isActive("/admin"))}
               </Link>
             </li>
           )}
@@ -363,19 +299,17 @@ export default function Navbar() {
                   }
                 }}
                 className={`flex items-center gap-2 px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full cursor-pointer transition-all duration-300 ${
-                  userDropdownOpen
-                    ? "bg-gradient-to-r from-indigo-500/30 to-purple-500/30 shadow-sm"
-                    : "hover:bg-indigo-200/60 hover:shadow-sm"
+                  userDropdownOpen ? "bg-primary/15 shadow-sm" : "hover:bg-base-200 hover:shadow-sm"
                 }`}
               >
-                <div className="w-7 h-7 xl:w-8 xl:h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm shadow-indigo-200">
+                <div className="w-7 h-7 xl:w-8 xl:h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm shadow-primary/20">
                   {userEmail ? userEmail[0].toUpperCase() : "?"}
                 </div>
-                <span className="text-sm font-medium max-w-[180px] truncate text-indigo-700">
+                <span className="text-sm font-medium max-w-[180px] truncate text-base-content">
                   {userEmail}
                 </span>
                 <svg
-                  className={`w-3.5 h-3.5 text-indigo-500 transition-transform duration-200 ${userDropdownOpen ? "rotate-180" : ""}`}
+                  className={`w-3.5 h-3.5 text-base-content/50 transition-transform duration-200 ${userDropdownOpen ? "rotate-180" : ""}`}
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -386,17 +320,17 @@ export default function Navbar() {
               {/* Desktop: absolute dropdown — only rendered when open, hidden below lg */}
               {userDropdownOpen && (
                 <div className="hidden lg:block absolute right-0 mt-1 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 overflow-hidden z-50 animate-fadeIn">
-                  <div className="px-4 py-3 border-b border-indigo-100/60 bg-gradient-to-r from-indigo-50/60 to-purple-50/60">
-                    <p className="text-xs font-medium text-indigo-600 truncate">{userEmail}</p>
+                  <div className="px-4 py-3 border-b border-base-300/60 bg-base-200/60">
+                    <p className="text-xs font-medium text-base-content/70 truncate">{userEmail}</p>
                   </div>
 
                   <Link
                     to="/profile"
                     onClick={closeMenu}
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50/60 hover:to-purple-50/60 hover:text-indigo-700 transition-all duration-200"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-base-content/70 hover:bg-base-200/60 hover:text-primary transition-all duration-200"
                   >
                     <svg
-                      className="w-4 h-4 text-indigo-400"
+                      className="w-4 h-4 text-base-content/50"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -411,7 +345,7 @@ export default function Navbar() {
                     My Profile
                   </Link>
 
-                  <div className="h-px bg-gradient-to-r from-transparent via-indigo-100 to-transparent mx-3" />
+                  <div className="h-px bg-gradient-to-r from-transparent via-base-300 to-transparent mx-3" />
 
                   <button
                     onClick={(e) => {
@@ -435,14 +369,14 @@ export default function Navbar() {
 
               {/* Mobile: inline expanded items — only rendered when mobile menu is open */}
               {userDropdownOpen && isMenuOpen && (
-                <div className="lg:hidden mt-2 space-y-1 bg-indigo-50/40 rounded-xl p-2 animate-fadeIn">
+                <div className="lg:hidden mt-2 space-y-1 bg-base-200/40 rounded-xl p-2 animate-fadeIn">
                   <Link
                     to="/profile"
                     onClick={closeMenu}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-white/60 rounded-lg transition-all duration-200"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-base-content/70 hover:bg-white/60 rounded-lg transition-all duration-200"
                   >
                     <svg
-                      className="w-4 h-4 text-indigo-400"
+                      className="w-4 h-4 text-base-content/50"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

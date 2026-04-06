@@ -59,17 +59,14 @@ export default function Contact() {
   };
 
   return (
-    <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen px-4 py-16">
+    <div className="min-h-screen px-4 py-16">
       <div className="container mx-auto">
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-center text-purple-700 mb-8">
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-center text-base-content mb-8">
           Get in Touch
         </h1>
-        <p className="text-center text-lg text-indigo-700 mb-12">
+        <p className="text-center text-lg text-base-content/70 mb-12">
           Please fill out the form below to send us your query. Alternatively, you can email us at{" "}
-          <a
-            href="mailto:info@ascuk.org.uk"
-            className="text-pink-600 font-semibold hover:underline"
-          >
+          <a href="mailto:info@ascuk.org.uk" className="text-primary font-semibold hover:underline">
             info@ascuk.org.uk
           </a>
         </p>
@@ -152,7 +149,7 @@ export default function Contact() {
             <div className="text-center">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-3 rounded-xl transition-all duration-300 shadow-md cursor-pointer"
+                className="w-full bg-gradient-to-r from-primary to-secondary text-white font-semibold py-3 rounded-xl transition-all duration-300 shadow-md cursor-pointer"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Sending..." : "Send Message"}

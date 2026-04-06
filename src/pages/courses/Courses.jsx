@@ -24,12 +24,14 @@ export default function CoursesPage() {
   const closed = filtered.filter((c) => !c.enrollmentOpen);
 
   return (
-    <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white p-8 md:p-14 shadow-lg">
+      <div className="bg-gradient-to-r from-primary to-secondary text-white p-8 md:p-14 shadow-lg">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-3">Courses</h1>
-          <p className="text-purple-100 text-lg">Learn, grow and connect with the community</p>
+          <p className="text-neutral-content/80 text-lg">
+            Learn, grow and connect with the community
+          </p>
         </div>
       </div>
 
@@ -37,10 +39,10 @@ export default function CoursesPage() {
         {/* Manage bar */}
         {canManage && (
           <div className="flex items-center justify-between mb-6 glass-card px-6 py-4 rounded-2xl border border-white/30 shadow-md">
-            <p className="text-sm text-purple-700 font-medium">Manage Courses</p>
+            <p className="text-sm text-base-content/70 font-medium">Manage Courses</p>
             <Link
               to="/courses/new"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-medium shadow transition-all"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -59,7 +61,7 @@ export default function CoursesPage() {
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <div className="relative flex-1">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/50"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -86,8 +88,8 @@ export default function CoursesPage() {
                 onClick={() => setActiveCategory(cat)}
                 className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                   activeCategory === cat
-                    ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md"
-                    : "bg-white/60 text-purple-700 hover:bg-white/80 border border-white/40"
+                    ? "bg-gradient-to-r from-primary to-secondary text-white shadow-md"
+                    : "bg-white/60 text-base-content hover:bg-white/80 border border-base-300"
                 }`}
               >
                 {cat}
@@ -99,7 +101,7 @@ export default function CoursesPage() {
         {/* Open enrollment */}
         {open.length > 0 && (
           <>
-            <h2 className="text-2xl font-bold text-purple-800 mb-5">Open for Enrollment</h2>
+            <h2 className="text-2xl font-bold text-base-content mb-5">Open for Enrollment</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {open.map((course) => (
                 <CourseCard key={course._id} course={course} />
@@ -111,7 +113,7 @@ export default function CoursesPage() {
         {/* Closed enrollment */}
         {closed.length > 0 && (
           <>
-            <h2 className="text-2xl font-bold text-indigo-700 mb-5">Coming Soon / Closed</h2>
+            <h2 className="text-2xl font-bold text-base-content mb-5">Coming Soon / Closed</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {closed.map((course) => (
                 <CourseCard key={course._id} course={course} />
@@ -122,7 +124,7 @@ export default function CoursesPage() {
 
         {filtered.length === 0 && (
           <div className="glass-card p-12 text-center rounded-2xl border border-white/30">
-            <p className="text-purple-500 text-lg">No courses found.</p>
+            <p className="text-base-content/70 text-lg">No courses found.</p>
           </div>
         )}
       </div>

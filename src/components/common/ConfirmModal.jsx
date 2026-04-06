@@ -1,7 +1,8 @@
 import React from "react";
+import { Button } from "../ui";
 
 /**
- * Themed confirmation modal matching the site's pink/purple glass style.
+ * Themed confirmation modal.
  *
  * Props:
  *   isOpen    {boolean}  — whether the modal is visible
@@ -32,9 +33,9 @@ export default function ConfirmModal({
       >
         {/* Icon */}
         <div className="flex justify-center mb-4">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center shadow-inner">
+          <div className="w-12 h-12 rounded-full bg-base-200 flex items-center justify-center shadow-inner">
             <svg
-              className="w-6 h-6 text-purple-600"
+              className="w-6 h-6 text-primary"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -50,25 +51,19 @@ export default function ConfirmModal({
         </div>
 
         {/* Text */}
-        <h3 className="text-lg font-bold text-purple-700 text-center mb-2">{title}</h3>
+        <h3 className="text-lg font-bold text-base-content text-center mb-2">{title}</h3>
         {message && (
-          <p className="text-sm text-gray-600 text-center leading-relaxed mb-6">{message}</p>
+          <p className="text-sm text-base-content/70 text-center leading-relaxed mb-6">{message}</p>
         )}
 
         {/* Actions */}
         <div className="flex gap-3">
-          <button
-            onClick={onCancel}
-            className="flex-1 px-4 py-2 rounded-full bg-white border border-purple-200 text-purple-600 text-sm font-medium shadow hover:bg-purple-50 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer"
-          >
+          <Button variant="secondary" className="flex-1 rounded-full" onClick={onCancel}>
             Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-md hover:shadow-lg hover:brightness-110 transition-all cursor-pointer"
-          >
+          </Button>
+          <Button variant="primary" className="flex-1 rounded-full" onClick={onConfirm}>
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

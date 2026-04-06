@@ -5,20 +5,20 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-gradient-to-br from-slate-900 via-purple-950 to-indigo-950 text-white mt-10">
+    <footer className="bg-neutral text-neutral-content mt-10">
       {/* Main footer grid */}
       <div className="container mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
         {/* Brand */}
         <div className="lg:col-span-1">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-pink-500/30">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-primary/30">
               ASC
             </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-pink-400 to-purple-300 bg-clip-text text-transparent">
+            <span className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Ayendah Sazan
             </span>
           </div>
-          <p className="text-sm text-slate-400 leading-relaxed">
+          <p className="text-sm text-neutral-content/60 leading-relaxed">
             A community-based organisation in Leeds dedicated to bringing people together through
             cultural, educational, and sporting events.
           </p>
@@ -29,7 +29,7 @@ export default function Footer() {
           <h3 className="text-sm font-semibold text-white uppercase tracking-widest mb-4">
             Quick Links
           </h3>
-          <ul className="space-y-2 text-sm text-slate-400">
+          <ul className="space-y-2 text-sm text-neutral-content/60">
             {[
               { to: "/", label: "Home" },
               { to: "/about", label: "About Us" },
@@ -38,9 +38,9 @@ export default function Footer() {
               <li key={to}>
                 <Link
                   to={to}
-                  className="hover:text-pink-400 transition-colors duration-200 flex items-center gap-1.5 group"
+                  className="hover:text-primary transition-colors duration-200 flex items-center gap-1.5 group"
                 >
-                  <span className="w-1 h-1 rounded-full bg-purple-500 group-hover:bg-pink-400 transition-colors" />
+                  <span className="w-1 h-1 rounded-full bg-primary group-hover:bg-primary/80 transition-colors" />
                   {label}
                 </Link>
               </li>
@@ -53,7 +53,7 @@ export default function Footer() {
           <h3 className="text-sm font-semibold text-white uppercase tracking-widest mb-4">
             Programmes
           </h3>
-          <ul className="space-y-2 text-sm text-slate-400">
+          <ul className="space-y-2 text-sm text-neutral-content/60">
             {[
               { to: "/events", label: "Events" },
               { to: "/courses", label: "Courses" },
@@ -61,9 +61,9 @@ export default function Footer() {
               <li key={to}>
                 <Link
                   to={to}
-                  className="hover:text-pink-400 transition-colors duration-200 flex items-center gap-1.5 group"
+                  className="hover:text-primary transition-colors duration-200 flex items-center gap-1.5 group"
                 >
-                  <span className="w-1 h-1 rounded-full bg-purple-500 group-hover:bg-pink-400 transition-colors" />
+                  <span className="w-1 h-1 rounded-full bg-primary group-hover:bg-primary/80 transition-colors" />
                   {label}
                 </Link>
               </li>
@@ -76,10 +76,10 @@ export default function Footer() {
           <h3 className="text-sm font-semibold text-white uppercase tracking-widest mb-4">
             Get in Touch
           </h3>
-          <ul className="space-y-3 text-sm text-slate-400">
+          <ul className="space-y-3 text-sm text-neutral-content/60">
             <li className="flex items-start gap-2">
               <svg
-                className="w-4 h-4 mt-0.5 text-pink-400 flex-shrink-0"
+                className="w-4 h-4 mt-0.5 text-primary flex-shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -102,7 +102,7 @@ export default function Footer() {
             <li>
               <Link
                 to="/contact"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500/20 to-purple-500/20 hover:from-pink-500/40 hover:to-purple-500/40 border border-pink-500/30 text-pink-300 text-xs font-medium transition-all duration-200"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/20 hover:bg-primary/40 border border-primary/30 text-primary text-xs font-medium transition-all duration-200"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
@@ -123,13 +123,13 @@ export default function Footer() {
       <div className="border-t border-white/10" />
 
       {/* Bottom bar */}
-      <div className="container mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+      <div className="container mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-neutral-content/40">
         <p>&copy; {year} Ayendah Sazan Community Organisation. All rights reserved.</p>
         <div className="flex items-center gap-4">
-          <Link to="/about" className="hover:text-slate-300 transition-colors">
+          <Link to="/about" className="hover:text-neutral-content/80 transition-colors">
             About
           </Link>
-          <Link to="/contact" className="hover:text-slate-300 transition-colors">
+          <Link to="/contact" className="hover:text-neutral-content/80 transition-colors">
             Contact
           </Link>
         </div>

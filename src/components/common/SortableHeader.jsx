@@ -16,7 +16,7 @@ export default function SortableHeader({ label, sortKey, sort, onSort }) {
   return (
     <th
       onClick={handleClick}
-      className="px-4 py-3 font-semibold text-purple-700 cursor-pointer select-none hover:text-purple-900 transition-colors"
+      className="px-4 py-3 font-semibold text-base-content cursor-pointer select-none hover:text-base-content/70 transition-colors"
     >
       <span className="inline-flex items-center gap-1">
         {label}
@@ -32,7 +32,7 @@ export default function SortableHeader({ label, sortKey, sort, onSort }) {
         )}
         {!isActive && (
           <svg
-            className="w-3 h-3 text-purple-300"
+            className="w-3 h-3 text-base-content/50"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

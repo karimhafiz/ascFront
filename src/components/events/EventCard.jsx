@@ -3,10 +3,11 @@ import { Link, useNavigate, useRouteLoaderData } from "react-router-dom";
 import { isAdmin, isModerator } from "../../auth/auth";
 import { formatDateRange, optimizeCloudinaryUrl, toSlug } from "../../util/util";
 import ConfirmModal from "../common/ConfirmModal";
+import { Badge, GlassCard } from "../ui";
 
 const TYPE_COLORS = {
-  ASC: { bg: "from-pink-500 to-purple-600", badge: "bg-pink-100 text-pink-700" },
-  Sports: { bg: "from-emerald-500 to-teal-600", badge: "bg-emerald-100 text-emerald-700" },
+  ASC: { bg: "from-primary to-primary/70", badge: "primary" },
+  Sports: { bg: "from-accent to-success", badge: "accent" },
 };
 
 export default function EventCard({ event }) {
@@ -53,7 +54,7 @@ export default function EventCard({ event }) {
       />
 
       <div className="group">
-        <div className="glass-card rounded-2xl shadow-lg border border-white/30 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+        <GlassCard className="overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
           <Link to={`/events/${slug}`} className="block">
             {/* Image */}
             {event.images && event.images.length > 0 ? (
@@ -87,28 +88,22 @@ export default function EventCard({ event }) {
             <div className="p-5 flex-1 flex flex-col">
               {/* Type badge + recurring badge */}
               <div className="flex items-center justify-between mb-2">
-                <span
-                  className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${colors.badge}`}
-                >
-                  {event.typeOfEvent}
-                </span>
-                {event.isReoccurring && (
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-100 text-purple-600 border border-purple-200">
-                    ↻ Recurring
-                  </span>
-                )}
+                <Badge color={colors.badge}>{event.typeOfEvent}</Badge>
+                {event.isReoccurring && <Badge color="secondary">↻ Recurring</Badge>}
               </div>
 
               {/* Title */}
-              <h3 className="text-lg font-bold text-purple-900 mb-1 group-hover:text-pink-600 transition-colors line-clamp-2">
+              <h3 className="text-lg font-bold text-base-content mb-1 group-hover:text-primary transition-colors line-clamp-2">
                 {event.title}
               </h3>
 
               {/* Short description */}
-              <p className="text-sm text-purple-600 mb-3 line-clamp-2">{event.shortDescription}</p>
+              <p className="text-sm text-base-content/70 mb-3 line-clamp-2">
+                {event.shortDescription}
+              </p>
 
               {/* Info rows */}
-              <div className="space-y-1.5 text-xs text-purple-600">
+              <div className="space-y-1.5 text-xs text-base-content/70">
                 <div className="flex items-center gap-1.5">
                   <svg
                     className="w-3.5 h-3.5 flex-shrink-0"
@@ -200,23 +195,16 @@ export default function EventCard({ event }) {
               {event.categories && event.categories.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-3">
                   {event.categories.map((category, index) => (
-                    <span
-                      key={index}
-                      className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700"
-                    >
+                    <Badge key={index} color="info">
                       {category}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               )}
 
               {/* Featured badge — spacer always present to push buttons down */}
               <div className="mt-auto pt-4 min-h-[2rem]">
-                {event.featured && (
-                  <span className="inline-flex items-center text-xs px-2.5 py-1 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium">
-                    ★ Featured
-                  </span>
-                )}
+                {event.featured && <Badge color="info">★ Featured</Badge>}
               </div>
             </div>
           </Link>
@@ -230,10 +218,10 @@ export default function EventCard({ event }) {
 
           {/* Admin/mod action bar */}
           {canManage && (
-            <div className="flex gap-2 p-3 bg-gray-50/80 border-t border-gray-100 mt-auto">
+            <div className="flex gap-2 p-3 bg-base-100/50 border-t border-base-300 mt-auto">
               <button
                 onClick={handleEditEvent}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs font-semibold transition-all cursor-pointer"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-base-200 hover:bg-base-300 text-base-content text-xs font-semibold transition-all cursor-pointer"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
@@ -261,7 +249,7 @@ export default function EventCard({ event }) {
               </button>
             </div>
           )}
-        </div>
+        </GlassCard>
       </div>
     </>
   );

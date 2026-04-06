@@ -273,7 +273,7 @@ export default function About() {
           {!editing ? (
             <button
               onClick={handleEdit}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 transition-all cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-medium shadow-primary/20 transition-all cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -289,7 +289,7 @@ export default function About() {
             <>
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 rounded-full bg-white border border-purple-200 text-purple-600 text-sm font-medium shadow hover:bg-purple-50 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer"
+                className="px-4 py-2 rounded-full bg-white border border-base-300 text-primary text-sm font-medium shadow hover:bg-base-200 hover:border-base-300 hover:shadow-md transition-all cursor-pointer"
               >
                 Cancel
               </button>
@@ -303,7 +303,7 @@ export default function About() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium shadow-lg shadow-pink-200 transition-all disabled:opacity-60 cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-medium shadow-primary/20 transition-all disabled:opacity-60 cursor-pointer"
               >
                 {saving ? "Saving…" : "Save Changes"}
               </button>
@@ -351,12 +351,12 @@ export default function About() {
 
       {/* ── Hero ── */}
       <div
-        className={`text-center mb-12 ${editing ? "bg-white/40 rounded-2xl p-6 ring-2 ring-purple-200" : ""}`}
+        className={`text-center mb-12 ${editing ? "bg-white/40 rounded-2xl p-6 ring-2 ring-primary/20" : ""}`}
       >
         {editing ? (
           <>
             <input
-              className="glass-input text-center text-3xl font-bold text-purple-700 mb-3"
+              className="glass-input text-center text-3xl font-bold text-primary mb-3"
               value={draft.aboutHeroTitle}
               onChange={(e) => setDraft({ ...draft, aboutHeroTitle: e.target.value })}
             />
@@ -376,10 +376,10 @@ export default function About() {
           </>
         ) : (
           <>
-            <h1 className="text-3xl sm:text-4xl font-bold text-primary mb-4">
+            <h1 className="text-3xl sm:text-4xl font-bold text-base-content mb-4">
               {pageContent.aboutHeroTitle}
             </h1>
-            <p className="text-lg text-gray-700">{pageContent.aboutHeroDescription}</p>
+            <p className="text-lg text-base-content/80">{pageContent.aboutHeroDescription}</p>
           </>
         )}
       </div>
@@ -387,7 +387,7 @@ export default function About() {
       {/* ── What We Do ── */}
       <div className="mb-12">
         <div className="flex items-center justify-center gap-3 mb-6">
-          <h2 className="text-3xl font-bold text-secondary">What We Do</h2>
+          <h2 className="text-3xl font-bold text-base-content">What We Do</h2>
           {editing && (
             <button
               onClick={() => resetSection("cards")}
@@ -404,7 +404,7 @@ export default function About() {
             return (
               <div
                 key={i}
-                className={`glass-card overflow-hidden transition-all ${editing ? "ring-2 ring-purple-200" : ""}`}
+                className={`glass-card overflow-hidden transition-all ${editing ? "ring-2 ring-primary/20" : ""}`}
               >
                 <div className="relative w-full h-48 sm:h-64">
                   <img
@@ -416,7 +416,7 @@ export default function About() {
                     <>
                       <button
                         onClick={() => cardImageRefs.current[i]?.click()}
-                        className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 rounded-full text-xs font-medium text-purple-700 shadow hover:bg-white transition-all cursor-pointer"
+                        className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 rounded-full text-xs font-medium text-primary shadow hover:bg-white transition-all cursor-pointer"
                       >
                         <svg
                           className="w-3.5 h-3.5"
@@ -447,7 +447,7 @@ export default function About() {
                   {editing ? (
                     <>
                       <input
-                        className="glass-input text-center font-semibold text-purple-700 py-1.5"
+                        className="glass-input text-center font-semibold text-primary py-1.5"
                         value={card.title}
                         onChange={(e) => updateCard(i, "title", e.target.value)}
                       />
@@ -460,8 +460,8 @@ export default function About() {
                     </>
                   ) : (
                     <>
-                      <h3 className="text-xl font-semibold text-primary mb-2">{card.title}</h3>
-                      <p className="text-gray-600">{card.description}</p>
+                      <h3 className="text-xl font-semibold text-base-content mb-2">{card.title}</h3>
+                      <p className="text-base-content/70">{card.description}</p>
                     </>
                   )}
                 </div>
@@ -473,12 +473,12 @@ export default function About() {
 
       {/* ── Mission ── */}
       <div
-        className={`mb-12 text-center glass-card max-w-3xl mx-auto p-8 transition-all ${editing ? "ring-2 ring-purple-200" : ""}`}
+        className={`mb-12 text-center glass-card max-w-3xl mx-auto p-8 transition-all ${editing ? "ring-2 ring-primary/20" : ""}`}
       >
         {editing ? (
           <>
             <input
-              className="glass-input text-center text-2xl font-bold text-purple-700 mb-4"
+              className="glass-input text-center text-2xl font-bold text-primary mb-4"
               value={draft.missionTitle}
               onChange={(e) => setDraft({ ...draft, missionTitle: e.target.value })}
             />
@@ -498,20 +498,24 @@ export default function About() {
           </>
         ) : (
           <>
-            <h2 className="text-3xl font-bold text-secondary mb-6">{pageContent.missionTitle}</h2>
-            <p className="text-lg text-gray-700 mx-auto max-w-3xl">{pageContent.missionText}</p>
+            <h2 className="text-3xl font-bold text-base-content mb-6">
+              {pageContent.missionTitle}
+            </h2>
+            <p className="text-lg text-base-content/80 mx-auto max-w-3xl">
+              {pageContent.missionText}
+            </p>
           </>
         )}
       </div>
 
       {/* ── Get Involved ── */}
       <div
-        className={`text-center glass-card max-w-2xl mx-auto p-8 transition-all ${editing ? "ring-2 ring-purple-200" : ""}`}
+        className={`text-center glass-card max-w-2xl mx-auto p-8 transition-all ${editing ? "ring-2 ring-primary/20" : ""}`}
       >
         {editing ? (
           <>
             <input
-              className="glass-input text-center text-2xl font-bold text-purple-700 mb-4"
+              className="glass-input text-center text-2xl font-bold text-primary mb-4"
               value={draft.getInvolvedTitle}
               onChange={(e) => setDraft({ ...draft, getInvolvedTitle: e.target.value })}
             />
@@ -531,15 +535,15 @@ export default function About() {
           </>
         ) : (
           <>
-            <h2 className="text-3xl font-bold text-secondary mb-6">
+            <h2 className="text-3xl font-bold text-base-content mb-6">
               {pageContent.getInvolvedTitle}
             </h2>
-            <p className="text-lg text-gray-700 mb-6">{pageContent.getInvolvedText}</p>
+            <p className="text-lg text-base-content/80 mb-6">{pageContent.getInvolvedText}</p>
           </>
         )}
         <Link
           to="/contact"
-          className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-full font-semibold shadow-lg shadow-pink-200 transition-all"
+          className="inline-block bg-gradient-to-r from-primary to-secondary text-white px-6 py-3 rounded-full font-semibold shadow-primary/20 transition-all"
         >
           Contact Us
         </Link>

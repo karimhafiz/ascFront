@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { isAuthenticated, getAuthToken } from "../../auth/auth";
 import TicketCard from "../../components/tickets/TicketCard";
+import { PageContainer, GlassCard, Spinner } from "../../components/ui";
 
 export default function TicketPage() {
   const { ticketCode } = useParams();
@@ -30,32 +31,32 @@ export default function TicketPage() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-purple-50">
+      <PageContainer center>
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-4 border-pink-200 border-t-purple-500 animate-spin" />
-          <p className="text-sm text-gray-400">Loading ticket…</p>
+          <Spinner />
+          <p className="text-sm text-base-content/50">Loading ticket…</p>
         </div>
-      </div>
+      </PageContainer>
     );
 
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-purple-50">
-        <div className="bg-white rounded-2xl p-8 shadow-sm border border-red-100 text-center max-w-sm">
+      <PageContainer center>
+        <GlassCard className="p-8 text-center max-w-sm border border-red-100">
           <p className="text-red-500 font-medium mb-4">{error}</p>
-          <Link to="/profile" className="text-sm text-purple-600 hover:underline">
+          <Link to="/profile" className="text-sm text-base-content/70 hover:underline">
             Back to profile
           </Link>
-        </div>
-      </div>
+        </GlassCard>
+      </PageContainer>
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 py-10 px-4">
-      <div className="max-w-lg mx-auto">
+    <PageContainer>
+      <div className="max-w-lg mx-auto py-10 px-4">
         <Link
           to="/profile"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-purple-600 mb-6 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-base-content/50 hover:text-base-content/70 mb-6 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -69,6 +70,6 @@ export default function TicketPage() {
         </Link>
         <TicketCard ticket={ticket} />
       </div>
-    </div>
+    </PageContainer>
   );
 }
