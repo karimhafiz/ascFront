@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAuthToken, isAuthenticated, parseJwt, isAdmin, isModerator } from "../../auth/auth";
-import { slugToId } from "../../util/util";
+import { slugToId, validatePhone } from "../../util/util";
 import { PageContainer, Button, GlassCard } from "../../components/ui";
 
 const INTERVAL_LABELS = { month: "month", year: "year" };
@@ -42,6 +42,7 @@ export default function CourseDetails() {
     if (!token) return "";
     return parseJwt(token)?.email || "";
   });
+  const [phone, setPhone] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [enrollError, setEnrollError] = useState("");
   const [multiMode, setMultiMode] = useState(false);
@@ -51,6 +52,11 @@ export default function CourseDetails() {
   const [newParticipant, setNewParticipant] = useState({ name: "", age: "", email: "" });
   const [addingParticipant, setAddingParticipant] = useState(false);
   const [addParticipantError, setAddParticipantError] = useState("");
+
+  // Cancel / reactivate state
+  const [cancellingSubscription, setCancellingSubscription] = useState(false);
+  const [reactivatingSubscription, setReactivatingSubscription] = useState(false);
+  const [subscriptionError, setSubscriptionError] = useState("");
 
   const addParticipant = () => setParticipants((p) => [...p, { name: "", age: "", email: "" }]);
   const removeParticipant = (i) => setParticipants((p) => p.filter((_, idx) => idx !== i));
@@ -119,10 +125,59 @@ export default function CourseDetails() {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    setSubscriptionError("");
+    setCancellingSubscription(true);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${myEnrollment._id}/cancel`,
+        { method: "POST", headers: { Authorization: `Bearer ${getAuthToken()}` } }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to cancel subscription");
+      queryClient.invalidateQueries({ queryKey: ["my-enrollment", courseId] });
+    } catch (err) {
+      setSubscriptionError(err.message);
+    } finally {
+      setCancellingSubscription(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    setSubscriptionError("");
+    setReactivatingSubscription(true);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${myEnrollment._id}/reactivate`,
+        { method: "POST", headers: { Authorization: `Bearer ${getAuthToken()}` } }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to reactivate subscription");
+      if (data.url) {
+        // Stripe subscription was gone — redirect to new checkout
+        window.location.href = data.url;
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: ["my-enrollment", courseId] });
+    } catch (err) {
+      setSubscriptionError(err.message);
+    } finally {
+      setReactivatingSubscription(false);
+    }
+  };
+
   const handleEnroll = async () => {
     setEnrollError("");
     if (!email) {
       setEnrollError("Please enter your email.");
+      return;
+    }
+    if (!phone.trim()) {
+      setEnrollError("Please enter your phone number.");
+      return;
+    }
+    if (!validatePhone(phone)) {
+      setEnrollError("Please enter a valid UK phone number (e.g. 07123456789 or +447123456789).");
       return;
     }
     try {
@@ -139,7 +194,7 @@ export default function CourseDetails() {
       const res = await fetch(`${import.meta.env.VITE_DEV_URI}courses/${courseId}/enroll`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${getAuthToken()}` },
-        body: JSON.stringify({ email, participants: enrollParticipants }),
+        body: JSON.stringify({ email, phone: phone.trim(), participants: enrollParticipants }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Enrollment failed");
@@ -185,7 +240,7 @@ export default function CourseDetails() {
       <div className="container mx-auto p-6">
         {canManage && (
           <div className="flex gap-3 mb-6">
-            <Button variant="ghost" size="sm" to={`/courses/${courseSlug}/edit`}>
+            <Button variant="primary" to={`/courses/${courseSlug}/edit`}>
               Edit Course
             </Button>
           </div>
@@ -370,28 +425,56 @@ export default function CourseDetails() {
                     </div>
 
                     <span
-                      className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${STATUS_STYLES[myEnrollment.status] || "bg-base-200 text-base-content"}`}
+                      className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${
+                        myEnrollment.subscriptionStatus === "cancelled"
+                          ? "bg-orange-100 text-orange-700"
+                          : STATUS_STYLES[myEnrollment.status] || "bg-base-200 text-base-content"
+                      }`}
                     >
-                      {STATUS_LABELS[myEnrollment.status] || myEnrollment.status}
+                      {myEnrollment.subscriptionStatus === "cancelled"
+                        ? "Cancelled"
+                        : STATUS_LABELS[myEnrollment.status] || myEnrollment.status}
                     </span>
 
-                    {myEnrollment.subscriptionId && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
-                        <p className="font-semibold mb-1">
-                          {INTERVAL_ADJ[course.billingInterval] || "Monthly"} Subscription
-                        </p>
-                        <p>
-                          £{course.price} / {INTERVAL_LABELS[course.billingInterval] || "month"}
-                        </p>
-                        {myEnrollment.currentPeriodEnd && (
-                          <p className="mt-1 text-blue-600">
-                            {myEnrollment.subscriptionStatus === "cancelled"
-                              ? `Access until ${new Date(myEnrollment.currentPeriodEnd).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
-                              : `Renews ${new Date(myEnrollment.currentPeriodEnd).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
+                    {myEnrollment.subscriptionId &&
+                      myEnrollment.subscriptionStatus === "cancelled" && (
+                        <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 text-xs text-orange-700">
+                          <p className="font-semibold mb-1">You have cancelled your subscription</p>
+                          <p>You'll retain access until the end of your current billing period.</p>
+                          {myEnrollment.currentPeriodEnd && (
+                            <p className="mt-1 font-medium text-orange-600">
+                              Access until{" "}
+                              {new Date(myEnrollment.currentPeriodEnd).toLocaleDateString("en-GB", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                    {myEnrollment.subscriptionId &&
+                      myEnrollment.subscriptionStatus !== "cancelled" && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
+                          <p className="font-semibold mb-1">
+                            {INTERVAL_ADJ[course.billingInterval] || "Monthly"} Subscription
                           </p>
-                        )}
-                      </div>
-                    )}
+                          <p>
+                            £{course.price} / {INTERVAL_LABELS[course.billingInterval] || "month"}
+                          </p>
+                          {myEnrollment.currentPeriodEnd && (
+                            <p className="mt-1 text-blue-600">
+                              Renews{" "}
+                              {new Date(myEnrollment.currentPeriodEnd).toLocaleDateString("en-GB", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </p>
+                          )}
+                        </div>
+                      )}
 
                     {/* Current participants */}
                     <div>
@@ -417,48 +500,79 @@ export default function CourseDetails() {
                     </div>
 
                     {/* Add participant form */}
-                    {myEnrollment.status !== "cancelled" && (
-                      <div className="border-t border-base-300/50 pt-4">
-                        <p className="text-sm font-semibold text-base-content mb-2">
-                          Add Participant
-                        </p>
-                        <div className="space-y-2">
-                          <input
-                            type="text"
-                            placeholder="Name *"
-                            value={newParticipant.name}
-                            onChange={(e) =>
-                              setNewParticipant((p) => ({ ...p, name: e.target.value }))
-                            }
-                            className="glass-input text-sm py-1.5"
-                          />
-                          <input
-                            type="number"
-                            placeholder="Age"
-                            min="1"
-                            value={newParticipant.age}
-                            onChange={(e) =>
-                              setNewParticipant((p) => ({ ...p, age: e.target.value }))
-                            }
-                            className="glass-input text-sm py-1.5"
-                          />
-                          {addParticipantError && (
-                            <p className="text-red-500 text-xs">{addParticipantError}</p>
-                          )}
+                    {myEnrollment.status !== "cancelled" &&
+                      myEnrollment.subscriptionStatus !== "cancelled" && (
+                        <div className="border-t border-base-300/50 pt-4">
+                          <p className="text-sm font-semibold text-base-content mb-2">
+                            Add Participant
+                          </p>
+                          <div className="space-y-2">
+                            <input
+                              type="text"
+                              placeholder="Name *"
+                              value={newParticipant.name}
+                              onChange={(e) =>
+                                setNewParticipant((p) => ({ ...p, name: e.target.value }))
+                              }
+                              className="glass-input text-sm py-1.5"
+                            />
+                            <input
+                              type="number"
+                              placeholder="Age"
+                              min="1"
+                              value={newParticipant.age}
+                              onChange={(e) =>
+                                setNewParticipant((p) => ({ ...p, age: e.target.value }))
+                              }
+                              className="glass-input text-sm py-1.5"
+                            />
+                            {addParticipantError && (
+                              <p className="text-red-500 text-xs">{addParticipantError}</p>
+                            )}
+                            <Button
+                              variant="primary"
+                              onClick={handleAddParticipant}
+                              disabled={addingParticipant}
+                              className="w-full text-sm"
+                            >
+                              {addingParticipant ? "Adding..." : "+ Add Participant"}
+                            </Button>
+                            {course.isSubscription && (
+                              <p className="text-xs text-base-content/50 text-center">
+                                Adding a participant will increase your subscription billing.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                    {/* Cancel / Reactivate subscription */}
+                    {myEnrollment.subscriptionId && (
+                      <div className="border-t border-base-300/50 pt-4 space-y-2">
+                        {myEnrollment.subscriptionStatus === "cancelled" ? (
                           <Button
                             variant="primary"
-                            onClick={handleAddParticipant}
-                            disabled={addingParticipant}
+                            onClick={handleReactivateSubscription}
+                            disabled={reactivatingSubscription}
                             className="w-full text-sm"
                           >
-                            {addingParticipant ? "Adding..." : "+ Add Participant"}
+                            {reactivatingSubscription
+                              ? "Reactivating..."
+                              : "Reactivate Subscription"}
                           </Button>
-                          {course.isSubscription && (
-                            <p className="text-xs text-base-content/50 text-center">
-                              Adding a participant will increase your subscription billing.
-                            </p>
-                          )}
-                        </div>
+                        ) : (
+                          <Button
+                            variant="danger"
+                            onClick={handleCancelSubscription}
+                            disabled={cancellingSubscription}
+                            className="w-full text-sm"
+                          >
+                            {cancellingSubscription ? "Cancelling..." : "Cancel Subscription"}
+                          </Button>
+                        )}
+                        {subscriptionError && (
+                          <p className="text-red-500 text-xs text-center">{subscriptionError}</p>
+                        )}
                       </div>
                     )}
 
@@ -507,6 +621,19 @@ export default function CourseDetails() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Enter your email"
+                            className="glass-input"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-base-content mb-1.5">
+                            Phone Number
+                          </label>
+                          <input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder="Enter your phone number"
                             className="glass-input"
                           />
                         </div>

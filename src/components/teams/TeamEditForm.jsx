@@ -1,54 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { getAuthToken } from "../../auth/auth";
+import React, { useState } from "react";
+import { fetchWithAuth } from "../../auth/auth";
 import { validatePhone } from "../../util/util";
 import { Button, Spinner } from "../ui";
 
-export default function TeamSignupForm({ eventId, managerId, onClose }) {
-  const [name, setName] = useState("");
-  const [members, setMembers] = useState([{ name: "", email: "" }]);
+export default function TeamEditForm({ team, onClose, onSaved }) {
+  const [name, setName] = useState(team.name);
+  const [managerName, setManagerName] = useState(team.manager?.name || "");
+  const [managerPhone, setManagerPhone] = useState(team.manager?.phone || "");
+  const [members, setMembers] = useState(
+    team.members.map((m) => ({ name: m.name, email: m.email || "" }))
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [managerName, setManagerName] = useState("");
-  const [managerEmail, setManagerEmail] = useState(managerId || "");
-  const [managerPhone, setManagerPhone] = useState("");
-  const [unpaidTeams, setUnpaidTeams] = useState([]);
-  const [loadingUnpaid, setLoadingUnpaid] = useState(false);
-
-  // Fetch unpaid teams for this manager + event when email is available
-  useEffect(() => {
-    if (!managerEmail || !eventId) return;
-    setLoadingUnpaid(true);
-    fetch(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/unpaid`, {
-      headers: { Authorization: `Bearer ${getAuthToken()}` },
-    })
-      .then((r) => r.json())
-      .then((data) => setUnpaidTeams(data.teams || []))
-      .catch(() => {})
-      .finally(() => setLoadingUnpaid(false));
-  }, [managerEmail, eventId]);
-
-  const handleResumeTeam = async (team) => {
-    setLoading(true);
-    setError("");
-    try {
-      const paymentRes = await fetch(`${import.meta.env.VITE_DEV_URI}teams/${team._id}/pay`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${getAuthToken()}` },
-      });
-      const paymentData = await paymentRes.json();
-      if (!paymentRes.ok || !paymentData.url)
-        throw new Error(paymentData.error || "Payment initialization failed");
-      window.location.href = paymentData.url;
-    } catch (err) {
-      setError(err.message || "Failed to resume payment");
-      setLoading(false);
-    }
-  };
 
   const handleMemberChange = (idx, field, value) => {
     setMembers((prev) => {
       const updated = [...prev];
-      updated[idx][field] = value;
+      updated[idx] = { ...updated[idx], [field]: value };
       return updated;
     });
   };
@@ -65,29 +33,20 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${getAuthToken()}` },
+      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}teams/${team._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
           members,
-          manager: { name: managerName, email: managerEmail, phone: managerPhone.trim() },
+          manager: { name: managerName, email: team.manager.email, phone: managerPhone.trim() },
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to register team");
-
-      const paymentRes = await fetch(`${import.meta.env.VITE_DEV_URI}teams/${data.team._id}/pay`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${getAuthToken()}` },
-      });
-      const paymentData = await paymentRes.json();
-      if (!paymentRes.ok || !paymentData.url)
-        throw new Error(paymentData.error || "Payment initialization failed");
-
-      window.location.href = paymentData.url;
+      if (!res.ok) throw new Error(data.error || "Failed to update team");
+      onSaved(data.team);
     } catch (err) {
-      setError(err.message || "An error occurred during registration");
+      setError(err.message || "An error occurred while updating the team");
     }
     setLoading(false);
   };
@@ -106,7 +65,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
         </Button>
 
         <div className="text-center mb-4">
-          <h2 className="text-2xl font-bold text-base-content">Team Sign Up</h2>
+          <h2 className="text-2xl font-bold text-base-content">Edit Team</h2>
           <div className="h-1 w-24 bg-gradient-to-r from-primary to-primary/70 rounded-full mx-auto mt-2"></div>
         </div>
 
@@ -125,43 +84,6 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
               />
             </svg>
             {error}
-          </div>
-        )}
-
-        {/* Unpaid teams — resume payment */}
-        {!loadingUnpaid && unpaidTeams.length > 0 && (
-          <div className="mb-5">
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-              <p className="text-sm font-semibold text-amber-700 mb-3">
-                ⚠️ You have {unpaidTeams.length} incomplete registration
-                {unpaidTeams.length > 1 ? "s" : ""} for this tournament:
-              </p>
-              <div className="space-y-2">
-                {unpaidTeams.map((team) => (
-                  <div
-                    key={team._id}
-                    className="flex items-center justify-between bg-white/70 rounded-lg px-3 py-2 border border-amber-100"
-                  >
-                    <div>
-                      <p className="font-medium text-base-content text-sm">{team.name}</p>
-                      <p className="text-xs text-base-content/50">
-                        {team.members.length} player{team.members.length !== 1 ? "s" : ""}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => handleResumeTeam(team)}
-                      disabled={loading}
-                      className="btn btn-sm bg-gradient-to-r from-amber-400 to-orange-500 border-none text-white transition-all duration-300 rounded-lg text-xs"
-                    >
-                      Resume & Pay
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-amber-600 mt-3">
-                Or fill in the form below to register a new team.
-              </p>
-            </div>
           </div>
         )}
 
@@ -191,12 +113,9 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
           <div>
             <label className="block font-medium text-base-content mb-1">Manager Email</label>
             <input
-              className="glass-input py-2.5"
-              placeholder="Manager Email"
-              value={managerEmail}
-              onChange={(e) => setManagerEmail(e.target.value)}
-              required
-              type="email"
+              className="glass-input py-2.5 bg-base-200/40 cursor-not-allowed"
+              value={team.manager?.email || ""}
+              disabled
             />
           </div>
 
@@ -293,7 +212,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
             {loading ? (
               <div className="flex items-center justify-center gap-2">
                 <Spinner size="sm" />
-                <span>Processing Payment...</span>
+                <span>Saving...</span>
               </div>
             ) : (
               <div className="flex items-center justify-center gap-1">
@@ -308,10 +227,10 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"
+                    d="M5 13l4 4L19 7"
                   />
                 </svg>
-                Pay & Register Team
+                Save Changes
               </div>
             )}
           </Button>
