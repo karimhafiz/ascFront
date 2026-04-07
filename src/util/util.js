@@ -81,3 +81,15 @@ export const toSlug = (title, id) => {
 
 // Extract the MongoDB ObjectId from the end of a slug (always 24 hex chars)
 export const slugToId = (slug) => slug.slice(-24);
+
+// Validate a UK phone number.
+// Accepts: 07xxx (11 digits), +447xxx (12 digits), 01/02/03 landlines (10-11 digits).
+// Strips spaces, dashes, and parens before checking.
+export const validatePhone = (phone) => {
+  const stripped = phone.replace(/[\s\-()]/g, "");
+  // +44 international format
+  if (/^\+44\d{10}$/.test(stripped)) return true;
+  // 0-prefixed UK number (10 or 11 digits total)
+  if (/^0\d{9,10}$/.test(stripped)) return true;
+  return false;
+};

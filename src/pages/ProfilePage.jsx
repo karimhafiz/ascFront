@@ -455,6 +455,9 @@ function TeamRow({ team }) {
             {event?.title ?? "Unknown Event"}
             {event?.date && <span> · {formatDate(event.date)}</span>}
           </p>
+          {team.manager?.phone && (
+            <p className="text-xs text-base-content/40 mt-0.5">{team.manager.phone}</p>
+          )}
         </div>
 
         {/* Right side */}
@@ -523,6 +526,7 @@ function EnrollmentRow({ enrollment }) {
   const [expanded, setExpanded] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [cancelDone, setCancelDone] = useState(enrollment.subscriptionStatus === "cancelled");
+  const [reactivating, setReactivating] = useState(false);
   const [participants, setParticipants] = useState(enrollment.participants || []);
   const [removingIdx, setRemovingIdx] = useState(null);
   const [confirm, setConfirm] = useState(null);
@@ -565,6 +569,30 @@ function EnrollmentRow({ enrollment }) {
         setCancelling(false);
       },
     });
+  };
+
+  const handleReactivate = async () => {
+    setReactivating(true);
+    try {
+      const token = getAuthToken();
+      const res = await fetch(
+        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/reactivate`,
+        { method: "POST", headers: { Authorization: "Bearer " + token } }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+        setCancelDone(false);
+      } else {
+        showToast(data.error || "Failed to reactivate");
+      }
+    } catch {
+      showToast("Something went wrong");
+    }
+    setReactivating(false);
   };
 
   const handleRemoveParticipant = (index) => {
@@ -649,6 +677,7 @@ function EnrollmentRow({ enrollment }) {
             {" · "}
             {participants.length} participant{participants.length !== 1 ? "s" : ""}
             {isSubscription && ` · ${INTERVAL_ADJ[course.billingInterval] || "Monthly"}`}
+            {enrollment.buyerPhone && ` · ${enrollment.buyerPhone}`}
           </p>
         </div>
         <div className="flex flex-col items-end justify-center px-5 gap-2 flex-shrink-0">
@@ -719,7 +748,15 @@ function EnrollmentRow({ enrollment }) {
               </span>
             )}
           </div>
-          {!cancelDone && (
+          {cancelDone ? (
+            <button
+              onClick={handleReactivate}
+              disabled={reactivating}
+              className="text-xs text-green-600 hover:text-green-800 font-medium hover:underline transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+            >
+              {reactivating ? "Reactivating..." : "Reactivate"}
+            </button>
+          ) : (
             <button
               onClick={handleCancel}
               disabled={cancelling}
@@ -788,7 +825,7 @@ function EnrollmentRow({ enrollment }) {
                   {p.email && <span className="truncate">{p.email}</span>}
                 </div>
               </div>
-              {participants.length > 1 && (
+              {participants.length > 1 && !cancelDone && (
                 <button
                   onClick={() => handleRemoveParticipant(i)}
                   disabled={removingIdx !== null}

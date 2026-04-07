@@ -260,6 +260,7 @@ function TeamsTab({ teams }) {
       t.name?.toLowerCase().includes(q) ||
       t.manager?.name?.toLowerCase().includes(q) ||
       t.manager?.email?.toLowerCase().includes(q) ||
+      t.manager?.phone?.includes(q) ||
       t.members?.some(
         (m) => m.name?.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q)
       )
@@ -342,6 +343,7 @@ function TeamsTab({ teams }) {
               </p>
               <p className="text-xs text-base-content/50 mt-0.5">
                 Manager: {team.manager?.name} · {team.manager?.email}
+                {team.manager?.phone && ` · ${team.manager.phone}`}
               </p>
             </div>
             <div className="flex flex-col items-end gap-1">
@@ -418,6 +420,7 @@ function CoursesTab({ enrollments, courses }) {
   const filteredEnrollments = enrollments.filter(
     (e) =>
       e.buyerEmail?.toLowerCase().includes(search.toLowerCase()) ||
+      e.buyerPhone?.includes(search) ||
       e.courseId?.title?.toLowerCase().includes(search.toLowerCase())
   );
   const filteredCourses = courses.filter(
@@ -499,6 +502,7 @@ function CoursesTab({ enrollments, courses }) {
                 <tr className="bg-gradient-to-r from-base-200 to-base-200 text-left">
                   <th className="px-4 py-3 font-semibold text-base-content">Course</th>
                   <th className="px-4 py-3 font-semibold text-base-content">Buyer Email</th>
+                  <th className="px-4 py-3 font-semibold text-base-content">Phone</th>
                   <th className="px-4 py-3 font-semibold text-base-content">Participants</th>
                   <SortableHeader
                     label="Status"
@@ -517,7 +521,7 @@ function CoursesTab({ enrollments, courses }) {
               <tbody className="divide-y divide-base-100">
                 {sortedEnrollments.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="text-center py-10 text-base-content/50">
+                    <td colSpan={6} className="text-center py-10 text-base-content/50">
                       No enrollments found
                     </td>
                   </tr>
@@ -528,6 +532,7 @@ function CoursesTab({ enrollments, courses }) {
                         {e.courseId?.title ?? "—"}
                       </td>
                       <td className="px-4 py-3 text-base-content/70">{e.buyerEmail}</td>
+                      <td className="px-4 py-3 text-base-content/70">{e.buyerPhone || "—"}</td>
                       <td className="px-4 py-3 text-base-content/70">
                         {e.participants?.length > 0
                           ? e.participants.map((p) => p.name).join(", ")

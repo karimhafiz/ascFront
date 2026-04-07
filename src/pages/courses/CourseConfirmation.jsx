@@ -6,6 +6,7 @@ export default function CourseConfirmation() {
   const [searchParams] = useSearchParams();
   const courseId = searchParams.get("courseId");
   const isFree = searchParams.get("free") === "true";
+  const isReactivated = searchParams.get("reactivated") === "true";
 
   const { data: course, isLoading } = useQuery({
     queryKey: ["course", courseId],
@@ -36,11 +37,17 @@ export default function CourseConfirmation() {
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-base-content">Enrollment Confirmed!</h1>
+          <h1 className="text-3xl font-bold text-base-content">
+            {isReactivated ? "Subscription Reactivated!" : "Enrollment Confirmed!"}
+          </h1>
           <p className="text-base-content/70 mt-2">
-            {isFree ? "You've been enrolled for free." : "Payment received. You're now enrolled."}
+            {isReactivated
+              ? "Your subscription is no longer cancelled. You're all set."
+              : isFree
+                ? "You've been enrolled for free."
+                : "Payment received. You're now enrolled."}
           </p>
-          {!isLoading && course?.isSubscription && (
+          {!isLoading && course?.isSubscription && !isReactivated && (
             <p className="text-base-content/50 text-sm mt-1">
               Your {course.billingInterval === "year" ? "yearly" : "monthly"} subscription is now
               active. Manage it anytime from your profile.
