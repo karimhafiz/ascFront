@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function Pagination({ page, totalPages, setPage, total, label }) {
   if (totalPages <= 1) {
     return (
