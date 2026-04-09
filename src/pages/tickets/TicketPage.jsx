@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { isAuthenticated, getAuthToken } from "../../auth/auth";
 import TicketCard from "../../components/tickets/TicketCard";
 import { PageContainer, GlassCard, Spinner } from "../../components/ui";
 
 export default function TicketPage() {
   const { ticketCode } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,6 +29,14 @@ export default function TicketPage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [ticketCode, navigate]);
+
+  // Auto-print when opened with ?print=true (e.g. from admin dashboard)
+  useEffect(() => {
+    if (ticket && searchParams.get("print") === "true") {
+      const timer = setTimeout(() => window.print(), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [ticket, searchParams]);
 
   if (loading)
     return (
