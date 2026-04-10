@@ -96,4 +96,26 @@ describe("TicketsTab", () => {
     render(<TicketsTab tickets={[ticket]} />);
     expect(screen.getByTitle("Print ticket")).toBeInTheDocument();
   });
+
+  it("shows 'Print all N tickets' button for multi-ticket orders", () => {
+    const paymentId = "pay_print_all";
+    const tickets = [
+      makeTicket({ paymentId, ticketCode: "TKT-A" }),
+      makeTicket({ paymentId, ticketCode: "TKT-B" }),
+      makeTicket({ paymentId, ticketCode: "TKT-C" }),
+    ];
+    render(<TicketsTab tickets={tickets} />);
+    expect(screen.getByTitle("Print all 3 tickets")).toBeInTheDocument();
+  });
+
+  it("opens multi-ticket print URL with comma-separated codes", () => {
+    const paymentId = "pay_print_codes";
+    const tickets = [
+      makeTicket({ paymentId, ticketCode: "TKT-X" }),
+      makeTicket({ paymentId, ticketCode: "TKT-Y" }),
+    ];
+    render(<TicketsTab tickets={tickets} />);
+    fireEvent.click(screen.getByTitle("Print all 2 tickets"));
+    expect(mockOpen).toHaveBeenCalledWith("/tickets/TKT-X?codes=TKT-X,TKT-Y&print=true", "_blank");
+  });
 });

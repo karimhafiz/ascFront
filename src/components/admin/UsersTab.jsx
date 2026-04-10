@@ -71,7 +71,7 @@ export default function UsersTab({ users, currentUserId, onRoleChange }) {
               <th className="px-4 py-3 font-semibold text-base-content">Email</th>
               <SortableHeader label="Role" sortKey="role" sort={sort} onSort={setSort} />
               <SortableHeader label="Joined" sortKey="joined" sort={sort} onSort={setSort} />
-              <th className="px-4 py-3 font-semibold text-base-content">Actions</th>
+              <th className="px-4 py-3 font-semibold text-base-content text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-base-100">
@@ -97,7 +97,7 @@ export default function UsersTab({ users, currentUserId, onRoleChange }) {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-base-content/50">{formatDate(u.createdAt)}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 text-center">
                     {u._id === currentUserId ? (
                       <span className="text-xs text-base-content/50 italic">you</span>
                     ) : (

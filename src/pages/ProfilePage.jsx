@@ -352,7 +352,14 @@ function OrderRow({ tickets }) {
           {expanded ? "Hide tickets" : `View ${qty} ticket${qty !== 1 ? "s" : ""}`}
         </button>
         <Link
-          to={`/tickets/${firstTicket.ticketCode}`}
+          to={
+            qty > 1
+              ? `/tickets/${firstTicket.ticketCode}?codes=${tickets
+                  .map((t) => t.ticketCode)
+                  .filter(Boolean)
+                  .join(",")}`
+              : `/tickets/${firstTicket.ticketCode}`
+          }
           className="text-xs font-medium text-base-content/70 hover:text-base-content flex items-center gap-1 transition-colors"
         >
           View Order

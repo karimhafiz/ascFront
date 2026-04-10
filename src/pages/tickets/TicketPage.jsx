@@ -8,9 +8,13 @@ export default function TicketPage() {
   const { ticketCode } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [ticket, setTicket] = useState(null);
+  const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Support multi-ticket printing via ?codes=TKT-A,TKT-B query param
+  const codesParam = searchParams.get("codes");
+  const codes = codesParam ? codesParam.split(",").filter(Boolean) : [ticketCode];
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -18,25 +22,29 @@ export default function TicketPage() {
       return;
     }
     const token = getAuthToken();
-    fetch(`${import.meta.env.VITE_DEV_URI}tickets/${ticketCode}`, {
-      headers: { Authorization: "Bearer " + token },
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Ticket not found");
-        return res.json();
-      })
-      .then(setTicket)
+    Promise.all(
+      codes.map((code) =>
+        fetch(`${import.meta.env.VITE_DEV_URI}tickets/${code}`, {
+          headers: { Authorization: "Bearer " + token },
+        }).then(async (res) => {
+          if (!res.ok) throw new Error(`Ticket ${code} not found`);
+          return res.json();
+        })
+      )
+    )
+      .then(setTickets)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [ticketCode, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticketCode, codesParam, navigate]);
 
   // Auto-print when opened with ?print=true (e.g. from admin dashboard)
   useEffect(() => {
-    if (ticket && searchParams.get("print") === "true") {
+    if (tickets.length > 0 && searchParams.get("print") === "true") {
       const timer = setTimeout(() => window.print(), 400);
       return () => clearTimeout(timer);
     }
-  }, [ticket, searchParams]);
+  }, [tickets, searchParams]);
 
   if (loading)
     return (
@@ -60,12 +68,14 @@ export default function TicketPage() {
       </PageContainer>
     );
 
+  const isMulti = tickets.length > 1;
+
   return (
     <PageContainer>
       <div className="max-w-lg mx-auto py-10 px-4">
         <Link
           to="/profile"
-          className="inline-flex items-center gap-1.5 text-sm text-base-content/50 hover:text-base-content/70 mb-6 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-base-content/50 hover:text-base-content/70 mb-6 transition-colors print:hidden"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -77,7 +87,16 @@ export default function TicketPage() {
           </svg>
           Back to profile
         </Link>
-        <TicketCard ticket={ticket} />
+        {isMulti && (
+          <p className="text-xs text-base-content/50 mb-4 print:hidden">
+            Showing {tickets.length} tickets from this order
+          </p>
+        )}
+        <div className="space-y-6">
+          {tickets.map((t) => (
+            <TicketCard key={t._id || t.ticketCode} ticket={t} />
+          ))}
+        </div>
       </div>
     </PageContainer>
   );

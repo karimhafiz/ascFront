@@ -140,10 +140,10 @@ export default function TeamsTab({ teams }) {
                   );
                   w.document.close();
                 }}
-                className="p-1.5 rounded-lg hover:bg-base-200 text-base-content/50 hover:text-primary transition-colors cursor-pointer shrink-0"
+                className="p-2 rounded-lg hover:bg-base-200 text-base-content/60 hover:text-primary transition-colors cursor-pointer shrink-0"
                 title="Print team details"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"

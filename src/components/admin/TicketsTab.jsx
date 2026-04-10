@@ -71,7 +71,7 @@ export default function TicketsTab({ tickets }) {
               <SortableHeader label="Paid" sortKey="paid" sort={sort} onSort={setSort} />
               <SortableHeader label="Date" sortKey="date" sort={sort} onSort={setSort} />
               <th className="px-4 py-3 font-semibold text-base-content">Ref</th>
-              <th className="px-4 py-3 font-semibold text-base-content">Actions</th>
+              <th className="px-4 py-3 font-semibold text-base-content text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-base-100">
@@ -134,18 +134,25 @@ export default function TicketsTab({ tickets }) {
                         {first.paymentId ? "…" + first.paymentId.slice(-8) : "—"}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          {!isMulti && first.ticketCode && (
+                        <div className="flex items-center justify-center gap-1">
+                          {first.ticketCode && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                window.open(`/tickets/${first.ticketCode}?print=true`, "_blank");
+                                const codes = group
+                                  .map((t) => t.ticketCode)
+                                  .filter(Boolean)
+                                  .join(",");
+                                const url = isMulti
+                                  ? `/tickets/${group[0].ticketCode}?codes=${codes}&print=true`
+                                  : `/tickets/${first.ticketCode}?print=true`;
+                                window.open(url, "_blank");
                               }}
-                              className="p-1.5 rounded-lg hover:bg-base-200 text-base-content/50 hover:text-primary transition-colors cursor-pointer"
-                              title="Print ticket"
+                              className="p-2 rounded-lg hover:bg-base-200 text-base-content/60 hover:text-primary transition-colors cursor-pointer"
+                              title={isMulti ? `Print all ${group.length} tickets` : "Print ticket"}
                             >
                               <svg
-                                className="w-4 h-4"
+                                className="w-5 h-5"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -189,18 +196,18 @@ export default function TicketsTab({ tickets }) {
                             )}
                           </td>
                           <td className="px-4 py-2" />
-                          <td className="px-4 py-2">
+                          <td className="px-4 py-2 text-center">
                             {t.ticketCode && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   window.open(`/tickets/${t.ticketCode}?print=true`, "_blank");
                                 }}
-                                className="p-1 rounded-lg hover:bg-base-200 text-base-content/50 hover:text-primary transition-colors cursor-pointer"
+                                className="p-1.5 rounded-lg hover:bg-base-200 text-base-content/50 hover:text-primary transition-colors cursor-pointer"
                                 title="Print ticket"
                               >
                                 <svg
-                                  className="w-3.5 h-3.5"
+                                  className="w-4 h-4"
                                   fill="none"
                                   viewBox="0 0 24 24"
                                   stroke="currentColor"

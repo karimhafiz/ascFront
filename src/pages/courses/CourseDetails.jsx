@@ -249,14 +249,6 @@ export default function CourseDetails() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left — details */}
           <div className="md:col-span-2 space-y-6">
-            {course.images && course.images.length > 0 && (
-              <img
-                src={course.images[0]}
-                alt={course.title}
-                className="w-full h-48 sm:h-64 object-cover rounded-2xl shadow-xl"
-              />
-            )}
-
             <GlassCard className="p-6">
               <h2 className="text-xl font-bold text-base-content mb-4">Course Details</h2>
               <div className="space-y-3">
@@ -391,7 +383,13 @@ export default function CourseDetails() {
                 )}
               </div>
             </GlassCard>
-
+            {course.images && course.images.length > 0 && (
+              <img
+                src={course.images[0]}
+                alt={course.title}
+                className="w-full h-3/8  object-cover rounded-2xl shadow-xl"
+              />
+            )}
             <GlassCard className="p-6">
               <h2 className="text-xl font-bold text-base-content mb-3">About This Course</h2>
               <p className="text-base-content/80 leading-relaxed">{course.description}</p>

@@ -111,7 +111,7 @@ export default function CoursesTab({ enrollments, courses }) {
                     sort={enrollSort}
                     onSort={setEnrollSort}
                   />
-                  <th className="px-4 py-3 font-semibold text-base-content">Actions</th>
+                  <th className="px-4 py-3 font-semibold text-base-content text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-base-100">
@@ -150,7 +150,7 @@ export default function CoursesTab({ enrollments, courses }) {
                         })()}
                       </td>
                       <td className="px-4 py-3 text-base-content/50">{formatDate(e.createdAt)}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-center">
                         <button
                           onClick={() => {
                             const participants = (e.participants || [])
@@ -168,11 +168,11 @@ export default function CoursesTab({ enrollments, courses }) {
                             );
                             w.document.close();
                           }}
-                          className="p-1.5 rounded-lg hover:bg-base-200 text-base-content/50 hover:text-primary transition-colors cursor-pointer"
+                          className="p-2 rounded-lg hover:bg-base-200 text-base-content/60 hover:text-primary transition-colors cursor-pointer"
                           title="Print enrollment"
                         >
                           <svg
-                            className="w-4 h-4"
+                            className="w-5 h-5"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"

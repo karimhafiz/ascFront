@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, ScrollRestoration } from "react-router-dom";
 import TeamSignupForm from "../../components/teams/TeamSignupForm";
 import TeamEditForm from "../../components/teams/TeamEditForm";
 import { parseJwt, getAuthToken, fetchWithAuth, isAuthenticated } from "../../auth/auth";
@@ -207,13 +207,6 @@ export default function EventDetails() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left column: Event Details */}
           <div className="md:col-span-2 space-y-6">
-            {event.images && event.images.length > 0 && (
-              <img
-                src={event.images[0]}
-                alt={event.title}
-                className="w-full h-auto object-cover rounded-2xl shadow-xl"
-              />
-            )}
             <GlassCard className="shadow-xl">
               <div className="card-body">
                 <h2 className="card-title text-xl text-base-content">Event Details:</h2>
@@ -337,7 +330,13 @@ export default function EventDetails() {
                 </div>
               </div>
             </GlassCard>
-
+            {event.images && event.images.length > 0 && (
+              <img
+                src={event.images[0]}
+                alt={event.title}
+                className="w-full h-3/8 object-cover rounded-2xl shadow-xl"
+              />
+            )}
             <GlassCard className="shadow-xl">
               <div className="card-body">
                 <h2 className="card-title text-xl text-base-content">About This Event</h2>
