@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getAuthToken } from "../../auth/auth";
+import { fetchWithAuth } from "../../auth/auth";
 import { validatePhone } from "../../util/util";
 import { Button, Spinner } from "../ui";
 
@@ -18,9 +18,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
   useEffect(() => {
     if (!managerEmail || !eventId) return;
     setLoadingUnpaid(true);
-    fetch(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/unpaid`, {
-      headers: { Authorization: `Bearer ${getAuthToken()}` },
-    })
+    fetchWithAuth(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/unpaid`)
       .then((r) => r.json())
       .then((data) => setUnpaidTeams(data.teams || []))
       .catch(() => {})
@@ -31,10 +29,10 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
     setLoading(true);
     setError("");
     try {
-      const paymentRes = await fetch(`${import.meta.env.VITE_DEV_URI}teams/${team._id}/pay`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${getAuthToken()}` },
-      });
+      const paymentRes = await fetchWithAuth(
+        `${import.meta.env.VITE_DEV_URI}teams/${team._id}/pay`,
+        { method: "POST" }
+      );
       const paymentData = await paymentRes.json();
       if (!paymentRes.ok || !paymentData.url)
         throw new Error(paymentData.error || "Payment initialization failed");
@@ -65,22 +63,25 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${getAuthToken()}` },
-        body: JSON.stringify({
-          name,
-          members,
-          manager: { name: managerName, email: managerEmail, phone: managerPhone.trim() },
-        }),
-      });
+      const res = await fetchWithAuth(
+        `${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/signup`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            members,
+            manager: { name: managerName, email: managerEmail, phone: managerPhone.trim() },
+          }),
+        }
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to register team");
 
-      const paymentRes = await fetch(`${import.meta.env.VITE_DEV_URI}teams/${data.team._id}/pay`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${getAuthToken()}` },
-      });
+      const paymentRes = await fetchWithAuth(
+        `${import.meta.env.VITE_DEV_URI}teams/${data.team._id}/pay`,
+        { method: "POST" }
+      );
       const paymentData = await paymentRes.json();
       if (!paymentRes.ok || !paymentData.url)
         throw new Error(paymentData.error || "Payment initialization failed");

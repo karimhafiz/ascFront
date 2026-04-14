@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAuthToken } from "../../auth/auth";
+import { fetchWithAuth } from "../../auth/auth";
 import { Button, PageContainer, Spinner, GlassCard } from "../../components/ui";
 
 const TICKET_CODE_RE = /^TKT-[A-Z2-9]{6}$/;
 
 const fetchTicket = async (ticketCode) => {
-  const response = await fetch(`${import.meta.env.VITE_DEV_URI}tickets/verify/${ticketCode}`, {
-    headers: { Authorization: `Bearer ${getAuthToken()}` },
-  });
+  const response = await fetchWithAuth(
+    `${import.meta.env.VITE_DEV_URI}tickets/verify/${ticketCode}`
+  );
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) throw new Error("AUTH_REQUIRED");
     if (response.status === 404) throw new Error("INVALID");
@@ -19,12 +19,9 @@ const fetchTicket = async (ticketCode) => {
 };
 
 const checkInTicket = async (ticketCode) => {
-  const response = await fetch(
+  const response = await fetchWithAuth(
     `${import.meta.env.VITE_DEV_URI}tickets/verify/${ticketCode}/checkin`,
-    {
-      method: "POST",
-      headers: { Authorization: `Bearer ${getAuthToken()}` },
-    }
+    { method: "POST" }
   );
   if (!response.ok) throw new Error("Failed to check in ticket");
   return response.json();

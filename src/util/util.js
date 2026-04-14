@@ -19,6 +19,47 @@ export const formatDate = (dateString) => {
   return `${year}-${month}-${day}`;
 };
 
+// Capitalised day name for a lowercase dayOfWeek value ("monday" → "Monday").
+export const capitalize = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : "");
+
+// Return the next upcoming occurrence of a recurring event from `fromDate` (default: now),
+// or null if the recurrence window has ended or the event isn't recurring.
+export const getNextRecurringDate = (event, fromDate = new Date()) => {
+  if (
+    !event?.isReoccurring ||
+    !event.reoccurringStartDate ||
+    !event.reoccurringEndDate ||
+    !event.dayOfWeek
+  ) {
+    return null;
+  }
+
+  const dayOfWeekMap = {
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+    sunday: 0,
+  };
+
+  const start = new Date(event.reoccurringStartDate);
+  const end = new Date(event.reoccurringEndDate);
+  const targetDay = dayOfWeekMap[event.dayOfWeek.toLowerCase()];
+  if (targetDay === undefined) return null;
+
+  // Search from whichever is later — today or the series start.
+  let candidate = new Date(fromDate > start ? fromDate : start);
+  candidate.setHours(0, 0, 0, 0);
+
+  // Advance to the next target weekday (inclusive of today if today matches).
+  const diff = (targetDay - candidate.getDay() + 7) % 7;
+  candidate.setDate(candidate.getDate() + diff);
+
+  return candidate <= end ? candidate : null;
+};
+
 export const generateRecurringEvents = (event) => {
   if (
     !event.isReoccurring ||

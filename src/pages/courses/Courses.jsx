@@ -81,15 +81,15 @@ export default function CoursesPage() {
               className="glass-input pl-9 py-2.5"
             />
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex bg-white/60 rounded-xl border border-white/40 p-1 flex-wrap">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                   activeCategory === cat
                     ? "bg-gradient-to-r from-primary to-secondary text-white shadow-md"
-                    : "bg-white/60 text-base-content hover:bg-white/80 border border-base-300"
+                    : "text-base-content hover:bg-white/80"
                 }`}
               >
                 {cat}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Link, useNavigate, useRouteLoaderData } from "react-router-dom";
-import { isAdmin, isModerator } from "../../auth/auth";
+import { Link, useNavigate } from "react-router-dom";
+import { isAdmin, isModerator, fetchWithAuth } from "../../auth/auth";
 import { formatDateRange, optimizeCloudinaryUrl, toSlug } from "../../util/util";
 import ConfirmModal from "../common/ConfirmModal";
 import { Badge, GlassCard } from "../ui";
@@ -11,7 +11,6 @@ const TYPE_COLORS = {
 };
 
 export default function EventCard({ event }) {
-  const { token } = useRouteLoaderData("root");
   const canManage = isAdmin() || isModerator();
   const navigate = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -30,9 +29,8 @@ export default function EventCard({ event }) {
     setConfirmOpen(false);
     setDeleteError(null);
     try {
-      const response = await fetch(`${import.meta.env.VITE_DEV_URI}events/${event._id}`, {
+      const response = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}events/${event._id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) {
         const errorData = await response.json();

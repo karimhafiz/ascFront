@@ -1,5 +1,5 @@
 import { redirect } from "react-router-dom";
-import { getAuthToken } from "../auth/auth";
+import { fetchWithAuth } from "../auth/auth";
 import { compressImage } from "../util/compressImage";
 import { slugToId } from "../util/util";
 
@@ -31,8 +31,6 @@ export async function eventAction({ request, params }) {
       data.get("ticketsAvailable") !== "" ? parseInt(data.get("ticketsAvailable"), 10) : undefined,
   };
 
-  const token = getAuthToken();
-
   const formData = new FormData();
   formData.append("eventData", JSON.stringify(eventData));
   const imageFile = data.get("image");
@@ -49,11 +47,8 @@ export async function eventAction({ request, params }) {
   }
 
   try {
-    const response = await fetch(url, {
+    const response = await fetchWithAuth(url, {
       method: method,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       body: formData,
     });
 

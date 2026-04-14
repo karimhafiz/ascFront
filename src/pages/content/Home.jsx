@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import EventCard from "../../components/events/EventCard";
+import CourseCard from "../../components/courses/CourseCard";
 import Button from "../../components/ui/Button";
-import { isAdmin, isModerator, getAuthToken } from "../../auth/auth";
+import { isAdmin, isModerator, fetchWithAuth } from "../../auth/auth";
 import { compressImage } from "../../util/compressImage";
 import ConfirmModal from "../../components/common/ConfirmModal";
 
@@ -20,7 +21,7 @@ function mergeWithDefaults(saved) {
 }
 
 export default function Home() {
-  const { events } = useRouteLoaderData("root");
+  const { events, courses } = useRouteLoaderData("root");
   const canEdit = isAdmin() || isModerator();
 
   const [pageContent, setPageContent] = useState(DEFAULTS);
@@ -69,10 +70,8 @@ export default function Home() {
     setResetting(true);
     setSaveError(null);
     try {
-      const token = getAuthToken();
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}pageContent/home`, {
+      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}pageContent/home`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
@@ -105,7 +104,6 @@ export default function Home() {
 
     setSaving(true);
     try {
-      const token = getAuthToken();
       const formData = new FormData();
       formData.append(
         "contentData",
@@ -117,9 +115,8 @@ export default function Home() {
       );
       if (heroImageFile) formData.append("heroImage", heroImageFile);
 
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}pageContent/home`, {
+      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}pageContent/home`, {
         method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
       if (!res.ok) {
@@ -140,6 +137,7 @@ export default function Home() {
   };
 
   const upcomingEvents = events.filter((e) => new Date(e.date) >= new Date());
+  const availableCourses = (courses || []).filter((c) => c.enrollmentOpen).slice(0, 3);
   const heroImage = heroImagePreview || pageContent.heroImage;
 
   return (
@@ -395,6 +393,46 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {upcomingEvents?.map((event) => (
               <EventCard key={event._id} event={event} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Available Courses ── */}
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl font-bold text-base-content">Available Courses</h2>
+          <Link
+            to="/courses"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              />
+            </svg>
+            View All Courses
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 7l5 5m0 0l-5 5m5-5H6"
+              />
+            </svg>
+          </Link>
+        </div>
+        {availableCourses.length === 0 ? (
+          <div className="glass-card p-8 text-center rounded-xl backdrop-blur-md shadow-xl">
+            <p className="text-base-content/70">No courses available right now.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {availableCourses.map((course) => (
+              <CourseCard key={course._id} course={course} />
             ))}
           </div>
         )}

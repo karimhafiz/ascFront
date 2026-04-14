@@ -142,7 +142,7 @@ export default function EventPage() {
           {/* Search + Sort (cards view only) */}
           {view === "cards" && (
             <div className="flex items-center gap-2 flex-1">
-              <div className="relative max-w-xs flex-1">
+              <div className="relative flex-1">
                 <svg
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/50"
                   fill="none"
