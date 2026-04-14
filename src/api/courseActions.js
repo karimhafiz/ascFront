@@ -1,5 +1,5 @@
 import { redirect } from "react-router-dom";
-import { getAuthToken } from "../auth/auth";
+import { fetchWithAuth } from "../auth/auth";
 import { compressImage } from "../util/compressImage";
 import { slugToId } from "../util/util";
 
@@ -28,7 +28,6 @@ export async function courseAction({ request, params }) {
     featured: formData.get("featured") === "true",
   };
 
-  const token = getAuthToken();
   const body = new FormData();
   body.append("courseData", JSON.stringify(courseData));
   const imageFile = formData.get("image");
@@ -43,7 +42,7 @@ export async function courseAction({ request, params }) {
     : `${import.meta.env.VITE_DEV_URI}courses`;
 
   try {
-    const res = await fetch(url, { method, headers: { Authorization: `Bearer ${token}` }, body });
+    const res = await fetchWithAuth(url, { method, body });
     const resData = await res.json().catch(() => ({}));
     if (!res.ok)
       return { errors: { message: resData.error || resData.message || "Unknown error" } };

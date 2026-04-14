@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAuthToken, isAuthenticated, parseJwt, isAdmin, isModerator } from "../../auth/auth";
+import { getAuthToken, isAuthenticated, parseJwt, fetchWithAuth } from "../../auth/auth";
 import { slugToId, validatePhone } from "../../util/util";
-import { PageContainer, Button, GlassCard } from "../../components/ui";
+import { PageContainer, Button, GlassCard, Spinner } from "../../components/ui";
+import EnrolledPanel from "../../components/courses/EnrolledPanel";
 
 const INTERVAL_LABELS = { month: "month", year: "year" };
 const INTERVAL_ADJ = { month: "Monthly", year: "Yearly" };
@@ -15,20 +16,6 @@ const CATEGORY_COLORS = {
   Academic: "from-primary to-secondary",
   Arts: "from-secondary to-primary",
   Other: "from-warning to-warning/70",
-};
-
-const STATUS_STYLES = {
-  active: "bg-green-100 text-green-700",
-  paid: "bg-blue-100 text-blue-700",
-  free: "bg-teal-100 text-teal-700",
-  past_due: "bg-amber-100 text-amber-700",
-};
-
-const STATUS_LABELS = {
-  active: "Active Subscription",
-  paid: "Enrolled",
-  free: "Enrolled (Free)",
-  past_due: "Past Due",
 };
 
 export default function CourseDetails() {
@@ -48,16 +35,6 @@ export default function CourseDetails() {
   const [multiMode, setMultiMode] = useState(false);
   const [participants, setParticipants] = useState([{ name: "", age: "", email: "" }]);
 
-  // Add-participant form state
-  const [newParticipant, setNewParticipant] = useState({ name: "", age: "", email: "" });
-  const [addingParticipant, setAddingParticipant] = useState(false);
-  const [addParticipantError, setAddParticipantError] = useState("");
-
-  // Cancel / reactivate state
-  const [cancellingSubscription, setCancellingSubscription] = useState(false);
-  const [reactivatingSubscription, setReactivatingSubscription] = useState(false);
-  const [subscriptionError, setSubscriptionError] = useState("");
-
   const addParticipant = () => setParticipants((p) => [...p, { name: "", age: "", email: "" }]);
   const removeParticipant = (i) => setParticipants((p) => p.filter((_, idx) => idx !== i));
   const updateParticipant = (i, field, value) =>
@@ -66,7 +43,6 @@ export default function CourseDetails() {
       updated[i] = { ...updated[i], [field]: value };
       return updated;
     });
-  const canManage = isAdmin() || isModerator();
 
   const {
     data: course,
@@ -84,9 +60,9 @@ export default function CourseDetails() {
   const { data: enrollmentData } = useQuery({
     queryKey: ["my-enrollment", courseId],
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}courses/${courseId}/my-enrollment`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` },
-      });
+      const res = await fetchWithAuth(
+        `${import.meta.env.VITE_DEV_URI}courses/${courseId}/my-enrollment`
+      );
       if (!res.ok) return { enrollment: null };
       return res.json();
     },
@@ -94,77 +70,6 @@ export default function CourseDetails() {
   });
 
   const myEnrollment = enrollmentData?.enrollment;
-
-  const handleAddParticipant = async () => {
-    setAddParticipantError("");
-    if (!newParticipant.name.trim()) {
-      setAddParticipantError("Name is required.");
-      return;
-    }
-    try {
-      setAddingParticipant(true);
-      const res = await fetch(
-        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${myEnrollment._id}/add-participant`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getAuthToken()}`,
-          },
-          body: JSON.stringify(newParticipant),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to add participant");
-      setNewParticipant({ name: "", age: "", email: "" });
-      queryClient.invalidateQueries({ queryKey: ["my-enrollment", courseId] });
-    } catch (err) {
-      setAddParticipantError(err.message);
-    } finally {
-      setAddingParticipant(false);
-    }
-  };
-
-  const handleCancelSubscription = async () => {
-    setSubscriptionError("");
-    setCancellingSubscription(true);
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${myEnrollment._id}/cancel`,
-        { method: "POST", headers: { Authorization: `Bearer ${getAuthToken()}` } }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to cancel subscription");
-      queryClient.invalidateQueries({ queryKey: ["my-enrollment", courseId] });
-    } catch (err) {
-      setSubscriptionError(err.message);
-    } finally {
-      setCancellingSubscription(false);
-    }
-  };
-
-  const handleReactivateSubscription = async () => {
-    setSubscriptionError("");
-    setReactivatingSubscription(true);
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${myEnrollment._id}/reactivate`,
-        { method: "POST", headers: { Authorization: `Bearer ${getAuthToken()}` } }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to reactivate subscription");
-      if (data.url) {
-        // Stripe subscription was gone — redirect to new checkout
-        window.location.href = data.url;
-        return;
-      }
-      queryClient.invalidateQueries({ queryKey: ["my-enrollment", courseId] });
-    } catch (err) {
-      setSubscriptionError(err.message);
-    } finally {
-      setReactivatingSubscription(false);
-    }
-  };
 
   const handleEnroll = async () => {
     setEnrollError("");
@@ -191,9 +96,9 @@ export default function CourseDetails() {
         return;
       }
 
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}courses/${courseId}/enroll`, {
+      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}courses/${courseId}/enroll`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${getAuthToken()}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, phone: phone.trim(), participants: enrollParticipants }),
       });
       const data = await res.json();
@@ -210,8 +115,23 @@ export default function CourseDetails() {
     }
   };
 
-  if (isLoading) return <p className="text-center text-base-content/50 mt-20">Loading...</p>;
-  if (error) return <p className="text-center text-red-500 mt-20">Error: {error.message}</p>;
+  if (isLoading)
+    return (
+      <PageContainer center>
+        <div className="flex flex-col items-center gap-3">
+          <Spinner />
+          <p className="text-sm text-base-content/50">Loading course details...</p>
+        </div>
+      </PageContainer>
+    );
+  if (error)
+    return (
+      <PageContainer center>
+        <div className="bg-white/90 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-red-100 text-center max-w-sm">
+          <p className="text-red-500 font-medium mb-4">{error.message}</p>
+        </div>
+      </PageContainer>
+    );
 
   const gradient = CATEGORY_COLORS[course.category] || CATEGORY_COLORS.Other;
   const spotsLeft = course.maxEnrollment ? course.maxEnrollment - course.currentEnrollment : null;
@@ -238,17 +158,17 @@ export default function CourseDetails() {
       </div>
 
       <div className="container mx-auto p-6">
-        {canManage && (
-          <div className="flex gap-3 mb-6">
-            <Button variant="primary" to={`/courses/${courseSlug}/edit`}>
-              Edit Course
-            </Button>
-          </div>
+        {course.images && course.images.length > 0 && (
+          <img
+            src={course.images[0]}
+            alt={course.title}
+            className="w-full aspect-[16/9] object-cover rounded-2xl shadow-xl mb-6"
+          />
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left — details */}
-          <div className="md:col-span-2 space-y-6">
+          {/* Left — details (second on mobile) */}
+          <div className="md:col-span-2 md:order-1 space-y-6">
             <GlassCard className="p-6">
               <h2 className="text-xl font-bold text-base-content mb-4">Course Details</h2>
               <div className="space-y-3">
@@ -383,201 +303,24 @@ export default function CourseDetails() {
                 )}
               </div>
             </GlassCard>
-            {course.images && course.images.length > 0 && (
-              <img
-                src={course.images[0]}
-                alt={course.title}
-                className="w-full h-3/8  object-cover rounded-2xl shadow-xl"
-              />
-            )}
             <GlassCard className="p-6">
               <h2 className="text-xl font-bold text-base-content mb-3">About This Course</h2>
               <p className="text-base-content/80 leading-relaxed">{course.description}</p>
             </GlassCard>
           </div>
 
-          {/* Right — enrollment */}
-          <div className="md:col-span-1">
+          {/* Right — enrollment (first on mobile) */}
+          <div className="md:col-span-1 md:order-2">
             <GlassCard className="md:sticky md:top-20">
               <div className="p-6">
                 {myEnrollment ? (
-                  /* ── Already enrolled ── */
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                        <svg
-                          className="w-5 h-5 text-green-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2.5}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      </div>
-                      <h2 className="text-xl font-bold text-base-content">You're Enrolled</h2>
-                    </div>
-
-                    <span
-                      className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${
-                        myEnrollment.subscriptionStatus === "cancelled"
-                          ? "bg-orange-100 text-orange-700"
-                          : STATUS_STYLES[myEnrollment.status] || "bg-base-200 text-base-content"
-                      }`}
-                    >
-                      {myEnrollment.subscriptionStatus === "cancelled"
-                        ? "Cancelled"
-                        : STATUS_LABELS[myEnrollment.status] || myEnrollment.status}
-                    </span>
-
-                    {myEnrollment.subscriptionId &&
-                      myEnrollment.subscriptionStatus === "cancelled" && (
-                        <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 text-xs text-orange-700">
-                          <p className="font-semibold mb-1">You have cancelled your subscription</p>
-                          <p>You'll retain access until the end of your current billing period.</p>
-                          {myEnrollment.currentPeriodEnd && (
-                            <p className="mt-1 font-medium text-orange-600">
-                              Access until{" "}
-                              {new Date(myEnrollment.currentPeriodEnd).toLocaleDateString("en-GB", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              })}
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                    {myEnrollment.subscriptionId &&
-                      myEnrollment.subscriptionStatus !== "cancelled" && (
-                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
-                          <p className="font-semibold mb-1">
-                            {INTERVAL_ADJ[course.billingInterval] || "Monthly"} Subscription
-                          </p>
-                          <p>
-                            £{course.price} / {INTERVAL_LABELS[course.billingInterval] || "month"}
-                          </p>
-                          {myEnrollment.currentPeriodEnd && (
-                            <p className="mt-1 text-blue-600">
-                              Renews{" "}
-                              {new Date(myEnrollment.currentPeriodEnd).toLocaleDateString("en-GB", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              })}
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                    {/* Current participants */}
-                    <div>
-                      <p className="text-sm font-semibold text-base-content mb-2">
-                        Participants ({myEnrollment.participants?.length || 0})
-                      </p>
-                      <div className="space-y-1.5">
-                        {myEnrollment.participants?.map((p, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center gap-2 bg-base-200/50 rounded-lg px-3 py-2 text-sm"
-                          >
-                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                              {p.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-base-content truncate">{p.name}</p>
-                              {p.age && <p className="text-xs text-base-content/50">Age {p.age}</p>}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Add participant form */}
-                    {myEnrollment.status !== "cancelled" &&
-                      myEnrollment.subscriptionStatus !== "cancelled" && (
-                        <div className="border-t border-base-300/50 pt-4">
-                          <p className="text-sm font-semibold text-base-content mb-2">
-                            Add Participant
-                          </p>
-                          <div className="space-y-2">
-                            <input
-                              type="text"
-                              placeholder="Name *"
-                              value={newParticipant.name}
-                              onChange={(e) =>
-                                setNewParticipant((p) => ({ ...p, name: e.target.value }))
-                              }
-                              className="glass-input text-sm py-1.5"
-                            />
-                            <input
-                              type="number"
-                              placeholder="Age"
-                              min="1"
-                              value={newParticipant.age}
-                              onChange={(e) =>
-                                setNewParticipant((p) => ({ ...p, age: e.target.value }))
-                              }
-                              className="glass-input text-sm py-1.5"
-                            />
-                            {addParticipantError && (
-                              <p className="text-red-500 text-xs">{addParticipantError}</p>
-                            )}
-                            <Button
-                              variant="primary"
-                              onClick={handleAddParticipant}
-                              disabled={addingParticipant}
-                              className="w-full text-sm"
-                            >
-                              {addingParticipant ? "Adding..." : "+ Add Participant"}
-                            </Button>
-                            {course.isSubscription && (
-                              <p className="text-xs text-base-content/50 text-center">
-                                Adding a participant will increase your subscription billing.
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                    {/* Cancel / Reactivate subscription */}
-                    {myEnrollment.subscriptionId && (
-                      <div className="border-t border-base-300/50 pt-4 space-y-2">
-                        {myEnrollment.subscriptionStatus === "cancelled" ? (
-                          <Button
-                            variant="primary"
-                            onClick={handleReactivateSubscription}
-                            disabled={reactivatingSubscription}
-                            className="w-full text-sm"
-                          >
-                            {reactivatingSubscription
-                              ? "Reactivating..."
-                              : "Reactivate Subscription"}
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="danger"
-                            onClick={handleCancelSubscription}
-                            disabled={cancellingSubscription}
-                            className="w-full text-sm"
-                          >
-                            {cancellingSubscription ? "Cancelling..." : "Cancel Subscription"}
-                          </Button>
-                        )}
-                        {subscriptionError && (
-                          <p className="text-red-500 text-xs text-center">{subscriptionError}</p>
-                        )}
-                      </div>
-                    )}
-
-                    <Button variant="ghost" to="/profile" className="w-full text-sm">
-                      Manage in Profile
-                    </Button>
-                  </div>
+                  <EnrolledPanel
+                    course={course}
+                    enrollment={myEnrollment}
+                    onChanged={() =>
+                      queryClient.invalidateQueries({ queryKey: ["my-enrollment", courseId] })
+                    }
+                  />
                 ) : (
                   /* ── Not enrolled — enroll form ── */
                   <>
@@ -812,9 +555,15 @@ export default function CourseDetails() {
           </div>
         </div>
 
-        <div className="mt-8">
-          <Button variant="ghost" onClick={() => navigate(-1)}>
-            <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="mt-8 mb-4 flex items-center justify-between gap-3 flex-wrap">
+          <Button variant="secondary" onClick={() => navigate(-1)}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -824,6 +573,25 @@ export default function CourseDetails() {
             </svg>
             Back to Courses
           </Button>
+          <button
+            onClick={() =>
+              window.open("https://www.facebook.com/profile.php?id=100081705505202", "_blank")
+            }
+            className="btn bg-[#1877F2] hover:bg-[#166FE5] text-white border-none shadow-md hover:shadow-lg transition-all duration-200"
+            aria-label="Share on Facebook"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="mr-1.5"
+            >
+              <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
+            </svg>
+            Share on Facebook
+          </button>
         </div>
       </div>
     </PageContainer>

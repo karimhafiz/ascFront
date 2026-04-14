@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { isAuthenticated, getAuthToken } from "../auth/auth";
+import { isAuthenticated, fetchWithAuth } from "../auth/auth";
 import { optimizeCloudinaryUrl, toSlug } from "../util/util";
 import { Button, Spinner } from "../components/ui";
+import MyTeamRow from "../components/teams/MyTeamRow";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
@@ -28,23 +29,26 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("Orders");
   const navigate = useNavigate();
 
+  const loadProfile = useCallback(async () => {
+    try {
+      const res = await fetchWithAuth(import.meta.env.VITE_DEV_URI + "users/profile");
+      if (!res.ok) throw new Error("Failed to load profile");
+      const json = await res.json();
+      setData(json);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!isAuthenticated()) {
       navigate("/login");
       return;
     }
-    const token = getAuthToken();
-    fetch(import.meta.env.VITE_DEV_URI + "users/profile", {
-      headers: { Authorization: "Bearer " + token },
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Failed to load profile");
-        return res.json();
-      })
-      .then(setData)
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [navigate]);
+    loadProfile();
+  }, [navigate, loadProfile]);
 
   // Group tickets by paymentId so bulk purchases show as one order
   // Hooks must be called before any early returns
@@ -252,7 +256,7 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-4">
                 {teams.map((team) => (
-                  <TeamRow key={team._id} team={team} />
+                  <MyTeamRow key={team._id} team={team} onTeamUpdated={loadProfile} />
                 ))}
               </div>
             ))}
@@ -428,99 +432,6 @@ function OrderRow({ tickets }) {
   );
 }
 
-function TeamRow({ team }) {
-  const [expanded, setExpanded] = useState(false);
-  const event = team.event;
-
-  return (
-    <div className="bg-white rounded-2xl border border-base-300 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-      <div
-        onClick={() => team.members?.length > 0 && setExpanded((v) => !v)}
-        className={`flex items-center px-5 py-4 gap-4 transition-colors ${team.members?.length > 0 ? "cursor-pointer hover:bg-base-200/30" : ""}`}
-      >
-        {/* Icon */}
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-base-200 to-base-200 flex items-center justify-center flex-shrink-0">
-          <svg
-            className="w-6 h-6 text-base-content/50"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-        </div>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-base-content truncate">{team.name}</p>
-          <p className="text-sm text-base-content/50 mt-0.5">
-            {event?.title ?? "Unknown Event"}
-            {event?.date && <span> · {formatDate(event.date)}</span>}
-          </p>
-          {team.manager?.phone && (
-            <p className="text-xs text-base-content/40 mt-0.5">{team.manager.phone}</p>
-          )}
-        </div>
-
-        {/* Right side */}
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <div className="flex flex-col items-end gap-1.5">
-            <span
-              className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${
-                team.paid
-                  ? "bg-green-50 text-green-700 border-green-200"
-                  : "bg-orange-50 text-orange-600 border-orange-200"
-              }`}
-            >
-              {team.paid ? "✓ Paid" : "Pending"}
-            </span>
-            <span className="text-xs text-base-content/50">
-              {team.members?.length ?? 0} member{team.members?.length !== 1 ? "s" : ""}
-            </span>
-          </div>
-          {team.members?.length > 0 && (
-            <svg
-              className={`w-4 h-4 text-base-content/50 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          )}
-        </div>
-      </div>
-
-      {/* Members list */}
-      {team.members?.length > 0 && expanded && (
-        <div className="px-5 pb-4 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-base-100">
-          {team.members.map((m, i) => (
-            <div key={i} className="flex items-center gap-2.5 bg-base-200/40 rounded-xl px-3 py-2">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-                {m.name?.[0]?.toUpperCase() ?? "?"}
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-base-content truncate">{m.name}</p>
-                {m.email && <p className="text-[10px] text-base-content/50 truncate">{m.email}</p>}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 const CATEGORY_COLORS = {
   Language: "from-blue-500 to-primary/70",
   Religious: "from-emerald-500 to-teal-600",
@@ -562,10 +473,9 @@ function EnrollmentRow({ enrollment }) {
         setConfirm(null);
         setCancelling(true);
         try {
-          const token = getAuthToken();
-          const res = await fetch(
+          const res = await fetchWithAuth(
             `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/cancel`,
-            { method: "POST", headers: { Authorization: "Bearer " + token } }
+            { method: "POST" }
           );
           const data = await res.json();
           if (res.ok) setCancelDone(true);
@@ -581,10 +491,9 @@ function EnrollmentRow({ enrollment }) {
   const handleReactivate = async () => {
     setReactivating(true);
     try {
-      const token = getAuthToken();
-      const res = await fetch(
+      const res = await fetchWithAuth(
         `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/reactivate`,
-        { method: "POST", headers: { Authorization: "Bearer " + token } }
+        { method: "POST" }
       );
       const data = await res.json();
       if (res.ok) {
@@ -613,15 +522,11 @@ function EnrollmentRow({ enrollment }) {
         setConfirm(null);
         setRemovingIdx(index);
         try {
-          const token = getAuthToken();
-          const res = await fetch(
+          const res = await fetchWithAuth(
             `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/remove-participant`,
             {
               method: "POST",
-              headers: {
-                Authorization: "Bearer " + token,
-                "Content-Type": "application/json",
-              },
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ participantIndex: index }),
             }
           );

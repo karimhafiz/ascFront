@@ -6,15 +6,15 @@ import "@testing-library/jest-dom";
 // Mock auth
 jest.mock("../../../src/auth/auth", () => ({
   getAuthToken: () => "mock-token",
+  fetchWithAuth: jest.fn(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ message: "Role updated" }),
+    })
+  ),
 }));
 
-// Mock fetch for role change
-global.fetch = jest.fn(() =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({ message: "Role updated" }),
-  })
-);
+import { fetchWithAuth } from "../../../src/auth/auth";
 
 const users = [
   {
@@ -87,7 +87,7 @@ describe("UsersTab", () => {
       fireEvent.change(selects[0], { target: { value: "admin" } });
     });
 
-    expect(global.fetch).toHaveBeenCalled();
+    expect(fetchWithAuth).toHaveBeenCalled();
     expect(onRoleChange).toHaveBeenCalledWith("u2", "admin");
   });
 

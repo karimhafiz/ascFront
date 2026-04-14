@@ -3,13 +3,12 @@ import { useRouteLoaderData, useLocation, useParams } from "react-router-dom";
 import { isAdmin, isModerator } from "../../auth/auth";
 import { Button } from "../ui";
 
-const EventHeader = () => {
+const CourseHeader = () => {
   const { token } = useRouteLoaderData("root");
   const location = useLocation();
-  const { eventSlug } = useParams();
+  const { courseSlug } = useParams();
 
-  // Hide on create/edit pages — the form itself is the focus
-  if (/\/events\/(new|[^/]+\/edit)/.test(location.pathname)) {
+  if (/\/courses\/(new|[^/]+\/edit)/.test(location.pathname)) {
     return null;
   }
 
@@ -17,7 +16,7 @@ const EventHeader = () => {
     return null;
   }
 
-  const isDetailPage = !!eventSlug;
+  const isDetailPage = !!courseSlug;
 
   return (
     <div className="container mx-auto px-6 pt-6">
@@ -34,17 +33,17 @@ const EventHeader = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
               />
             </svg>
           </div>
-          <span className="text-sm font-semibold text-base-content">Event Management</span>
+          <span className="text-sm font-semibold text-base-content">Course Management</span>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {isDetailPage && (
             <Button
               variant="primary"
-              to={`/events/${eventSlug}/edit`}
+              to={`/courses/${courseSlug}/edit`}
               className="shadow-md shadow-primary/20"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -55,10 +54,10 @@ const EventHeader = () => {
                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                 />
               </svg>
-              Edit Event
+              Edit Course
             </Button>
           )}
-          <Button variant="primary" to="/events/new" className="shadow-md shadow-primary/20">
+          <Button variant="primary" to="/courses/new" className="shadow-md shadow-primary/20">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 strokeLinecap="round"
@@ -67,7 +66,7 @@ const EventHeader = () => {
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            Create Event
+            Create Course
           </Button>
         </div>
       </div>
@@ -75,4 +74,4 @@ const EventHeader = () => {
   );
 };
 
-export default EventHeader;
+export default CourseHeader;

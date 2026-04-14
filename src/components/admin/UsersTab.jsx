@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getAuthToken } from "../../auth/auth";
+import { fetchWithAuth } from "../../auth/auth";
 import SortableHeader from "../common/SortableHeader";
 import { formatDate, roleBadgeClass, usePagination } from "./adminHelpers";
 import Pagination from "./Pagination";
@@ -34,14 +34,10 @@ export default function UsersTab({ users, currentUserId, onRoleChange }) {
 
   const handleRole = async (userId, newRole) => {
     setUpdating(userId);
-    const token = getAuthToken();
     try {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}admin/users/${userId}/role`, {
+      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}admin/users/${userId}/role`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: newRole }),
       });
       const data = await res.json();

@@ -1,6 +1,7 @@
 import React from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "../../components/ui";
 
 export default function CourseConfirmation() {
   const [searchParams] = useSearchParams();
@@ -98,18 +99,26 @@ export default function CourseConfirmation() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <Link
-            to="/profile"
-            className="flex-1 btn bg-gradient-to-r from-primary to-secondary border-none text-white transition-all rounded-xl shadow-md"
-          >
+          <Button variant="primary" to="/profile" className="flex-1">
             View My Profile
-          </Link>
-          <Link
-            to="/courses"
-            className="flex-1 btn bg-white/60 border border-base-300 text-base-content hover:bg-white/80 rounded-xl"
-          >
+          </Button>
+          <Button variant="secondary" to="/courses" className="flex-1">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
             Back to Courses
-          </Link>
+          </Button>
         </div>
       </div>
     </div>

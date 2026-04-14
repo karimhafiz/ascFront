@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { isAdmin, isModerator, getAuthToken } from "../../auth/auth";
+import { isAdmin, isModerator, fetchWithAuth } from "../../auth/auth";
 import { optimizeCloudinaryUrl, toSlug } from "../../util/util";
 import { Badge, GlassCard } from "../ui";
 
@@ -24,9 +24,8 @@ export default function CourseCard({ course }) {
     if (!window.confirm(`Delete "${course.title}"? This cannot be undone.`)) return;
     setDeleting(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}courses/${course._id}`, {
+      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}courses/${course._id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
       if (res.ok) window.location.reload();
     } catch (err) {

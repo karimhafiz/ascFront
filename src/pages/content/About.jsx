@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { isAdmin, isModerator, getAuthToken } from "../../auth/auth";
+import { isAdmin, isModerator, fetchWithAuth } from "../../auth/auth";
 import { compressImage } from "../../util/compressImage";
-import { Link } from "react-router-dom";
 import ConfirmModal from "../../components/common/ConfirmModal";
+import { Button } from "../../components/ui";
 
 const DEFAULT_CARDS = [
   {
@@ -144,16 +144,12 @@ export default function About() {
     setResetting(true);
     setSaveError(null);
     try {
-      const token = getAuthToken();
       const url =
         section === "all"
           ? `${import.meta.env.VITE_DEV_URI}pageContent/about`
           : `${import.meta.env.VITE_DEV_URI}pageContent/about/${section}`;
 
-      const res = await fetch(url, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetchWithAuth(url, { method: "DELETE" });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         throw new Error(body?.message || `Server error (${res.status})`);
@@ -215,7 +211,6 @@ export default function About() {
 
     setSaving(true);
     try {
-      const token = getAuthToken();
       const formData = new FormData();
       formData.append(
         "contentData",
@@ -233,9 +228,8 @@ export default function About() {
         formData.append(`activityImage_${index}`, file);
       });
 
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}pageContent/about`, {
+      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}pageContent/about`, {
         method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
       if (!res.ok) {
@@ -525,13 +519,18 @@ export default function About() {
               value={draft.getInvolvedText}
               onChange={(e) => setDraft({ ...draft, getInvolvedText: e.target.value })}
             />
-            <button
-              onClick={() => resetSection("getInvolved")}
-              disabled={resetting}
-              className="mb-4 px-3 py-1.5 rounded-full bg-white border border-amber-300 text-amber-700 text-xs font-medium shadow hover:bg-amber-50 transition-all disabled:opacity-60 cursor-pointer"
-            >
-              Reset to Defaults
-            </button>
+            <div className="flex gap-3 justify-center">
+              <Button
+                variant="danger"
+                onClick={() => resetSection("getInvolved")}
+                disabled={resetting}
+              >
+                Reset to Defaults
+              </Button>
+              <Button variant="primary" disabled>
+                Contact Us
+              </Button>
+            </div>
           </>
         ) : (
           <>
@@ -539,14 +538,11 @@ export default function About() {
               {pageContent.getInvolvedTitle}
             </h2>
             <p className="text-lg text-base-content/80 mb-6">{pageContent.getInvolvedText}</p>
+            <Button variant="primary" to="/contact">
+              Contact Us
+            </Button>
           </>
         )}
-        <Link
-          to="/contact"
-          className="inline-block bg-gradient-to-r from-primary to-secondary text-white px-6 py-3 rounded-full font-semibold shadow-primary/20 transition-all"
-        >
-          Contact Us
-        </Link>
       </div>
     </div>
   );

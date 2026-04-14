@@ -45,13 +45,21 @@ export async function refreshAccessToken() {
         credentials: "include",
       });
       if (!res.ok) {
+        if (import.meta.env.DEV) {
+          console.debug(
+            `[auth] refreshAccessToken: ${res.status} ${res.statusText} — cookie likely missing or expired`
+          );
+        }
         clearAuth();
         return false;
       }
       const data = await res.json();
       setAuth(data.accessToken, data.user);
       return true;
-    } catch {
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.debug("[auth] refreshAccessToken threw:", err);
+      }
       clearAuth();
       return false;
     } finally {

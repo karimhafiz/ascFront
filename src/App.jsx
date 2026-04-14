@@ -34,6 +34,7 @@ const CoursesPage = lazy(() => import("./pages/courses/Courses"));
 const CourseConfirmation = lazy(() => import("./pages/courses/CourseConfirmation"));
 const CourseDetails = lazy(() => import("./pages/courses/CourseDetails"));
 const CourseFormPage = lazy(() => import("./pages/courses/CourseFormPage"));
+const CourseRoot = lazy(() => import("./pages/courses/CourseRoot"));
 
 const fallback = (
   <div className="flex justify-center items-center p-12">
@@ -60,13 +61,19 @@ const router = createBrowserRouter([
       { path: "profile", element: w(ProfilePage) },
       { path: "tickets/:ticketCode", element: w(TicketPage) },
       { path: "tickets/verify/:ticketCode", element: w(TicketVerify) },
-      { path: "courses", element: w(CoursesPage) },
-      { path: "courses/:courseSlug", element: w(CourseDetails) },
       {
-        element: <ModeratorRoute />,
+        path: "courses",
+        element: w(CourseRoot),
         children: [
-          { path: "courses/new", element: w(CourseFormPage), action: courseAction },
-          { path: "courses/:courseSlug/edit", element: w(CourseFormPage), action: courseAction },
+          { index: true, element: w(CoursesPage) },
+          { path: ":courseSlug", element: w(CourseDetails) },
+          {
+            element: <ModeratorRoute />,
+            children: [
+              { path: "new", element: w(CourseFormPage), action: courseAction },
+              { path: ":courseSlug/edit", element: w(CourseFormPage), action: courseAction },
+            ],
+          },
         ],
       },
       { path: "course-confirmation", element: w(CourseConfirmation) },

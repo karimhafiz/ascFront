@@ -12,7 +12,7 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-import { getAuthToken, getUserRole as getAuthRole } from "../../auth/auth";
+import { getAuthToken, getUserRole as getAuthRole, fetchWithAuth } from "../../auth/auth";
 import { PageContainer, Spinner } from "../../components/ui";
 import { roleBadgeClass } from "../../components/admin/adminHelpers";
 import TicketsTab from "../../components/admin/TicketsTab";
@@ -51,10 +51,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    const token = getAuthToken();
-    fetch(import.meta.env.VITE_DEV_URI + "admin/dashboard", {
-      headers: { Authorization: "Bearer " + token },
-    })
+    fetchWithAuth(import.meta.env.VITE_DEV_URI + "admin/dashboard")
       .then(async (res) => {
         if (!res.ok) throw new Error("Failed to load dashboard");
         return res.json();
