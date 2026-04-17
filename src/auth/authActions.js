@@ -1,4 +1,7 @@
 import { redirect } from "react-router-dom";
+import { setAuth, clearAuth } from "./auth";
+
+const API = import.meta.env.VITE_DEV_URI;
 
 export async function loginAction({ request }) {
   const data = await request.formData();
@@ -10,29 +13,25 @@ export async function loginAction({ request }) {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       }
     );
 
     if (!response.ok) {
       const resData = await response.json();
-      return { message: resData.message || "An error occurred. Please try again later." };
+      return {
+        message: resData.message || "An error occurred. Please try again later.",
+        authMethod: resData.authMethod || null,
+      };
     }
 
     const resData = await response.json();
-    const token = resData.token;
-    localStorage.setItem("token", token);
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const expiration = new Date(payload.exp * 1000); // exp is in seconds, JS needs ms
-    localStorage.setItem("expiration", expiration.toISOString());
+    setAuth(resData.accessToken, resData.user);
 
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      if (payload.role === "admin" || payload.role === "moderator") {
-        return redirect("/admin");
-      }
-    } catch (err) {
-      console.error("Error parsing token payload:", err);
+    const role = resData.user?.role;
+    if (role === "admin" || role === "moderator") {
+      return redirect("/admin");
     }
     return redirect("/");
   } catch (error) {
@@ -41,7 +40,6 @@ export async function loginAction({ request }) {
   }
 }
 
-// helper used by non-form code (eg. OAuth callback) to perform a login
 export async function googleLogin(tokenId) {
   try {
     const response = await fetch(
@@ -49,6 +47,7 @@ export async function googleLogin(tokenId) {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ tokenId }),
       }
     );
@@ -59,25 +58,10 @@ export async function googleLogin(tokenId) {
     }
 
     const resData = await response.json();
-    const token = resData.token;
-    const user = resData.user || null;
-    localStorage.setItem("token", token);
-    const expiration = new Date();
-    expiration.setHours(expiration.getHours() + 1);
-    localStorage.setItem("expiration", expiration.toISOString());
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
-    }
+    setAuth(resData.accessToken, resData.user);
 
-    let role = null;
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      role = payload.role;
-    } catch (err) {
-      console.error("Error parsing token payload:", err);
-    }
-
-    return { token, role, user };
+    const role = resData.user?.role;
+    return { role, user: resData.user };
   } catch (err) {
     console.error("Error during google login:", err);
     throw err;
@@ -101,7 +85,10 @@ export async function signupAction({ request }) {
 
     if (!response.ok) {
       const resData = await response.json();
-      return { message: resData.message || "An error occurred. Please try again later." };
+      return {
+        message: resData.message || "An error occurred. Please try again later.",
+        authMethod: resData.authMethod || null,
+      };
     }
 
     return redirect("/login");
@@ -109,4 +96,17 @@ export async function signupAction({ request }) {
     console.error("Error during signup:\n", error);
     return { message: "An error occurred. Please try again later." };
   }
+}
+
+export async function logoutAction() {
+  try {
+    await fetch(`${API}users/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch {
+    // clear local state anyway
+  }
+  clearAuth();
+  return redirect("/");
 }

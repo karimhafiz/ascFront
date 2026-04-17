@@ -1,10 +1,11 @@
 import React from "react";
+import { Button, PageContainer, GlassCard } from "../components/ui";
 
 export default function ErrorPage({ error }) {
   return (
-    <div className="bg-gradient-to-tr from-pink-100 via-purple-100 to-indigo-100 min-h-screen flex items-center justify-center p-6">
-      <div className="glass-card shadow-xl rounded-2xl p-10 text-center max-w-lg border border-white/30 backdrop-blur-md">
-        <div className="w-24 h-24 rounded-full bg-red-100/50 flex items-center justify-center mx-auto mb-6">
+    <PageContainer center>
+      <GlassCard className="p-10 text-center max-w-lg">
+        <div className="  w-24 h-24 rounded-full bg-red-100/50 flex items-center justify-center mx-auto w-full mb-6">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-12 w-12 text-red-500"
@@ -20,21 +21,18 @@ export default function ErrorPage({ error }) {
             />
           </svg>
         </div>
-        <h1 className="text-4xl font-bold text-pink-700 mb-4">Oops!</h1>
-        <p className="text-xl text-purple-700 mb-6">Something went wrong.</p>
+        <h1 className="text-4xl font-bold text-base-content mb-4">Oops!</h1>
+        <p className="text-xl text-base-content/70 mb-6">Something went wrong.</p>
         {error && (
           <div className="bg-white/30 p-4 rounded-xl text-left text-red-700 mb-6 backdrop-blur-sm">
             <p className="font-medium">Error details:</p>
             <p className="mt-2">{error.message || "Unknown error"}</p>
           </div>
         )}
-        <button
-          className="btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none hover:scale-105 transition-all duration-300 shadow-md"
-          onClick={() => (window.location.href = "/")}
-        >
+        <Button variant="primary" onClick={() => (window.location.href = "/")}>
           Return to Home
-        </button>
-      </div>
-    </div>
+        </Button>
+      </GlassCard>
+    </PageContainer>
   );
 }

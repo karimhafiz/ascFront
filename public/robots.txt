@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Public content
+Allow: /events/
+Allow: /courses/
+Allow: /about
+Allow: /contact
+
+# Private / app-only routes
+Disallow: /admin
+Disallow: /profile
+Disallow: /tickets/
+Disallow: /login
+Disallow: /signup
+Disallow: /logout
+Disallow: /order-confirmation
+Disallow: /cancel
+Disallow: /team-confirmation
+Disallow: /course-confirmation
+
+Sitemap: /sitemap.xml

@@ -1,0 +1,201 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+import { getAuthToken, getUserRole as getAuthRole, fetchWithAuth } from "../../auth/auth";
+import { PageContainer, Spinner } from "../../components/ui";
+import { roleBadgeClass } from "../../components/admin/adminHelpers";
+import TicketsTab from "../../components/admin/TicketsTab";
+import RevenueTab from "../../components/admin/RevenueTab";
+import TeamsTab from "../../components/admin/TeamsTab";
+import CoursesTab from "../../components/admin/CoursesTab";
+import UsersTab from "../../components/admin/UsersTab";
+
+function getRole() {
+  return getAuthRole();
+}
+
+const TABS = ["Tickets", "Revenue", "Teams", "Courses", "Users"];
+
+export default function AdminDashboard() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("Tickets");
+  const navigate = useNavigate();
+
+  const role = getRole();
+  const isAdmin = role === "admin";
+
+  let currentUserId = null;
+  try {
+    const token = getAuthToken();
+    if (token) currentUserId = JSON.parse(atob(token.split(".")[1])).id;
+  } catch {
+    /* */
+  }
+
+  useEffect(() => {
+    if (!role || (role !== "admin" && role !== "moderator")) {
+      navigate("/");
+      return;
+    }
+
+    fetchWithAuth(import.meta.env.VITE_DEV_URI + "admin/dashboard")
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Failed to load dashboard");
+        return res.json();
+      })
+      .then(setData)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [navigate, role]);
+
+  const handleRoleChange = (userId, newRole) => {
+    setData((prev) => ({
+      ...prev,
+      users: prev.users.map((u) => (u._id === userId ? { ...u, role: newRole } : u)),
+    }));
+  };
+
+  const visibleTabs = isAdmin ? TABS : TABS.filter((t) => t !== "Users");
+
+  if (loading) {
+    return (
+      <PageContainer center>
+        <div className="flex flex-col items-center gap-3">
+          <Spinner />
+          <p className="text-sm text-base-content/70">Loading dashboard…</p>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageContainer center>
+        <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
+          <p className="text-red-500 font-medium">{error}</p>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-tr from-base-200 via-white to-base-200 pt-10 px-4 pb-10">
+      <div className="max-w-5xl mx-auto">
+        {/* Sticky header + tabs */}
+        <div className="sticky top-0 z-20 pb-6 -mx-4 px-4 [mask-image:linear-gradient(black_85%,transparent)] backdrop-blur-xl">
+          <div className="max-w-5xl mx-auto space-y-4 pt-1">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-base-content">
+                  {isAdmin ? "Admin Dashboard" : "Moderator Dashboard"}
+                </h1>
+                <p className="text-xs sm:text-sm text-base-content/50 mt-0.5">
+                  {isAdmin
+                    ? "Full access — manage events, users, and view all data"
+                    : "View-only access to tickets, revenue, and teams"}
+                </p>
+              </div>
+              <span
+                className={
+                  "text-xs font-medium px-3 py-1 rounded-full border capitalize shrink-0 " +
+                  (roleBadgeClass[role] ?? roleBadgeClass.user)
+                }
+              >
+                {role}
+              </span>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-1 bg-white/70 backdrop-blur-sm rounded-2xl border border-base-300 shadow-sm p-1.5 overflow-x-auto">
+              {visibleTabs.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={
+                    "flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap cursor-pointer " +
+                    (activeTab === tab
+                      ? "bg-gradient-to-r from-primary to-primary/70 text-white shadow-sm"
+                      : "text-base-content/50 hover:text-base-content hover:bg-base-100")
+                  }
+                >
+                  {tab}
+                  {tab === "Tickets" && data && (
+                    <span
+                      className={
+                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full " +
+                        (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
+                      }
+                    >
+                      {data.tickets.length}
+                    </span>
+                  )}
+                  {tab === "Teams" && data && (
+                    <span
+                      className={
+                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full " +
+                        (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
+                      }
+                    >
+                      {data.teams.length}
+                    </span>
+                  )}
+                  {tab === "Courses" && data?.enrollments && (
+                    <span
+                      className={
+                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full " +
+                        (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
+                      }
+                    >
+                      {data.enrollments.length}
+                    </span>
+                  )}
+                  {tab === "Users" && data?.users && (
+                    <span
+                      className={
+                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full " +
+                        (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
+                      }
+                    >
+                      {data.users.length}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Tab content */}
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl sm:rounded-3xl border border-base-300 shadow-sm p-3 sm:p-6 mt-2">
+          {activeTab === "Tickets" && <TicketsTab tickets={data.tickets} />}
+          {activeTab === "Revenue" && <RevenueTab events={data.events} />}
+          {activeTab === "Teams" && <TeamsTab teams={data.teams} />}
+          {activeTab === "Courses" && (
+            <CoursesTab enrollments={data.enrollments ?? []} courses={data.courses ?? []} />
+          )}
+          {activeTab === "Users" && isAdmin && (
+            <UsersTab
+              users={data.users}
+              currentUserId={currentUserId}
+              onRoleChange={handleRoleChange}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

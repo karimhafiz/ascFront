@@ -1,0 +1,150 @@
+import React from "react";
+import { QRCodeSVG } from "qrcode.react";
+import { optimizeCloudinaryUrl } from "../../util/util";
+
+function formatDate(dateStr) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+/**
+ * Shared ticket card used by TicketPage and OrderConfirmation.
+ * Props:
+ *   ticket — full ticket object with populated eventId and user
+ *   ticketsInGroup — optional prop with number of tickets in the same payment group (for display on order confirmation)
+ */
+export default function TicketCard({ ticket, ticketsInGroup }) {
+  const event = ticket.eventId;
+  const amountPaid = (event?.ticketPrice ?? 0).toFixed(2);
+  const qrValue = ticket.ticketCode
+    ? `${window.location.origin}/tickets/verify/${ticket.ticketCode}`
+    : `${window.location.origin}/tickets/verify/${ticket._id}`;
+
+  const buyerName = ticket.user?.name ?? null;
+
+  return (
+    <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-base-300">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-primary to-primary/70 px-6 py-5 text-white">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest opacity-75 mb-1">
+              {event?.typeOfEvent === "Sports" ? "Sports Event" : "ASC Event"}
+            </p>
+            <h2 className="text-2xl font-bold leading-tight">{event?.title ?? "Event"}</h2>
+          </div>
+          <div className="flex flex-col gap-1.5 shrink-0 ml-3">
+            <span className="text-xs font-bold px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
+              ✓ Paid
+            </span>
+            {ticket.checkedIn && (
+              <span className="text-xs font-bold px-3 py-1.5 bg-green-400/30 backdrop-blur-sm rounded-full border border-green-300/40">
+                ✓ Checked In
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Event image */}
+      {event?.images?.[0] && (
+        <img
+          src={optimizeCloudinaryUrl(event.images[0])}
+          alt={event.title}
+          className="w-full h-48 object-fill"
+          width="400"
+          height="192"
+        />
+      )}
+
+      {/* Ticket code + QR */}
+      <div className="px-6 py-6 flex items-center justify-between border-b border-dashed border-base-300">
+        <div>
+          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Ticket ID</p>
+          <p className="text-lg sm:text-2xl font-bold text-base-content tracking-widest font-mono">
+            {ticket.ticketCode ?? "—"}
+          </p>
+        </div>
+        <div className="p-3 bg-white rounded-2xl shadow-sm border border-base-300">
+          <QRCodeSVG value={qrValue} size={80} fgColor="#2563EB" level="M" />
+        </div>
+      </div>
+
+      {/* Tear line */}
+      <div className="relative flex items-center">
+        <div className="w-6 h-6 rounded-full bg-base-100 border border-base-300 -ml-3 shrink-0" />
+        <div className="flex-1 border-t-2 border-dashed border-base-300 mx-2" />
+        <div className="w-6 h-6 rounded-full bg-base-100 border border-base-300 -mr-3 shrink-0" />
+      </div>
+
+      {/* Details grid */}
+      <div className="px-6 py-6 grid grid-cols-2 gap-x-6 gap-y-5">
+        <div>
+          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Date</p>
+          <p className="text-sm font-semibold text-base-content">{formatDate(event?.date)}</p>
+        </div>
+        <div>
+          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Time</p>
+          <p className="text-sm font-semibold text-base-content">{event?.openingTime ?? "—"}</p>
+        </div>
+        <div>
+          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Venue</p>
+          <p className="text-sm font-semibold text-base-content">
+            {event?.street ? `${event.street}, ${event.city}` : (event?.city ?? "—")}
+          </p>
+          {event?.postCode && <p className="text-xs text-base-content/50">{event.postCode}</p>}
+        </div>
+        <div>
+          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">
+            {buyerName ? "Name" : "Email"}
+          </p>
+          <p className="text-sm font-semibold text-base-content">
+            {buyerName ?? ticket.buyerEmail}
+          </p>
+          {buyerName && (
+            <p className="text-xs text-base-content/50 truncate">{ticket.buyerEmail}</p>
+          )}
+        </div>
+        <div>
+          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Amount Paid</p>
+          <p className="text-sm font-bold text-base-content">£{amountPaid}</p>
+        </div>
+        {ticketsInGroup && (
+          <div>
+            <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Quantity</p>
+            <p className="text-sm font-semibold text-base-content">
+              {ticketsInGroup} ticket{ticketsInGroup !== 1 ? "s" : ""}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="px-6 pb-6">
+        <div className="bg-base-200 rounded-2xl px-4 py-3 flex items-center gap-3">
+          <svg
+            className="w-4 h-4 text-base-content/50 shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <p className="text-xs text-base-content/70">
+            Present this QR code at the entrance. Screenshot or print for offline access.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

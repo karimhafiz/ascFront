@@ -7,8 +7,18 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "preview": "vite preview",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
   "jest": {
     "testEnvironment": "jsdom",
@@ -19,16 +29,19 @@
       "<rootDir>/jest.setup.js"
     ],
     "moduleNameMapper": {
-      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+      "\\.(svg|png|jpg|jpeg|gif|webp)$": "<rootDir>/__mocks__/fileMock.js"
     }
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@tanstack/react-query": "^5.69.3",
+    "browser-image-compression": "^2.0.2",
     "chart.js": "^4.4.8",
     "jwt-decode": "^4.0.0",
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.48",
+    "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
     "react-big-calendar": "^1.18.0",
     "react-chartjs-2": "^5.3.0",
@@ -54,13 +67,17 @@
     "babel-jest": "^29.7.0",
     "daisyui": "^5.0.9",
     "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
+    "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.0.0",
     "jest-environment-jsdom": "^29.7.0",
+    "lint-staged": "^16.4.0",
     "postcss": "^8.5.3",
+    "prettier": "^3.8.1",
     "tailwindcss": "^4.1.7",
     "util": "^0.12.5",
     "vite": "^6.2.0"
