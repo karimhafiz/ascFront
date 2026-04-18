@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { isAdmin, isModerator, fetchWithAuth } from "../../auth/auth";
-import { formatDateRange, optimizeCloudinaryUrl, toSlug } from "../../util/util";
 import ConfirmModal from "../common/ConfirmModal";
 import { Badge, GlassCard } from "../ui";
+import { fetchWithAuth, isAdmin, isModerator } from "../../auth/auth";
+import { formatDateRange, optimizeCloudinaryUrl, toSlug } from "../../util/util";
 
 const TYPE_COLORS = {
-  ASC: { bg: "from-primary to-primary/70", badge: "primary" },
-  Sports: { bg: "from-accent to-success", badge: "accent" },
+  ASC: { bg: "from-primary to-neutral", badge: "primary" },
+  Sports: { bg: "from-accent to-primary", badge: "accent" },
 };
 
 export default function EventCard({ event }) {
@@ -53,24 +53,26 @@ export default function EventCard({ event }) {
         onCancel={() => setConfirmOpen(false)}
       />
 
-      <div className="group">
-        <GlassCard className="overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+      <div className="group h-full">
+        <GlassCard className="flex h-full flex-col overflow-hidden rounded-[1.75rem] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-strong)]">
           <Link to={`/events/${slug}`} className="block">
-            {/* Image */}
             {event.images && event.images.length > 0 ? (
-              <img
-                src={optimizeCloudinaryUrl(event.images[0])}
-                alt={event.title}
-                className="w-full h-44 object-cover"
-                width="400"
-                height="176"
-              />
+              <div className="relative overflow-hidden">
+                <img
+                  src={optimizeCloudinaryUrl(event.images[0])}
+                  alt={event.title}
+                  className="h-52 w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  width="400"
+                  height="208"
+                />
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/35 to-transparent" />
+              </div>
             ) : (
               <div
-                className={`w-full h-44 bg-gradient-to-br ${colors.bg} flex items-center justify-center`}
+                className={`flex h-52 w-full items-center justify-center bg-gradient-to-br ${colors.bg}`}
               >
                 <svg
-                  className="w-14 h-14 text-white/60"
+                  className="h-14 w-14 text-white/60"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -85,30 +87,26 @@ export default function EventCard({ event }) {
               </div>
             )}
 
-            <div className="p-5">
-              {/* Badges */}
-              <div className="flex items-center flex-wrap gap-1.5 mb-2">
+            <div className="p-6">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
                 <Badge color={colors.badge}>{event.typeOfEvent}</Badge>
                 {isPast && <Badge color="error">Past</Badge>}
-                {event.featured && <Badge color="info">★ Featured</Badge>}
-                {event.isReoccurring && <Badge color="secondary">↻ Recurring</Badge>}
+                {event.featured && <Badge color="info">Featured</Badge>}
+                {event.isReoccurring && <Badge color="secondary">Recurring</Badge>}
               </div>
 
-              {/* Title */}
-              <h3 className="text-lg font-bold text-base-content mb-1 group-hover:text-primary transition-colors line-clamp-2">
+              <h3 className="mb-2 line-clamp-2 text-xl font-semibold tracking-[-0.03em] text-base-content transition-colors group-hover:text-primary">
                 {event.title}
               </h3>
 
-              {/* Short description */}
-              <p className="text-sm text-base-content/70 mb-3 line-clamp-2">
+              <p className="mb-4 line-clamp-3 text-sm leading-6 text-base-content/70">
                 {event.shortDescription}
               </p>
 
-              {/* Info rows */}
-              <div className="space-y-1.5 text-xs text-base-content/70">
-                <div className="flex items-center gap-1.5">
+              <div className="space-y-2 text-sm text-base-content/72">
+                <div className="flex items-start gap-2">
                   <svg
-                    className="w-3.5 h-3.5 flex-shrink-0"
+                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -122,10 +120,11 @@ export default function EventCard({ event }) {
                   </svg>
                   <span>{formatDateRange(event.date)}</span>
                 </div>
+
                 {event.city && (
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-start gap-2">
                     <svg
-                      className="w-3.5 h-3.5 flex-shrink-0"
+                      className="mt-0.5 h-4 w-4 flex-shrink-0 text-secondary"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -149,12 +148,13 @@ export default function EventCard({ event }) {
                     </span>
                   </div>
                 )}
+
                 {(event.ticketPrice != null || event.ticketsAvailable != null) && (
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-4">
                     {event.ticketPrice != null && (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         <svg
-                          className="w-3.5 h-3.5 flex-shrink-0"
+                          className="h-4 w-4 flex-shrink-0 text-accent"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -172,9 +172,9 @@ export default function EventCard({ event }) {
                       </div>
                     )}
                     {event.ticketsAvailable != null && (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         <svg
-                          className="w-3.5 h-3.5 flex-shrink-0"
+                          className="h-4 w-4 flex-shrink-0 text-primary"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -193,11 +193,10 @@ export default function EventCard({ event }) {
                 )}
               </div>
 
-              {/* Category tags */}
               {event.categories && event.categories.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-3">
+                <div className="mt-4 flex flex-wrap gap-2">
                   {event.categories.map((category, index) => (
-                    <Badge key={index} color="info">
+                    <Badge key={index} color="ghost">
                       {category}
                     </Badge>
                   ))}
@@ -206,21 +205,19 @@ export default function EventCard({ event }) {
             </div>
           </Link>
 
-          {/* Delete error */}
           {deleteError && (
-            <p className="mx-5 mb-2 text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">
+            <p className="mx-5 mb-2 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600">
               {deleteError}
             </p>
           )}
 
-          {/* Admin/mod action bar */}
           {canManage && (
-            <div className="flex gap-2 p-3 bg-base-100/50 border-t border-base-300 mt-auto">
+            <div className="mt-auto flex gap-2 border-t border-base-300/80 bg-base-100/70 p-4">
               <button
                 onClick={handleEditEvent}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-base-200 hover:bg-base-300 text-base-content text-xs font-semibold transition-all cursor-pointer"
+                className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-base-300 bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-base-content transition-all hover:border-primary/20 hover:text-primary"
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -232,9 +229,9 @@ export default function EventCard({ event }) {
               </button>
               <button
                 onClick={() => setConfirmOpen(true)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 text-xs font-semibold transition-all cursor-pointer"
+                className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-red-600 transition-all hover:bg-red-100"
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"

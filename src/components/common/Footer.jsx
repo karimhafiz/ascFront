@@ -5,31 +5,28 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-neutral text-neutral-content mt-10">
-      {/* Main footer grid */}
-      <div className="container mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-        {/* Brand */}
+    <footer className="mt-16 border-t border-white/50 bg-neutral text-neutral-content">
+      <div className="page-section grid grid-cols-1 gap-10 px-6 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-1">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-primary/30">
+          <div className="mb-4 flex items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary via-primary to-primary/90 text-sm font-bold text-white shadow-lg shadow-black/20">
               ASC
             </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <span className="text-lg font-semibold tracking-[0.04em] text-white">
               Ayendah Sazan
             </span>
           </div>
-          <p className="text-sm text-neutral-content/60 leading-relaxed">
+          <p className="max-w-xs text-sm leading-relaxed text-neutral-content/68">
             A community-based organisation in Leeds dedicated to bringing people together through
             cultural, educational, and sporting events.
           </p>
         </div>
 
-        {/* Quick links */}
         <div>
-          <h3 className="text-sm font-semibold text-white uppercase tracking-widest mb-4">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-white">
             Quick Links
           </h3>
-          <ul className="space-y-2 text-sm text-neutral-content/60">
+          <ul className="space-y-2 text-sm text-neutral-content/65">
             {[
               { to: "/", label: "Home" },
               { to: "/about", label: "About Us" },
@@ -38,9 +35,9 @@ export default function Footer() {
               <li key={to}>
                 <Link
                   to={to}
-                  className="hover:text-primary transition-colors duration-200 flex items-center gap-1.5 group"
+                  className="group flex items-center gap-2 transition-colors duration-200 hover:text-white"
                 >
-                  <span className="w-1 h-1 rounded-full bg-primary group-hover:bg-primary/80 transition-colors" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-secondary transition-colors group-hover:bg-white" />
                   {label}
                 </Link>
               </li>
@@ -48,12 +45,11 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Programmes */}
         <div>
-          <h3 className="text-sm font-semibold text-white uppercase tracking-widest mb-4">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-white">
             Programmes
           </h3>
-          <ul className="space-y-2 text-sm text-neutral-content/60">
+          <ul className="space-y-2 text-sm text-neutral-content/65">
             {[
               { to: "/events", label: "Events" },
               { to: "/courses", label: "Courses" },
@@ -61,9 +57,9 @@ export default function Footer() {
               <li key={to}>
                 <Link
                   to={to}
-                  className="hover:text-primary transition-colors duration-200 flex items-center gap-1.5 group"
+                  className="group flex items-center gap-2 transition-colors duration-200 hover:text-white"
                 >
-                  <span className="w-1 h-1 rounded-full bg-primary group-hover:bg-primary/80 transition-colors" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-secondary transition-colors group-hover:bg-white" />
                   {label}
                 </Link>
               </li>
@@ -71,15 +67,14 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Contact */}
         <div>
-          <h3 className="text-sm font-semibold text-white uppercase tracking-widest mb-4">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-white">
             Get in Touch
           </h3>
-          <ul className="space-y-3 text-sm text-neutral-content/60">
+          <ul className="space-y-3 text-sm text-neutral-content/68">
             <li className="flex items-start gap-2">
               <svg
-                className="w-4 h-4 mt-0.5 text-primary flex-shrink-0"
+                className="mt-0.5 h-4 w-4 flex-shrink-0 text-secondary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -102,9 +97,9 @@ export default function Footer() {
             <li>
               <Link
                 to="/contact"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/20 hover:bg-primary/40 border border-primary/30 text-primary text-xs font-medium transition-all duration-200"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/8 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition-all duration-200 hover:bg-white/12"
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -119,17 +114,15 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Divider */}
       <div className="border-t border-white/10" />
 
-      {/* Bottom bar */}
-      <div className="container mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-neutral-content/40">
+      <div className="page-section flex flex-col items-center justify-between gap-2 px-6 py-4 text-xs text-neutral-content/45 sm:flex-row">
         <p>&copy; {year} Ayendah Sazan Community Organisation. All rights reserved.</p>
         <div className="flex items-center gap-4">
-          <Link to="/about" className="hover:text-neutral-content/80 transition-colors">
+          <Link to="/about" className="transition-colors hover:text-white">
             About
           </Link>
-          <Link to="/contact" className="hover:text-neutral-content/80 transition-colors">
+          <Link to="/contact" className="transition-colors hover:text-white">
             Contact
           </Link>
         </div>

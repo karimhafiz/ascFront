@@ -98,24 +98,23 @@ export default function EventDetails() {
 
       <EventDetailsBanner event={event} />
 
-      <div className="container mx-auto p-4">
+      <div className="page-section px-2 py-6 md:px-0 md:py-8">
         {event.images && event.images.length > 0 && (
           <img
             src={event.images[0]}
             alt={event.title}
-            className="w-full aspect-[16/9] object-cover rounded-2xl shadow-xl mb-6"
+            className="mb-8 aspect-[16/9] w-full rounded-[2rem] object-cover shadow-[var(--shadow-strong)]"
           />
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Right column on desktop, first on mobile: Ticket Purchase */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="md:col-span-1 md:order-2">
             {!isEventInPast && event.ticketPrice === 0 && !event.isTournament ? (
-              <GlassCard className="shadow-xl">
+              <GlassCard className="rounded-[1.75rem] shadow-xl">
                 <div className="card-body text-center">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center mx-auto mb-3">
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-accent to-primary">
                     <svg
-                      className="w-6 h-6 text-white"
+                      className="h-6 w-6 text-white"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -128,8 +127,8 @@ export default function EventDetails() {
                       />
                     </svg>
                   </div>
-                  <h2 className="card-title text-xl text-green-700 justify-center">Free Entry</h2>
-                  <p className="text-base-content/50 text-sm">
+                  <h2 className="card-title justify-center text-xl text-accent">Free Entry</h2>
+                  <p className="text-sm text-base-content/55">
                     This event is free to attend. Just show up!
                   </p>
                 </div>
@@ -141,7 +140,7 @@ export default function EventDetails() {
                 onTournamentSignup={handleTournamentSignup}
               />
             ) : (
-              <GlassCard className="bg-red-100/30 shadow-xl border-red-300/50">
+              <GlassCard className="rounded-[1.75rem] border-red-300/50 bg-red-100/30 shadow-xl">
                 <div className="card-body">
                   <h2 className="card-title text-xl text-red-600">Event Has Ended</h2>
                   <p className="text-red-500">
@@ -155,14 +154,13 @@ export default function EventDetails() {
             )}
           </div>
 
-          {/* Left column on desktop, second on mobile: Event Details */}
           <div className="md:col-span-2 md:order-1 space-y-6">
             <EventInfoGrid event={event} />
 
-            <GlassCard className="shadow-xl">
+            <GlassCard className="rounded-[1.75rem] shadow-xl">
               <div className="card-body">
                 <h2 className="card-title text-xl text-base-content">About This Event</h2>
-                <div className="prose max-w-none text-base-content/80">
+                <div className="prose max-w-none text-base-content/80 prose-headings:text-base-content prose-p:leading-7">
                   <p>{event.longDescription}</p>
                 </div>
               </div>
@@ -172,12 +170,11 @@ export default function EventDetails() {
           </div>
         </div>
 
-        {/* Share + Back row */}
-        <div className="mt-8 mb-4 flex items-center justify-between gap-3 flex-wrap">
+        <div className="mt-8 mb-4 flex flex-wrap items-center justify-between gap-3">
           <Button variant="secondary" onClick={handleBack}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-2"
+              className="mr-2 h-5 w-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -193,7 +190,7 @@ export default function EventDetails() {
           </Button>
           <button
             onClick={handleShare}
-            className="btn bg-[#1877F2] hover:bg-[#166FE5] text-white border-none shadow-md hover:shadow-lg transition-all duration-200"
+            className="btn border-0 bg-[#1877F2] text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#166FE5] hover:shadow-lg"
             aria-label="Share on Facebook"
           >
             <svg
@@ -210,7 +207,6 @@ export default function EventDetails() {
           </button>
         </div>
 
-        {/* TeamSignupForm Modal */}
         {showTeamSignup && (
           <TeamSignupForm
             eventId={eventId}

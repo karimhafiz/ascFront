@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import emailjs from "@emailjs/browser";
 
+import { Button } from "../../components/ui";
+
 export default function Contact() {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -147,13 +149,9 @@ export default function Contact() {
               ></textarea>
             </div>
             <div className="text-center">
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-primary to-secondary text-white font-semibold py-3 rounded-xl transition-all duration-300 shadow-md cursor-pointer"
-                disabled={isSubmitting}
-              >
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? "Sending..." : "Send Message"}
-              </button>
+              </Button>
             </div>
             {successMessage && (
               <div className="mt-4 flex items-center gap-2 bg-green-50/80 border border-green-200 text-green-700 text-sm p-3 rounded-xl backdrop-blur-sm">

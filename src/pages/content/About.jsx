@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
-import { isAdmin, isModerator, fetchWithAuth } from "../../auth/auth";
-import { compressImage } from "../../util/compressImage";
+import React, { useEffect, useRef, useState } from "react";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import { Button } from "../../components/ui";
+import { fetchWithAuth, isAdmin, isModerator } from "../../auth/auth";
+import { compressImage } from "../../util/compressImage";
 
 const DEFAULT_CARDS = [
   {
@@ -44,55 +44,113 @@ const DEFAULTS = {
     "Join us in making a difference! Whether you want to volunteer, attend an event, or support our initiatives, there are many ways to get involved with Ayendah Sazan.",
 };
 
-function mergeWithDefaults(saved) {
-  return {
-    ...DEFAULTS,
-    ...saved,
-    activityCards: saved.activityCards?.length
-      ? saved.activityCards.map((c, i) => ({
-          ...DEFAULT_CARDS[i],
-          ...c,
-          image: c.image || DEFAULT_CARDS[i].image,
-        }))
-      : DEFAULTS.activityCards,
-  };
-}
-
-function EditableField({ editing, value, onChange, className, multiline, placeholder, rows = 3 }) {
-  if (!editing)
-    return multiline ? (
-      <p className={className}>{value}</p>
-    ) : (
-      <span className={className}>{value}</span>
-    );
-
-  if (multiline)
-    return (
-      <textarea
-        rows={rows}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="glass-input text-sm resize-none"
-      />
-    );
-
-  return (
-    <input
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="glass-input text-sm"
-    />
-  );
-}
-
 const SECTION_LABELS = {
   hero: "the hero section",
   cards: "all activity cards",
   mission: "the mission section",
   getInvolved: "the Get Involved section",
 };
+
+function mergeWithDefaults(saved) {
+  return {
+    ...DEFAULTS,
+    ...saved,
+    activityCards: saved.activityCards?.length
+      ? saved.activityCards.map((card, index) => ({
+          ...DEFAULT_CARDS[index],
+          ...card,
+          image: card.image || DEFAULT_CARDS[index].image,
+        }))
+      : DEFAULTS.activityCards,
+  };
+}
+
+function SectionIntro({ kicker, title, copy }) {
+  return (
+    <div className="mb-8 max-w-3xl">
+      <span className="section-kicker mb-4">{kicker}</span>
+      <h2 className="section-heading mb-3">{title}</h2>
+      {copy && <p className="section-subcopy">{copy}</p>}
+    </div>
+  );
+}
+
+function ActivityCard({
+  card,
+  index,
+  imgSrc,
+  editing,
+  onTitleChange,
+  onDescriptionChange,
+  onImagePick,
+  imageRef,
+}) {
+  return (
+    <article
+      className={`glass-card overflow-hidden rounded-[1.75rem] ${
+        editing ? "ring-2 ring-primary/20" : ""
+      }`}
+    >
+      <div className="relative aspect-[16/10] min-h-[220px] overflow-hidden">
+        <img
+          src={imgSrc}
+          alt={card.title}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-neutral/60 via-neutral/10 to-transparent" />
+        <div className="absolute bottom-4 left-4 right-4">
+          <span className="section-kicker border-white/15 bg-white/10 text-white shadow-none">
+            Programme {index + 1}
+          </span>
+        </div>
+        {editing && (
+          <>
+            <button
+              onClick={onImagePick}
+              className="absolute right-4 top-4 rounded-full border border-white/60 bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary shadow-md hover:bg-white"
+            >
+              Change Image
+            </button>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              ref={imageRef}
+              onChange={(e) => onImagePick(e.target.files[0])}
+            />
+          </>
+        )}
+      </div>
+
+      <div className="p-5 sm:p-6">
+        {editing ? (
+          <div className="space-y-4">
+            <input
+              className="glass-input text-base font-semibold text-primary"
+              value={card.title}
+              onChange={(e) => onTitleChange(e.target.value)}
+            />
+            <textarea
+              rows={4}
+              className="glass-input resize-none text-sm"
+              value={card.description}
+              onChange={(e) => onDescriptionChange(e.target.value)}
+            />
+          </div>
+        ) : (
+          <>
+            <h3 className="mb-3 text-2xl font-semibold tracking-[-0.03em] text-base-content">
+              {card.title}
+            </h3>
+            <p className="text-sm leading-7 text-base-content/72 sm:text-base">
+              {card.description}
+            </p>
+          </>
+        )}
+      </div>
+    </article>
+  );
+}
 
 export default function About() {
   const canEdit = isAdmin() || isModerator();
@@ -105,12 +163,12 @@ export default function About() {
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [saveError, setSaveError] = useState(null);
-  const [pendingReset, setPendingReset] = useState(null); // section key or "all"
+  const [pendingReset, setPendingReset] = useState(null);
   const cardImageRefs = useRef([]);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_DEV_URI}pageContent/about`)
-      .then((r) => r.json())
+      .then((response) => response.json())
       .then((data) => {
         if (data && Object.keys(data).length > 0) {
           const merged = mergeWithDefaults(data);
@@ -143,6 +201,7 @@ export default function About() {
     setPendingReset(null);
     setResetting(true);
     setSaveError(null);
+
     try {
       const url =
         section === "all"
@@ -177,7 +236,9 @@ export default function About() {
   };
 
   const updateCard = (index, field, value) => {
-    const cards = draft.activityCards.map((c, i) => (i === index ? { ...c, [field]: value } : c));
+    const cards = draft.activityCards.map((card, cardIndex) =>
+      cardIndex === index ? { ...card, [field]: value } : card
+    );
     setDraft({ ...draft, activityCards: cards });
   };
 
@@ -191,7 +252,6 @@ export default function About() {
   const handleSave = async () => {
     setSaveError(null);
 
-    // ── Client-side validation ──
     const errors = [];
     if (!draft.aboutHeroTitle?.trim()) errors.push("Hero title cannot be empty.");
     if (!draft.aboutHeroDescription?.trim()) errors.push("Hero description cannot be empty.");
@@ -199,10 +259,11 @@ export default function About() {
     if (!draft.missionText?.trim()) errors.push("Mission text cannot be empty.");
     if (!draft.getInvolvedTitle?.trim()) errors.push("Get Involved title cannot be empty.");
     if (!draft.getInvolvedText?.trim()) errors.push("Get Involved text cannot be empty.");
-    draft.activityCards.forEach((card, i) => {
-      if (!card.title?.trim()) errors.push(`Activity card ${i + 1} title cannot be empty.`);
-      if (!card.description?.trim())
-        errors.push(`Activity card ${i + 1} description cannot be empty.`);
+    draft.activityCards.forEach((card, index) => {
+      if (!card.title?.trim()) errors.push(`Activity card ${index + 1} title cannot be empty.`);
+      if (!card.description?.trim()) {
+        errors.push(`Activity card ${index + 1} description cannot be empty.`);
+      }
     });
     if (errors.length > 0) {
       setSaveError(errors.join(" "));
@@ -236,6 +297,7 @@ export default function About() {
         const body = await res.json().catch(() => null);
         throw new Error(body?.message || `Server error (${res.status})`);
       }
+
       const { pageContent: saved } = await res.json();
       setPageContent(mergeWithDefaults(saved));
       setEditing(false);
@@ -251,8 +313,10 @@ export default function About() {
   const resetLabel =
     pendingReset === "all" ? "the entire about page" : SECTION_LABELS[pendingReset];
 
+  const cards = editing ? draft.activityCards : pageContent.activityCards;
+
   return (
-    <div className="container mx-auto p-6">
+    <div className="pb-12">
       <ConfirmModal
         isOpen={!!pendingReset}
         title="Reset to Defaults?"
@@ -261,56 +325,38 @@ export default function About() {
         onConfirm={doReset}
         onCancel={() => setPendingReset(null)}
       />
-      {/* ── Edit toolbar ── */}
+
       {canEdit && (
-        <div className="sticky top-16 z-40 flex justify-end gap-2 -mx-6 px-6 py-2 mb-4 bg-white/60 backdrop-blur-sm border-b border-white/40">
+        <div className="sticky top-20 z-40 mx-auto mb-6 mt-6 flex w-[min(1200px,calc(100%-2rem))] flex-wrap justify-end gap-2 rounded-3xl border border-white/60 bg-white/75 px-4 py-3 shadow-[var(--shadow-soft)] backdrop-blur-xl">
           {!editing ? (
-            <button
-              onClick={handleEdit}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-medium shadow-primary/20 transition-all cursor-pointer"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
+            <Button variant="primary" onClick={handleEdit}>
               Edit Page
-            </button>
+            </Button>
           ) : (
             <>
-              <button
-                onClick={handleCancel}
-                className="px-4 py-2 rounded-full bg-white border border-base-300 text-primary text-sm font-medium shadow hover:bg-base-200 hover:border-base-300 hover:shadow-md transition-all cursor-pointer"
-              >
+              <Button variant="secondary" onClick={handleCancel}>
                 Cancel
-              </button>
+              </Button>
               <button
                 onClick={() => resetSection("all")}
                 disabled={resetting}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-amber-300 text-amber-700 text-sm font-medium shadow hover:bg-amber-50 transition-all disabled:opacity-60 cursor-pointer"
+                className="btn border border-warning/25 bg-warning/10 text-warning-content hover:bg-warning/15"
               >
-                {resetting ? "Resetting…" : "Reset All to Defaults"}
+                {resetting ? "Resetting..." : "Reset All to Defaults"}
               </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-medium shadow-primary/20 transition-all disabled:opacity-60 cursor-pointer"
-              >
-                {saving ? "Saving…" : "Save Changes"}
-              </button>
+              <Button variant="primary" onClick={handleSave} disabled={saving}>
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
             </>
           )}
         </div>
       )}
 
       {saveError && (
-        <div className="fixed top-28 sm:top-36 right-3 sm:right-6 z-50 max-w-[calc(100vw-1.5rem)] sm:max-w-sm bg-red-50/95 backdrop-blur-sm border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl shadow-lg animate-scale-in">
+        <div className="fixed right-3 top-28 z-50 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-red-200 bg-red-50/95 px-4 py-3 text-sm text-red-600 shadow-lg backdrop-blur-sm animate-scale-in sm:right-6 sm:top-36 sm:max-w-sm">
           <div className="flex items-start gap-2">
             <svg
-              className="w-4 h-4 mt-0.5 flex-shrink-0"
+              className="mt-0.5 h-4 w-4 flex-shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -323,14 +369,14 @@ export default function About() {
               />
             </svg>
             <div>
-              <p className="font-medium mb-0.5">Could not save</p>
+              <p className="mb-0.5 font-medium">Could not save</p>
               <p className="text-xs leading-relaxed">{saveError}</p>
             </div>
             <button
               onClick={() => setSaveError(null)}
-              className="ml-auto text-red-400 hover:text-red-600 flex-shrink-0 cursor-pointer"
+              className="ml-auto flex-shrink-0 text-red-400 hover:text-red-600"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -343,207 +389,182 @@ export default function About() {
         </div>
       )}
 
-      {/* ── Hero ── */}
-      <div
-        className={`text-center mb-12 ${editing ? "bg-white/40 rounded-2xl p-6 ring-2 ring-primary/20" : ""}`}
-      >
-        {editing ? (
-          <>
-            <input
-              className="glass-input text-center text-3xl font-bold text-primary mb-3"
-              value={draft.aboutHeroTitle}
-              onChange={(e) => setDraft({ ...draft, aboutHeroTitle: e.target.value })}
-            />
-            <textarea
-              rows={3}
-              className="glass-input text-center text-lg resize-none"
-              value={draft.aboutHeroDescription}
-              onChange={(e) => setDraft({ ...draft, aboutHeroDescription: e.target.value })}
-            />
-            <button
-              onClick={() => resetSection("hero")}
-              disabled={resetting}
-              className="mt-3 px-3 py-1.5 rounded-full bg-white border border-amber-300 text-amber-700 text-xs font-medium shadow hover:bg-amber-50 transition-all disabled:opacity-60 cursor-pointer"
-            >
-              Reset to Defaults
-            </button>
-          </>
-        ) : (
-          <>
-            <h1 className="text-3xl sm:text-4xl font-bold text-base-content mb-4">
-              {pageContent.aboutHeroTitle}
-            </h1>
-            <p className="text-lg text-base-content/80">{pageContent.aboutHeroDescription}</p>
-          </>
-        )}
-      </div>
-
-      {/* ── What We Do ── */}
-      <div className="mb-12">
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <h2 className="text-3xl font-bold text-base-content">What We Do</h2>
-          {editing && (
-            <button
-              onClick={() => resetSection("cards")}
-              disabled={resetting}
-              className="px-3 py-1.5 rounded-full bg-white border border-amber-300 text-amber-700 text-xs font-medium shadow hover:bg-amber-50 transition-all disabled:opacity-60 cursor-pointer"
-            >
-              Reset to Defaults
-            </button>
-          )}
+      <section className="page-section pt-4 md:pt-6">
+        <div
+          className={`hero-panel rounded-[2rem] px-6 py-8 md:px-10 md:py-10 ${
+            editing ? "ring-2 ring-secondary/35" : ""
+          }`}
+        >
+          <div className="mx-auto max-w-4xl text-center">
+            <span className="section-kicker mb-5 border-white/10 bg-white/8 text-white">
+              About Us
+            </span>
+            {editing ? (
+              <div className="space-y-4">
+                <input
+                  className="glass-input text-center text-3xl font-bold text-primary"
+                  value={draft.aboutHeroTitle}
+                  onChange={(e) => setDraft({ ...draft, aboutHeroTitle: e.target.value })}
+                />
+                <textarea
+                  rows={4}
+                  className="glass-input text-center text-base resize-none"
+                  value={draft.aboutHeroDescription}
+                  onChange={(e) => setDraft({ ...draft, aboutHeroDescription: e.target.value })}
+                />
+                <Button
+                  variant="secondary"
+                  onClick={() => resetSection("hero")}
+                  disabled={resetting}
+                >
+                  Reset Hero
+                </Button>
+              </div>
+            ) : (
+              <>
+                <h1 className="mb-4 text-4xl font-semibold tracking-[-0.04em] text-white md:text-5xl lg:text-6xl">
+                  {pageContent.aboutHeroTitle}
+                </h1>
+                <p className="mx-auto max-w-3xl text-base leading-8 text-neutral-content/82 md:text-lg">
+                  {pageContent.aboutHeroDescription}
+                </p>
+              </>
+            )}
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {(editing ? draft.activityCards : pageContent.activityCards).map((card, i) => {
-            const imgSrc = cardImagePreviews[i] || card.image;
-            return (
-              <div
-                key={i}
-                className={`glass-card overflow-hidden transition-all ${editing ? "ring-2 ring-primary/20" : ""}`}
-              >
-                <div className="relative w-full h-48 sm:h-64">
-                  <img
-                    src={imgSrc}
-                    alt={card.title}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  {editing && (
-                    <>
-                      <button
-                        onClick={() => cardImageRefs.current[i]?.click()}
-                        className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 rounded-full text-xs font-medium text-primary shadow hover:bg-white transition-all cursor-pointer"
-                      >
-                        <svg
-                          className="w-3.5 h-3.5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                        Change
-                      </button>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        ref={(el) => (cardImageRefs.current[i] = el)}
-                        onChange={(e) => handleCardImageChange(i, e.target.files[0])}
-                      />
-                    </>
-                  )}
-                </div>
-                <div className="p-6 text-center space-y-2">
-                  {editing ? (
-                    <>
-                      <input
-                        className="glass-input text-center font-semibold text-primary py-1.5"
-                        value={card.title}
-                        onChange={(e) => updateCard(i, "title", e.target.value)}
-                      />
-                      <textarea
-                        rows={3}
-                        className="glass-input text-center text-sm resize-none py-1.5"
-                        value={card.description}
-                        onChange={(e) => updateCard(i, "description", e.target.value)}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <h3 className="text-xl font-semibold text-base-content mb-2">{card.title}</h3>
-                      <p className="text-base-content/70">{card.description}</p>
-                    </>
-                  )}
+      </section>
+
+      <section className="page-section py-6 md:py-8">
+        <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
+          <div
+            className={`glass-card rounded-[2rem] p-7 sm:p-8 ${editing ? "ring-2 ring-primary/20" : ""}`}
+          >
+            <span className="section-kicker mb-4">Our Mission</span>
+            {editing ? (
+              <div className="space-y-4">
+                <input
+                  className="glass-input text-2xl font-bold text-primary"
+                  value={draft.missionTitle}
+                  onChange={(e) => setDraft({ ...draft, missionTitle: e.target.value })}
+                />
+                <textarea
+                  rows={6}
+                  className="glass-input resize-none"
+                  value={draft.missionText}
+                  onChange={(e) => setDraft({ ...draft, missionText: e.target.value })}
+                />
+                <Button
+                  variant="secondary"
+                  onClick={() => resetSection("mission")}
+                  disabled={resetting}
+                >
+                  Reset Mission
+                </Button>
+              </div>
+            ) : (
+              <>
+                <h2 className="mb-5 text-3xl font-semibold tracking-[-0.03em] text-base-content">
+                  {pageContent.missionTitle}
+                </h2>
+                <p className="text-base leading-7 text-base-content/76 sm:text-lg sm:leading-8">
+                  {pageContent.missionText}
+                </p>
+              </>
+            )}
+          </div>
+
+          <div
+            className={`hero-panel rounded-[2rem] p-7 sm:p-8 ${editing ? "ring-2 ring-secondary/30" : ""}`}
+          >
+            <span className="section-kicker mb-4 border-white/10 bg-white/8 text-white">
+              Get Involved
+            </span>
+            {editing ? (
+              <div className="space-y-4">
+                <input
+                  className="glass-input text-2xl font-bold text-primary"
+                  value={draft.getInvolvedTitle}
+                  onChange={(e) => setDraft({ ...draft, getInvolvedTitle: e.target.value })}
+                />
+                <textarea
+                  rows={5}
+                  className="glass-input resize-none"
+                  value={draft.getInvolvedText}
+                  onChange={(e) => setDraft({ ...draft, getInvolvedText: e.target.value })}
+                />
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    variant="secondary"
+                    onClick={() => resetSection("getInvolved")}
+                    disabled={resetting}
+                  >
+                    Reset Section
+                  </Button>
+                  <Button variant="primary" disabled>
+                    Contact Us
+                  </Button>
                 </div>
               </div>
+            ) : (
+              <>
+                <h2 className="mb-5 text-3xl font-semibold tracking-[-0.03em] text-white">
+                  {pageContent.getInvolvedTitle}
+                </h2>
+                <p className="mb-6 text-base leading-7 text-neutral-content/82 sm:text-base sm:leading-8">
+                  {pageContent.getInvolvedText}
+                </p>
+                <Button variant="secondary" to="/contact">
+                  Contact Us
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="page-section py-8 md:py-10">
+        <SectionIntro
+          kicker="What We Do"
+          title="Community programmes at a glance"
+          copy="After understanding our purpose, this section gives a quick picture of the programmes and spaces we create for the community."
+        />
+
+        {editing && (
+          <div className="mb-6 flex justify-end">
+            <Button variant="secondary" onClick={() => resetSection("cards")} disabled={resetting}>
+              Reset Programme Cards
+            </Button>
+          </div>
+        )}
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          {cards.map((card, index) => {
+            const imgSrc = cardImagePreviews[index] || card.image;
+
+            return (
+              <ActivityCard
+                key={index}
+                card={card}
+                index={index}
+                imgSrc={imgSrc}
+                editing={editing}
+                onTitleChange={(value) => updateCard(index, "title", value)}
+                onDescriptionChange={(value) => updateCard(index, "description", value)}
+                onImagePick={(file) => {
+                  if (file instanceof File) {
+                    handleCardImageChange(index, file);
+                  } else {
+                    cardImageRefs.current[index]?.click();
+                  }
+                }}
+                imageRef={(element) => {
+                  cardImageRefs.current[index] = element;
+                }}
+              />
             );
           })}
         </div>
-      </div>
-
-      {/* ── Mission ── */}
-      <div
-        className={`mb-12 text-center glass-card max-w-3xl mx-auto p-8 transition-all ${editing ? "ring-2 ring-primary/20" : ""}`}
-      >
-        {editing ? (
-          <>
-            <input
-              className="glass-input text-center text-2xl font-bold text-primary mb-4"
-              value={draft.missionTitle}
-              onChange={(e) => setDraft({ ...draft, missionTitle: e.target.value })}
-            />
-            <textarea
-              rows={4}
-              className="glass-input text-center resize-none"
-              value={draft.missionText}
-              onChange={(e) => setDraft({ ...draft, missionText: e.target.value })}
-            />
-            <button
-              onClick={() => resetSection("mission")}
-              disabled={resetting}
-              className="mt-3 px-3 py-1.5 rounded-full bg-white border border-amber-300 text-amber-700 text-xs font-medium shadow hover:bg-amber-50 transition-all disabled:opacity-60 cursor-pointer"
-            >
-              Reset to Defaults
-            </button>
-          </>
-        ) : (
-          <>
-            <h2 className="text-3xl font-bold text-base-content mb-6">
-              {pageContent.missionTitle}
-            </h2>
-            <p className="text-lg text-base-content/80 mx-auto max-w-3xl">
-              {pageContent.missionText}
-            </p>
-          </>
-        )}
-      </div>
-
-      {/* ── Get Involved ── */}
-      <div
-        className={`text-center glass-card max-w-2xl mx-auto p-8 transition-all ${editing ? "ring-2 ring-primary/20" : ""}`}
-      >
-        {editing ? (
-          <>
-            <input
-              className="glass-input text-center text-2xl font-bold text-primary mb-4"
-              value={draft.getInvolvedTitle}
-              onChange={(e) => setDraft({ ...draft, getInvolvedTitle: e.target.value })}
-            />
-            <textarea
-              rows={3}
-              className="glass-input text-center resize-none mb-4"
-              value={draft.getInvolvedText}
-              onChange={(e) => setDraft({ ...draft, getInvolvedText: e.target.value })}
-            />
-            <div className="flex gap-3 justify-center">
-              <Button
-                variant="danger"
-                onClick={() => resetSection("getInvolved")}
-                disabled={resetting}
-              >
-                Reset to Defaults
-              </Button>
-              <Button variant="primary" disabled>
-                Contact Us
-              </Button>
-            </div>
-          </>
-        ) : (
-          <>
-            <h2 className="text-3xl font-bold text-base-content mb-6">
-              {pageContent.getInvolvedTitle}
-            </h2>
-            <p className="text-lg text-base-content/80 mb-6">{pageContent.getInvolvedText}</p>
-            <Button variant="primary" to="/contact">
-              Contact Us
-            </Button>
-          </>
-        )}
-      </div>
+      </section>
     </div>
   );
 }

@@ -7,7 +7,7 @@ export default function MyTeamsSection({ teams }) {
   return (
     <GlassCard className="shadow-xl">
       <div className="card-body">
-        <h2 className="card-title text-xl text-base-content">My Teams ({teams.length})</h2>
+        <h2 className="card-title text-xl text-base-content">Teams ({teams.length})</h2>
 
         <div className="space-y-3 mt-2">
           {teams.map((team) => (

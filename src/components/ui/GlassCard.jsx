@@ -1,13 +1,12 @@
 import React from "react";
 
 /**
- * Frosted-glass card container used throughout the app.
- * Wraps content with consistent glassmorphism styling.
+ * Elevated surface container used across the app.
  */
 export default function GlassCard({ className = "", children, ...props }) {
   return (
     <div
-      className={`glass-card rounded-2xl shadow-lg border border-white/30 backdrop-blur-md ${className}`}
+      className={`glass-card rounded-3xl border border-[var(--surface-border)] shadow-[var(--shadow-soft)] ${className}`}
       {...props}
     >
       {children}

@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
-import { isAuthenticated, isAdmin, parseJwt, getAuthToken, clearAuth } from "../../auth/auth";
+import { clearAuth, getAuthToken, isAdmin, isAuthenticated, parseJwt } from "../../auth/auth";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,11 +10,11 @@ export default function Navbar() {
   const userDropdownRef = useRef(null);
   const userCloseTimer = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const authenticated = isAuthenticated();
   const admin = isAdmin();
 
-  // Get user email from JWT for the dropdown label
   const userEmail = (() => {
     try {
       const payload = parseJwt(getAuthToken());
@@ -32,8 +31,6 @@ export default function Navbar() {
 
   const isActive = (path) => location.pathname === path;
 
-  const navigate = useNavigate();
-
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
@@ -42,28 +39,18 @@ export default function Navbar() {
         credentials: "include",
       });
     } catch {
-      // clear local state anyway
+      // Clear local auth state even if the network request fails.
     }
     clearAuth();
     navigate("/");
   };
 
-  // Add scroll effect for the navbar
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  // Close the menu when clicking outside
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       const isMenuToggleButton = event.target.closest('button[aria-label="Toggle menu"]');
@@ -74,57 +61,55 @@ export default function Navbar() {
         setUserDropdownOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
   const menuClasses = isMenuOpen ? "block" : "hidden";
 
   const linkClass = (active) =>
-    `relative group flex items-center px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full transition-all duration-300 ${
+    `relative group flex items-center rounded-full px-3 py-2 text-sm transition-all duration-300 lg:px-4 lg:py-2 xl:px-5 xl:py-2.5 xl:text-base ${
       active
-        ? "bg-primary/15 text-primary font-semibold shadow-sm"
-        : "text-base-content/70 hover:bg-base-200 hover:shadow-sm"
+        ? "bg-primary/10 text-primary shadow-sm shadow-primary/10 font-semibold"
+        : "text-base-content/72 hover:bg-base-200/80 hover:text-base-content hover:shadow-sm"
     }`;
 
   const indicator = (active) => (
     <>
       {active && (
-        <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-primary rounded-full"></span>
+        <span className="absolute bottom-0.5 left-1/2 hidden h-0.5 w-1/2 -translate-x-1/2 rounded-full bg-secondary lg:block" />
       )}
-      <span className="hidden lg:block absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-primary rounded-full group-hover:w-1/2 transition-all duration-300"></span>
+      <span className="absolute bottom-0.5 left-1/2 hidden h-0.5 w-0 -translate-x-1/2 rounded-full bg-secondary transition-all duration-300 group-hover:w-1/2 lg:block" />
     </>
   );
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white/92 backdrop-blur-xl shadow-lg py-2"
-          : "bg-white/75 backdrop-blur-md py-3 lg:py-4"
+          ? "border-b border-white/60 bg-white/88 py-2 shadow-[0_18px_50px_-30px_rgba(16,38,58,0.5)] backdrop-blur-2xl"
+          : "border-b border-transparent bg-white/60 py-3 backdrop-blur-xl lg:py-4"
       }`}
     >
-      <div className="flex justify-between items-center px-4 lg:px-4 xl:px-8">
-        {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2 group shrink-0">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
+      <div className="page-section flex items-center justify-between px-4 lg:px-4 xl:px-6">
+        <Link to="/" className="group flex shrink-0 items-center space-x-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary via-primary to-primary/90 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105">
             ASC
           </div>
-          <span className="text-lg lg:text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent drop-shadow-sm group-hover:tracking-wider transition-all duration-300  sm:inline">
+          <span className="text-lg font-semibold tracking-[0.06em] text-base-content transition-colors duration-300 group-hover:text-primary lg:text-xl">
             Ayendah Sazan
           </span>
-        </Link>{" "}
-        {/* Hamburger Menu for Mobile */}{" "}
-        <button
-          className="block lg:hidden text-base-content/70 focus:outline-none bg-white/60 hover:bg-base-200 rounded-full p-2 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent event bubbling
+        </Link>
 
+        <button
+          className="block cursor-pointer rounded-full border border-base-300/80 bg-white/80 p-2 text-base-content/70 shadow-md transition-all duration-300 hover:bg-white hover:shadow-lg focus:outline-none lg:hidden"
+          onClick={(e) => {
+            e.stopPropagation();
             if (isMenuOpen) {
-              // If menu is open, explicitly close it
               setIsMenuOpen(false);
               setUserDropdownOpen(false);
             } else {
-              // If menu is closed, open it
               setIsMenuOpen(true);
             }
           }}
@@ -147,7 +132,7 @@ export default function Navbar() {
             </svg>
           ) : (
             <svg
-              className="w-6 h-6"
+              className="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -158,20 +143,20 @@ export default function Navbar() {
                 strokeLinejoin="round"
                 strokeWidth="2"
                 d="M4 6h16M4 12h16m-7 6h7"
-              ></path>
+              />
             </svg>
           )}
-        </button>{" "}
-        {/* Navigation Links */}{" "}
+        </button>
+
         <ul
           ref={menuRef}
-          className={`${menuClasses} lg:flex lg:items-center space-y-6 lg:space-y-0 lg:space-x-2 xl:space-x-5 absolute lg:static top-full left-0 w-full lg:w-auto bg-white/95 lg:bg-transparent backdrop-blur-xl p-6 lg:p-0 rounded-b-2xl shadow-xl lg:shadow-none border-x border-b border-white/30 lg:border-none transition-all duration-300 animate-fadeIn`}
+          className={`${menuClasses} absolute left-0 top-full w-full space-y-6 rounded-b-3xl border-x border-b border-white/50 bg-white/95 p-6 shadow-[0_20px_50px_-30px_rgba(16,38,58,0.6)] backdrop-blur-2xl transition-all duration-300 animate-fadeIn lg:static lg:flex lg:w-auto lg:items-center lg:space-x-2 lg:space-y-0 lg:border-none lg:bg-transparent lg:p-0 lg:shadow-none xl:space-x-5`}
         >
           <li>
             <Link to="/" className={linkClass(isActive("/"))} onClick={closeMenu}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 xl:h-5 xl:w-5 mr-1.5"
+                className="mr-1.5 h-4 w-4 xl:h-5 xl:w-5"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -189,7 +174,7 @@ export default function Navbar() {
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 xl:h-5 xl:w-5 mr-1.5"
+                className="mr-1.5 h-4 w-4 xl:h-5 xl:w-5"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -207,7 +192,7 @@ export default function Navbar() {
             <Link to="/courses" className={linkClass(isActive("/courses"))} onClick={closeMenu}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 xl:h-5 xl:w-5 mr-1.5 shrink-0"
+                className="mr-1.5 h-4 w-4 shrink-0 xl:h-5 xl:w-5"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -221,7 +206,7 @@ export default function Navbar() {
             <Link to="/about" className={linkClass(isActive("/about"))} onClick={closeMenu}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 xl:h-5 xl:w-5 mr-1.5 shrink-0"
+                className="mr-1.5 h-4 w-4 shrink-0 xl:h-5 xl:w-5"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -239,7 +224,7 @@ export default function Navbar() {
             <Link to="/contact" className={linkClass(isActive("/contact"))} onClick={closeMenu}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 xl:h-5 xl:w-5 mr-1.5"
+                className="mr-1.5 h-4 w-4 xl:h-5 xl:w-5"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -250,7 +235,6 @@ export default function Navbar() {
               {indicator(isActive("/contact"))}
             </Link>
           </li>
-          {/* authentication links */}
           {!authenticated && (
             <>
               <li>
@@ -275,7 +259,6 @@ export default function Navbar() {
               </Link>
             </li>
           )}
-          {/* ── User dropdown ── */}
           {authenticated && (
             <li
               ref={userDropdownRef}
@@ -298,18 +281,22 @@ export default function Navbar() {
                     setUserDropdownOpen((prev) => !prev);
                   }
                 }}
-                className={`flex items-center gap-2 px-3 py-2 lg:py-2 lg:px-4 xl:py-2.5 xl:px-5 text-sm lg:text-sm xl:text-base rounded-full cursor-pointer transition-all duration-300 ${
-                  userDropdownOpen ? "bg-primary/15 shadow-sm" : "hover:bg-base-200 hover:shadow-sm"
+                className={`flex cursor-pointer items-center gap-2 rounded-full px-3 py-2 text-sm transition-all duration-300 lg:px-4 lg:py-2 xl:px-5 xl:py-2.5 xl:text-base ${
+                  userDropdownOpen
+                    ? "bg-primary/10 shadow-sm shadow-primary/10"
+                    : "hover:bg-base-200/80 hover:shadow-sm"
                 }`}
               >
-                <div className="w-7 h-7 xl:w-8 xl:h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm shadow-primary/20">
+                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-primary text-xs font-bold text-white shadow-sm shadow-primary/20 xl:h-8 xl:w-8">
                   {userEmail ? userEmail[0].toUpperCase() : "?"}
                 </div>
-                <span className="text-sm font-medium max-w-[180px] truncate text-base-content">
+                <span className="max-w-[180px] truncate text-sm font-medium text-base-content">
                   {userEmail}
                 </span>
                 <svg
-                  className={`w-3.5 h-3.5 text-base-content/50 transition-transform duration-200 ${userDropdownOpen ? "rotate-180" : ""}`}
+                  className={`h-3.5 w-3.5 text-base-content/50 transition-transform duration-200 ${
+                    userDropdownOpen ? "rotate-180" : ""
+                  }`}
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -317,20 +304,19 @@ export default function Navbar() {
                 </svg>
               </div>
 
-              {/* Desktop: absolute dropdown — only rendered when open, hidden below lg */}
               {userDropdownOpen && (
-                <div className="hidden lg:block absolute right-0 mt-1 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 overflow-hidden z-50 animate-fadeIn">
-                  <div className="px-4 py-3 border-b border-base-300/60 bg-base-200/60">
-                    <p className="text-xs font-medium text-base-content/70 truncate">{userEmail}</p>
+                <div className="absolute right-0 z-50 mt-2 hidden w-56 overflow-hidden rounded-3xl border border-white/60 bg-white/95 shadow-[0_30px_60px_-35px_rgba(16,38,58,0.7)] backdrop-blur-2xl animate-fadeIn lg:block">
+                  <div className="border-b border-base-300/60 bg-base-200/60 px-4 py-3">
+                    <p className="truncate text-xs font-medium text-base-content/70">{userEmail}</p>
                   </div>
 
                   <Link
                     to="/profile"
                     onClick={closeMenu}
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-base-content/70 hover:bg-base-200/60 hover:text-primary transition-all duration-200"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-base-content/72 transition-all duration-200 hover:bg-base-200/60 hover:text-primary"
                   >
                     <svg
-                      className="w-4 h-4 text-base-content/50"
+                      className="h-4 w-4 text-base-content/50"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -345,16 +331,16 @@ export default function Navbar() {
                     My Profile
                   </Link>
 
-                  <div className="h-px bg-gradient-to-r from-transparent via-base-300 to-transparent mx-3" />
+                  <div className="mx-3 h-px bg-gradient-to-r from-transparent via-base-300 to-transparent" />
 
                   <button
                     onClick={(e) => {
                       handleLogout(e);
                       closeMenu();
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50/60 hover:text-red-600 transition-all duration-200 cursor-pointer"
+                    className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-sm text-red-500 transition-all duration-200 hover:bg-red-50/70 hover:text-red-600"
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -367,16 +353,15 @@ export default function Navbar() {
                 </div>
               )}
 
-              {/* Mobile: inline expanded items — only rendered when mobile menu is open */}
               {userDropdownOpen && isMenuOpen && (
-                <div className="lg:hidden mt-2 space-y-1 bg-base-200/40 rounded-xl p-2 animate-fadeIn">
+                <div className="mt-2 space-y-1 rounded-2xl bg-base-200/50 p-2 animate-fadeIn lg:hidden">
                   <Link
                     to="/profile"
                     onClick={closeMenu}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-base-content/70 hover:bg-white/60 rounded-lg transition-all duration-200"
+                    className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-base-content/72 transition-all duration-200 hover:bg-white/70"
                   >
                     <svg
-                      className="w-4 h-4 text-base-content/50"
+                      className="h-4 w-4 text-base-content/50"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -396,9 +381,9 @@ export default function Navbar() {
                       handleLogout(e);
                       closeMenu();
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50/60 rounded-lg transition-all duration-200 cursor-pointer"
+                    className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-red-500 transition-all duration-200 hover:bg-red-50/70"
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
