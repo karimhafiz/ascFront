@@ -447,6 +447,9 @@ function EnrollmentRow({ enrollment }) {
   const [reactivating, setReactivating] = useState(false);
   const [participants, setParticipants] = useState(enrollment.participants || []);
   const [removingIdx, setRemovingIdx] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({ name: "", age: "", email: "" });
+  const [savingEdit, setSavingEdit] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const [toast, setToast] = useState(null);
   const course = enrollment.courseId;
@@ -542,6 +545,49 @@ function EnrollmentRow({ enrollment }) {
         setRemovingIdx(null);
       },
     });
+  };
+
+  const startEdit = (p) => {
+    setEditingId(p._id);
+    setEditForm({ name: p.name || "", age: p.age || "", email: p.email || "" });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditForm({ name: "", age: "", email: "" });
+  };
+
+  const handleSaveEdit = async (participantId) => {
+    if (!editForm.name.trim()) {
+      showToast("Name cannot be empty");
+      return;
+    }
+    setSavingEdit(true);
+    try {
+      const res = await fetchWithAuth(
+        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/participants/${participantId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: editForm.name.trim(),
+            age: editForm.age ? Number(editForm.age) : undefined,
+            email: editForm.email.trim() || undefined,
+          }),
+        }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setParticipants(data.participants);
+        setEditingId(null);
+        showToast("Participant updated", "success");
+      } else {
+        showToast(data.error || "Failed to update participant");
+      }
+    } catch {
+      showToast("Something went wrong");
+    }
+    setSavingEdit(false);
   };
 
   return (
@@ -722,44 +768,121 @@ function EnrollmentRow({ enrollment }) {
       {/* Participants list */}
       {expanded && hasParticipants && (
         <div className="px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {participants.map((p, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-2.5 bg-base-100 rounded-xl px-3 py-2 group/participant"
-            >
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-                {p.name?.[0]?.toUpperCase() ?? "?"}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-base-content truncate">{p.name}</p>
-                <div className="flex gap-2 text-[10px] text-base-content/50">
-                  {p.age && <span>Age {p.age}</span>}
-                  {p.email && <span className="truncate">{p.email}</span>}
+          {participants.map((p, i) =>
+            editingId === p._id ? (
+              <div
+                key={p._id || i}
+                className="flex flex-col gap-1.5 bg-base-100 rounded-xl px-3 py-2"
+              >
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  placeholder="Name"
+                  className="input input-xs input-bordered w-full text-xs"
+                />
+                <div className="flex gap-1.5">
+                  <input
+                    type="number"
+                    value={editForm.age}
+                    onChange={(e) => setEditForm({ ...editForm, age: e.target.value })}
+                    placeholder="Age"
+                    className="input input-xs input-bordered w-16 text-xs"
+                  />
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    placeholder="Email"
+                    className="input input-xs input-bordered flex-1 text-xs"
+                  />
+                </div>
+                <div className="flex gap-1.5 justify-end">
+                  <button
+                    onClick={cancelEdit}
+                    disabled={savingEdit}
+                    className="btn btn-xs btn-ghost text-[10px]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleSaveEdit(p._id)}
+                    disabled={savingEdit}
+                    className="btn btn-xs btn-primary text-[10px]"
+                  >
+                    {savingEdit ? "Saving..." : "Save"}
+                  </button>
                 </div>
               </div>
-              {participants.length > 1 && !cancelDone && (
-                <button
-                  onClick={() => handleRemoveParticipant(i)}
-                  disabled={removingIdx !== null}
-                  title={`Remove ${p.name}`}
-                  className="opacity-0 group-hover/participant:opacity-100 transition-opacity text-red-400 hover:text-red-600 disabled:opacity-30 flex-shrink-0 cursor-pointer disabled:cursor-not-allowed"
+            ) : (
+              <div
+                key={p._id || i}
+                className="flex items-center gap-2.5 bg-base-100 rounded-xl px-3 py-2 group/participant"
+              >
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                  {p.name?.[0]?.toUpperCase() ?? "?"}
+                </div>
+                <div
+                  className="min-w-0 flex-1 cursor-pointer"
+                  onClick={() => !cancelDone && startEdit(p)}
+                  title="Click to edit"
                 >
-                  {removingIdx === i ? (
-                    <div className="w-4 h-4 rounded-full border-2 border-red-300 border-t-red-500 animate-spin" />
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <p className="text-xs font-medium text-base-content truncate">{p.name}</p>
+                  <div className="flex gap-2 text-[10px] text-base-content/50">
+                    {p.age && <span>Age {p.age}</span>}
+                    {p.email && <span className="truncate">{p.email}</span>}
+                  </div>
+                </div>
+                {!cancelDone && (
+                  <button
+                    onClick={() => startEdit(p)}
+                    title={`Edit ${p.name}`}
+                    className="opacity-0 group-hover/participant:opacity-100 transition-opacity text-base-content/40 hover:text-primary flex-shrink-0 cursor-pointer"
+                  >
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
                       />
                     </svg>
-                  )}
-                </button>
-              )}
-            </div>
-          ))}
+                  </button>
+                )}
+                {participants.length > 1 && !cancelDone && (
+                  <button
+                    onClick={() => handleRemoveParticipant(i)}
+                    disabled={removingIdx !== null}
+                    title={`Remove ${p.name}`}
+                    className="opacity-0 group-hover/participant:opacity-100 transition-opacity text-red-400 hover:text-red-600 disabled:opacity-30 flex-shrink-0 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    {removingIdx === i ? (
+                      <div className="w-4 h-4 rounded-full border-2 border-red-300 border-t-red-500 animate-spin" />
+                    ) : (
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                )}
+              </div>
+            )
+          )}
         </div>
       )}
 
