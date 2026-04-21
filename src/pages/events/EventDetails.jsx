@@ -3,7 +3,6 @@ import { Helmet } from "react-helmet-async";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import TeamSignupForm from "../../components/teams/TeamSignupForm";
-import { fetchWithAuth, isAuthenticated } from "../../auth/auth";
 import { slugToId } from "../../util/util";
 import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
 import EventDetailsBanner from "../../components/events/EventDetailsBanner";
@@ -19,7 +18,6 @@ export default function EventDetails() {
   const [tournamentEmail, setTournamentEmail] = useState("");
 
   const queryClient = useQueryClient();
-  const loggedIn = isAuthenticated();
 
   const handleBack = () => {
     navigate(-1);
@@ -42,16 +40,14 @@ export default function EventDetails() {
 
   const isTournament = event && event.isTournament;
 
-  const { data: myTeams = [] } = useQuery({
-    queryKey: ["my-teams", eventId],
+  const { data: registeredTeams = [] } = useQuery({
+    queryKey: ["event-teams", eventId],
     queryFn: async () => {
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/my-teams`
-      );
+      const res = await fetch(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/teams`);
       if (!res.ok) throw new Error("Failed to fetch teams");
       return res.json();
     },
-    enabled: !!isTournament && loggedIn,
+    enabled: !!isTournament,
   });
 
   const handleShare = () => {
@@ -166,7 +162,7 @@ export default function EventDetails() {
               </div>
             </GlassCard>
 
-            {isTournament && <MyTeamsSection teams={myTeams} />}
+            {isTournament && <MyTeamsSection teams={registeredTeams} />}
           </div>
         </div>
 
@@ -213,7 +209,7 @@ export default function EventDetails() {
             managerId={tournamentEmail}
             onSuccess={() => {
               setShowTeamSignup(false);
-              queryClient.invalidateQueries({ queryKey: ["my-teams", eventId] });
+              queryClient.invalidateQueries({ queryKey: ["event-teams", eventId] });
             }}
             onClose={() => setShowTeamSignup(false)}
           />
