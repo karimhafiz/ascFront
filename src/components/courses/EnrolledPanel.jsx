@@ -28,7 +28,7 @@ function formatDate(d) {
 }
 
 export default function EnrolledPanel({ course, enrollment, onChanged }) {
-  const [newParticipant, setNewParticipant] = useState({ name: "", age: "", email: "" });
+  const [newParticipant, setNewParticipant] = useState({ name: "", age: "" });
   const [addingParticipant, setAddingParticipant] = useState(false);
   const [addParticipantError, setAddParticipantError] = useState("");
   const [cancellingSubscription, setCancellingSubscription] = useState(false);
@@ -55,7 +55,7 @@ export default function EnrolledPanel({ course, enrollment, onChanged }) {
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add participant");
-      setNewParticipant({ name: "", age: "", email: "" });
+      setNewParticipant({ name: "", age: "" });
       onChanged();
     } catch (err) {
       setAddParticipantError(err.message);
