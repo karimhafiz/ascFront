@@ -527,7 +527,7 @@ function EnrollmentRow({ enrollment }) {
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ participantIndex: index }),
+              body: JSON.stringify({ participantId: participants[index]._id }),
             }
           );
           const data = await res.json();
