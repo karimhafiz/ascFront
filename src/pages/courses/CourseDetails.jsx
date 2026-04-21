@@ -33,9 +33,9 @@ export default function CourseDetails() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [enrollError, setEnrollError] = useState("");
   const [multiMode, setMultiMode] = useState(false);
-  const [participants, setParticipants] = useState([{ name: "", age: "", email: "" }]);
+  const [participants, setParticipants] = useState([{ name: "", age: "" }]);
 
-  const addParticipant = () => setParticipants((p) => [...p, { name: "", age: "", email: "" }]);
+  const addParticipant = () => setParticipants((p) => [...p, { name: "", age: "" }]);
   const removeParticipant = (i) => setParticipants((p) => p.filter((_, idx) => idx !== i));
   const updateParticipant = (i, field, value) =>
     setParticipants((p) => {
@@ -446,13 +446,6 @@ export default function CourseDetails() {
                                     min="1"
                                     value={p.age}
                                     onChange={(e) => updateParticipant(i, "age", e.target.value)}
-                                    className="glass-input text-sm py-1.5"
-                                  />
-                                  <input
-                                    type="email"
-                                    placeholder="Email (optional)"
-                                    value={p.email}
-                                    onChange={(e) => updateParticipant(i, "email", e.target.value)}
                                     className="glass-input text-sm py-1.5"
                                   />
                                 </div>

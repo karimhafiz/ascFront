@@ -448,7 +448,7 @@ function EnrollmentRow({ enrollment }) {
   const [participants, setParticipants] = useState(enrollment.participants || []);
   const [removingIdx, setRemovingIdx] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ name: "", age: "", email: "" });
+  const [editForm, setEditForm] = useState({ name: "", age: "" });
   const [savingEdit, setSavingEdit] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const [toast, setToast] = useState(null);
@@ -549,12 +549,12 @@ function EnrollmentRow({ enrollment }) {
 
   const startEdit = (p) => {
     setEditingId(p._id);
-    setEditForm({ name: p.name || "", age: p.age || "", email: p.email || "" });
+    setEditForm({ name: p.name || "", age: p.age || "" });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setEditForm({ name: "", age: "", email: "" });
+    setEditForm({ name: "", age: "" });
   };
 
   const handleSaveEdit = async (participantId) => {
@@ -572,7 +572,6 @@ function EnrollmentRow({ enrollment }) {
           body: JSON.stringify({
             name: editForm.name.trim(),
             age: editForm.age ? Number(editForm.age) : undefined,
-            email: editForm.email.trim() || undefined,
           }),
         }
       );
@@ -781,22 +780,13 @@ function EnrollmentRow({ enrollment }) {
                   placeholder="Name"
                   className="input input-xs input-bordered w-full text-xs"
                 />
-                <div className="flex gap-1.5">
-                  <input
-                    type="number"
-                    value={editForm.age}
-                    onChange={(e) => setEditForm({ ...editForm, age: e.target.value })}
-                    placeholder="Age"
-                    className="input input-xs input-bordered w-16 text-xs"
-                  />
-                  <input
-                    type="email"
-                    value={editForm.email}
-                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                    placeholder="Email"
-                    className="input input-xs input-bordered flex-1 text-xs"
-                  />
-                </div>
+                <input
+                  type="number"
+                  value={editForm.age}
+                  onChange={(e) => setEditForm({ ...editForm, age: e.target.value })}
+                  placeholder="Age"
+                  className="input input-xs input-bordered w-20 text-xs"
+                />
                 <div className="flex gap-1.5 justify-end">
                   <button
                     onClick={cancelEdit}
