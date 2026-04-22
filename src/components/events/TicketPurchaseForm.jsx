@@ -2,7 +2,11 @@ import { useState } from "react";
 import { parseJwt, getAuthToken, fetchWithAuth } from "../../auth/auth";
 import { Button, GlassCard, Spinner } from "../ui";
 
+const INTERVAL_LABELS = { week: "week", month: "month" };
+
 export default function TicketPurchaseForm({ event, eventId, onTournamentSignup }) {
+  const isSubscription = event.isReoccurring && event.stripePriceId && event.ticketPrice > 0;
+
   const [quantity, setQuantity] = useState("1");
   const [email, setEmail] = useState(() => {
     const token = getAuthToken();
@@ -27,7 +31,7 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup 
       return;
     }
 
-    if (parseInt(quantity) > 5 && !awaitingConfirm) {
+    if (!isSubscription && parseInt(quantity) > 5 && !awaitingConfirm) {
       setAwaitingConfirm(true);
       return;
     }
@@ -37,7 +41,7 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup 
       return;
     }
 
-    if (!quantity || parseInt(quantity) < 1) {
+    if (!isSubscription && (!quantity || parseInt(quantity) < 1)) {
       setBuyError("Please select at least 1 ticket.");
       return;
     }
@@ -52,7 +56,7 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup 
           body: JSON.stringify({
             eventId,
             email,
-            quantity: parseInt(quantity) || 1,
+            quantity: isSubscription ? 1 : parseInt(quantity) || 1,
           }),
         }
       );
@@ -71,11 +75,17 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup 
     }
   };
 
+  const interval = INTERVAL_LABELS[event.subscriptionInterval] || "month";
+
   return (
     <GlassCard className="shadow-xl md:sticky md:top-20 hover:shadow-2xl transition-all duration-300">
       <div className="card-body">
         <h2 className="card-title text-xl text-base-content">
-          {event.isTournament ? "Team Registration" : "Purchase Tickets"}
+          {event.isTournament
+            ? "Team Registration"
+            : isSubscription
+              ? "Subscribe"
+              : "Purchase Tickets"}
         </h2>
         <div className="space-y-4">
           {event.isTournament && (
@@ -84,6 +94,16 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup 
               are welcome to attend for free.
             </div>
           )}
+
+          {isSubscription && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-700">
+              <p className="font-semibold mb-1">Recurring {interval}ly subscription</p>
+              <p>
+                £{event.ticketPrice.toFixed(2)} / {interval} — cancel anytime from your profile.
+              </p>
+            </div>
+          )}
+
           <div>
             <label className="block text-md font-medium mb-2 text-base-content">Your Email:</label>
             <input
@@ -96,7 +116,7 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup 
             />
           </div>
 
-          {!event.isTournament && (
+          {!event.isTournament && !isSubscription && (
             <div>
               <label className="block text-md font-medium mb-2 text-base-content">
                 Ticket Quantity:
@@ -157,17 +177,19 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup 
               variant="primary"
               className="w-full"
               onClick={handleBuyTickets}
-              disabled={isProcessing || event.ticketsAvailable === 0}
+              disabled={isProcessing || (!isSubscription && event.ticketsAvailable === 0)}
             >
               {isProcessing ? (
                 <span className="flex items-center justify-center">
                   <Spinner size="sm" />
                   <span className="ml-3">Redirecting to payment...</span>
                 </span>
-              ) : event.ticketsAvailable === 0 ? (
+              ) : !isSubscription && event.ticketsAvailable === 0 ? (
                 "Sold Out"
               ) : event.isTournament ? (
                 "Register & Pay for Team"
+              ) : isSubscription ? (
+                `Subscribe £${event.ticketPrice.toFixed(2)}/${interval}`
               ) : (
                 "Buy Tickets"
               )}
