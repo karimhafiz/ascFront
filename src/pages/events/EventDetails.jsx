@@ -4,10 +4,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import TeamSignupForm from "../../components/teams/TeamSignupForm";
 import { slugToId } from "../../util/util";
+import { isAuthenticated, fetchWithAuth } from "../../auth/auth";
 import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
 import EventDetailsBanner from "../../components/events/EventDetailsBanner";
 import EventInfoGrid from "../../components/events/EventInfoGrid";
 import TicketPurchaseForm from "../../components/events/TicketPurchaseForm";
+import SubscribedPanel from "../../components/events/SubscribedPanel";
 import MyTeamsSection from "../../components/events/MyTeamsSection";
 
 export default function EventDetails() {
@@ -49,6 +51,23 @@ export default function EventDetails() {
     },
     enabled: !!isTournament,
   });
+
+  const isRecurringSubscription =
+    event?.isReoccurring && event?.stripePriceId && event?.ticketPrice > 0;
+
+  const { data: mySubscriptionData } = useQuery({
+    queryKey: ["my-event-subscription", eventId],
+    queryFn: async () => {
+      const res = await fetchWithAuth(
+        `${import.meta.env.VITE_DEV_URI}events/${eventId}/my-subscription`
+      );
+      if (!res.ok) return { subscription: null };
+      return res.json();
+    },
+    enabled: !!isRecurringSubscription && isAuthenticated(),
+  });
+
+  const mySubscription = mySubscriptionData?.subscription;
 
   const handleShare = () => {
     window.open(`https://www.facebook.com/profile.php?id=100081705505202`, "_blank");
@@ -105,7 +124,21 @@ export default function EventDetails() {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="md:col-span-1 md:order-2">
-            {!isEventInPast && event.ticketPrice === 0 && !event.isTournament ? (
+            {!isEventInPast && mySubscription ? (
+              <GlassCard className="rounded-[1.75rem] shadow-xl">
+                <div className="card-body">
+                  <SubscribedPanel
+                    event={event}
+                    subscription={mySubscription}
+                    onChanged={() =>
+                      queryClient.invalidateQueries({
+                        queryKey: ["my-event-subscription", eventId],
+                      })
+                    }
+                  />
+                </div>
+              </GlassCard>
+            ) : !isEventInPast && event.ticketPrice === 0 && !event.isTournament ? (
               <GlassCard className="rounded-[1.75rem] shadow-xl">
                 <div className="card-body text-center">
                   <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-accent to-primary">
