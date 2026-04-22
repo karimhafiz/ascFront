@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { fetchWithAuth } from "../../auth/auth";
 import { validatePhone } from "../../util/util";
 import { Button, Spinner } from "../ui";
 
 export default function TeamSignupForm({ eventId, managerId, onClose }) {
   const [name, setName] = useState("");
-  const [members, setMembers] = useState([{ name: "", email: "" }]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [managerName, setManagerName] = useState("");
@@ -29,30 +28,32 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
     setLoading(true);
     setError("");
     try {
-      const paymentRes = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}teams/${team._id}/pay`,
-        { method: "POST" }
+      // Re-register triggers Stripe checkout for existing unpaid team
+      const res = await fetchWithAuth(
+        `${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: team.name,
+            manager: team.manager,
+          }),
+        }
       );
-      const paymentData = await paymentRes.json();
-      if (!paymentRes.ok || !paymentData.url)
-        throw new Error(paymentData.error || "Payment initialization failed");
-      window.location.href = paymentData.url;
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Payment initialization failed");
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        // Free tournament — already registered
+        onClose();
+        window.location.reload();
+      }
     } catch (err) {
       setError(err.message || "Failed to resume payment");
       setLoading(false);
     }
   };
-
-  const handleMemberChange = (idx, field, value) => {
-    setMembers((prev) => {
-      const updated = [...prev];
-      updated[idx][field] = value;
-      return updated;
-    });
-  };
-
-  const addMember = () => setMembers((prev) => [...prev, { name: "", email: "" }]);
-  const removeMember = (idx) => setMembers((prev) => prev.filter((_, i) => i !== idx));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,13 +65,12 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
     setError("");
     try {
       const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/signup`,
+        `${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name,
-            members,
             manager: { name: managerName, email: managerEmail, phone: managerPhone.trim() },
           }),
         }
@@ -78,15 +78,13 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to register team");
 
-      const paymentRes = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}teams/${data.team._id}/pay`,
-        { method: "POST" }
-      );
-      const paymentData = await paymentRes.json();
-      if (!paymentRes.ok || !paymentData.url)
-        throw new Error(paymentData.error || "Payment initialization failed");
-
-      window.location.href = paymentData.url;
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        // Free tournament — registered immediately
+        onClose();
+        window.location.reload();
+      }
     } catch (err) {
       setError(err.message || "An error occurred during registration");
     }
@@ -134,7 +132,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
           <div className="mb-5">
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
               <p className="text-sm font-semibold text-amber-700 mb-3">
-                ⚠️ You have {unpaidTeams.length} incomplete registration
+                You have {unpaidTeams.length} incomplete registration
                 {unpaidTeams.length > 1 ? "s" : ""} for this tournament:
               </p>
               <div className="space-y-2">
@@ -143,12 +141,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
                     key={team._id}
                     className="flex items-center justify-between bg-white/70 rounded-lg px-3 py-2 border border-amber-100"
                   >
-                    <div>
-                      <p className="font-medium text-base-content text-sm">{team.name}</p>
-                      <p className="text-xs text-base-content/50">
-                        {team.members.length} player{team.members.length !== 1 ? "s" : ""}
-                      </p>
-                    </div>
+                    <p className="font-medium text-base-content text-sm">{team.name}</p>
                     <button
                       onClick={() => handleResumeTeam(team)}
                       disabled={loading}
@@ -213,88 +206,11 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
             />
           </div>
 
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block font-medium text-base-content">Team Members</label>
-              <span className="text-xs text-base-content/50 bg-base-200/50 px-2 py-0.5 rounded-full">
-                {members.length} member{members.length !== 1 && "s"}
-              </span>
-            </div>
-            <div className="space-y-3 mb-3 max-h-60 overflow-y-auto pr-1">
-              {members.map((member, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2 bg-white/40 rounded-lg p-2 backdrop-blur-sm border border-white/70"
-                >
-                  <div className="flex-grow space-y-2">
-                    <input
-                      className="glass-input text-sm py-1.5"
-                      placeholder="Member Name"
-                      value={member.name}
-                      onChange={(e) => handleMemberChange(idx, "name", e.target.value)}
-                      required
-                    />
-                    <input
-                      className="glass-input text-sm py-1.5"
-                      placeholder="Member Email"
-                      value={member.email}
-                      onChange={(e) => handleMemberChange(idx, "email", e.target.value)}
-                      type="email"
-                    />
-                  </div>
-                  {members.length > 1 && (
-                    <button
-                      type="button"
-                      className="btn btn-sm bg-white/50 hover:bg-red-100/60 border border-red-200/50 text-red-500 hover:text-red-700 rounded-lg transition-all duration-300"
-                      onClick={() => removeMember(idx)}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              className="btn btn-sm bg-base-200/60 hover:bg-base-300/60 border border-base-300/60 text-base-content transition-all duration-300 rounded-lg"
-              onClick={addMember}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 mr-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-                />
-              </svg>
-              Add Member
-            </button>
-          </div>
-
           <Button variant="primary" className="w-full py-3" type="submit" disabled={loading}>
             {loading ? (
               <div className="flex items-center justify-center gap-2">
                 <Spinner size="sm" />
-                <span>Processing Payment...</span>
+                <span>Processing...</span>
               </div>
             ) : (
               <div className="flex items-center justify-center gap-1">
@@ -312,7 +228,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
                     d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"
                   />
                 </svg>
-                Pay & Register Team
+                Register Team
               </div>
             )}
           </Button>

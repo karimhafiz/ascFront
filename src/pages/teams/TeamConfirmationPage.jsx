@@ -115,10 +115,11 @@ export default function TeamConfirmationPage() {
                 <p>
                   <span className="font-semibold">Email:</span> {team.manager?.email}
                 </p>
-                <p>
-                  <span className="font-semibold">Players:</span> {team.members?.length || 0}{" "}
-                  members
-                </p>
+                {team.manager?.phone && (
+                  <p>
+                    <span className="font-semibold">Phone:</span> {team.manager.phone}
+                  </p>
+                )}
               </div>
             </GlassCard>
 

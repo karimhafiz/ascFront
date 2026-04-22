@@ -36,7 +36,7 @@ export default function MyTeamsSection({ teams }) {
             <div className="min-w-0">
               <p className="font-semibold text-base-content text-sm">Need to make changes?</p>
               <p className="text-xs text-base-content/60">
-                Edit team name, manager details, or members from your profile.
+                Edit team details or complete pending payments from your profile.
               </p>
             </div>
           </div>
