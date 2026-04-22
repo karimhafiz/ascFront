@@ -1,8 +1,41 @@
 import { useState } from "react";
+import { fetchWithAuth } from "../../auth/auth";
+import { Spinner } from "../ui";
 import TeamEditForm from "./TeamEditForm";
 
 export default function MyTeamRow({ team, onTeamUpdated, readOnly = false }) {
   const [editing, setEditing] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState("");
+
+  const handlePay = async () => {
+    setPaying(true);
+    setPayError("");
+    try {
+      const eventId = team.event?._id || team.event;
+      const res = await fetchWithAuth(
+        `${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: team.name,
+            manager: team.manager,
+          }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Payment failed");
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        onTeamUpdated();
+      }
+    } catch (err) {
+      setPayError(err.message || "Failed to start payment");
+      setPaying(false);
+    }
+  };
 
   return (
     <>
@@ -49,6 +82,16 @@ export default function MyTeamRow({ team, onTeamUpdated, readOnly = false }) {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
+            {!readOnly && !team.paid && (
+              <button
+                onClick={handlePay}
+                disabled={paying}
+                className="btn btn-sm bg-gradient-to-r from-amber-400 to-orange-500 border-none text-white transition-all duration-300 rounded-lg text-xs"
+                title="Complete payment"
+              >
+                {paying ? <Spinner size="sm" /> : "Pay Now"}
+              </button>
+            )}
             {!readOnly && (
               <button
                 onClick={(e) => {
@@ -81,6 +124,12 @@ export default function MyTeamRow({ team, onTeamUpdated, readOnly = false }) {
             </span>
           </div>
         </div>
+
+        {payError && (
+          <div className="px-5 pb-3">
+            <p className="text-xs text-red-600">{payError}</p>
+          </div>
+        )}
       </div>
 
       {editing && (
