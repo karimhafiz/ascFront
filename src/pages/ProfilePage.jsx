@@ -20,7 +20,7 @@ function formatCurrency(amount) {
 
 const INTERVAL_ADJ = { month: "Monthly", year: "Yearly", week: "Weekly" };
 
-const TABS = ["Orders", "Teams", "Courses", "Subscriptions"];
+const TABS = ["Orders", "Teams", "Subscriptions"];
 
 export default function ProfilePage() {
   const [data, setData] = useState(null);
@@ -130,13 +130,10 @@ export default function ProfilePage() {
               </span>
               <span>·</span>
               <span>
-                <strong className="text-base-content">{enrollments.length}</strong> course
-                {enrollments.length !== 1 ? "s" : ""}
-              </span>
-              <span>·</span>
-              <span>
-                <strong className="text-base-content">{eventSubscriptions.length}</strong> sub
-                {eventSubscriptions.length !== 1 ? "s" : ""}
+                <strong className="text-base-content">
+                  {enrollments.length + eventSubscriptions.length}
+                </strong>{" "}
+                sub{enrollments.length + eventSubscriptions.length !== 1 ? "s" : ""}
               </span>
             </div>
           </div>
@@ -167,9 +164,7 @@ export default function ProfilePage() {
                     ? orders.length
                     : tab === "Teams"
                       ? teams.length
-                      : tab === "Courses"
-                        ? enrollments.length
-                        : eventSubscriptions.length}
+                      : enrollments.length + eventSubscriptions.length}
                 </span>
               </button>
             ))}
@@ -209,37 +204,6 @@ export default function ProfilePage() {
               </div>
             ))}
 
-          {activeTab === "Courses" &&
-            (enrollments.length === 0 ? (
-              <div className="text-center py-20">
-                <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    className="w-7 h-7 text-base-content/30"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                    />
-                  </svg>
-                </div>
-                <p className="text-base-content/50 mb-4">No course enrollments yet.</p>
-                <Button variant="primary" size="sm" to="/courses">
-                  Browse courses
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {enrollments.map((enrollment) => (
-                  <EnrollmentRow key={enrollment._id} enrollment={enrollment} />
-                ))}
-              </div>
-            ))}
-
           {activeTab === "Teams" &&
             (teams.length === 0 ? (
               <div className="text-center py-20">
@@ -269,7 +233,7 @@ export default function ProfilePage() {
             ))}
 
           {activeTab === "Subscriptions" &&
-            (eventSubscriptions.length === 0 ? (
+            (enrollments.length === 0 && eventSubscriptions.length === 0 ? (
               <div className="text-center py-20">
                 <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-4">
                   <svg
@@ -286,16 +250,46 @@ export default function ProfilePage() {
                     />
                   </svg>
                 </div>
-                <p className="text-base-content/50 mb-4">No event subscriptions yet.</p>
-                <Button variant="primary" size="sm" to="/events/asc">
-                  Browse events
-                </Button>
+                <p className="text-base-content/50 mb-4">No subscriptions yet.</p>
+                <div className="flex gap-3 justify-center">
+                  <Button variant="primary" size="sm" to="/events/asc">
+                    Browse events
+                  </Button>
+                  <Button variant="secondary" size="sm" to="/courses">
+                    Browse courses
+                  </Button>
+                </div>
               </div>
             ) : (
-              <div className="space-y-4">
-                {eventSubscriptions.map((sub) => (
-                  <EventSubscriptionRow key={sub._id} subscription={sub} onAction={loadProfile} />
-                ))}
+              <div className="space-y-8">
+                {eventSubscriptions.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-base-content/60 uppercase tracking-wider mb-3">
+                      Events
+                    </h3>
+                    <div className="space-y-4">
+                      {eventSubscriptions.map((sub) => (
+                        <EventSubscriptionRow
+                          key={sub._id}
+                          subscription={sub}
+                          onAction={loadProfile}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {enrollments.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-base-content/60 uppercase tracking-wider mb-3">
+                      Courses
+                    </h3>
+                    <div className="space-y-4">
+                      {enrollments.map((enrollment) => (
+                        <EnrollmentRow key={enrollment._id} enrollment={enrollment} />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
         </div>
