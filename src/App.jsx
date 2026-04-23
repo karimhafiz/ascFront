@@ -35,6 +35,7 @@ const CourseConfirmation = lazy(() => import("./pages/courses/CourseConfirmation
 const CourseDetails = lazy(() => import("./pages/courses/CourseDetails"));
 const CourseFormPage = lazy(() => import("./pages/courses/CourseFormPage"));
 const CourseRoot = lazy(() => import("./pages/courses/CourseRoot"));
+const SubscriptionConfirmation = lazy(() => import("./pages/events/SubscriptionConfirmation"));
 
 const fallback = (
   <div className="flex justify-center items-center p-12">
@@ -77,6 +78,7 @@ const router = createBrowserRouter([
         ],
       },
       { path: "course-confirmation", element: w(CourseConfirmation) },
+      { path: "subscription-confirmation", element: w(SubscriptionConfirmation) },
       {
         path: "events",
         element: w(EventRoot),
