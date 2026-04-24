@@ -19,21 +19,31 @@ const GoogleLogin = () => {
   };
 
   useEffect(() => {
-    if (!window.google?.accounts?.id || !hiddenBtnRef.current) return;
+    const initGsi = () => {
+      if (!window.google?.accounts?.id || !hiddenBtnRef.current) return;
 
-    window.google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      callback: handleCredentialResponse,
-      ux_mode: "popup",
-      auto_select: false,
-    });
+      window.google.accounts.id.initialize({
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse,
+        ux_mode: "popup",
+        auto_select: false,
+      });
 
-    // render Google's real button into the hidden div
-    window.google.accounts.id.renderButton(hiddenBtnRef.current, {
-      type: "standard",
-      theme: "outline",
-      size: "large",
-    });
+      window.google.accounts.id.renderButton(hiddenBtnRef.current, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+      });
+    };
+
+    // If GSI is already loaded, init immediately; otherwise wait for it
+    if (window.google?.accounts?.id) {
+      initGsi();
+    } else {
+      const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+      script?.addEventListener("load", initGsi);
+      return () => script?.removeEventListener("load", initGsi);
+    }
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
