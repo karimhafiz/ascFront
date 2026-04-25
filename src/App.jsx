@@ -15,7 +15,7 @@ import { courseAction } from "./api/courseActions";
 const Home = lazy(() => import("./pages/content/Home"));
 const About = lazy(() => import("./pages/content/About"));
 const Contact = lazy(() => import("./pages/content/Contact"));
-const EventPage = lazy(() => import("./pages/events/Event"));
+const EventPage = lazy(() => import("./pages/events/Events"));
 const EventDetails = lazy(() => import("./pages/events/EventDetails"));
 const NewEvent = lazy(() => import("./pages/events/NewEvent"));
 const EditEvent = lazy(() => import("./pages/events/EditEvent"));

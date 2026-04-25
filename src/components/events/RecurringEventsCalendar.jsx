@@ -378,7 +378,7 @@ export default function RecurringEventsCalendar({ events, title = "Events Calend
                     </svg>
                     <span>
                       £{selectedEvent.ticketPrice}{" "}
-                      {selectedEvent.isTournament ? "per player" : "per ticket"}
+                      {selectedEvent.isTournament ? "per team" : "per ticket"}
                     </span>
                   </div>
                 )}

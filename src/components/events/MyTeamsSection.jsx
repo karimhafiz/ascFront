@@ -5,7 +5,7 @@ export default function MyTeamsSection({ teams }) {
   if (!teams?.length) return null;
 
   return (
-    <GlassCard className="shadow-xl">
+    <GlassCard className="rounded-[1.75rem] shadow-xl">
       <div className="card-body">
         <h2 className="card-title text-xl text-base-content">Teams ({teams.length})</h2>
 

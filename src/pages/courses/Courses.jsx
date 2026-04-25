@@ -81,7 +81,7 @@ export default function CoursesPage() {
               className="glass-input pl-9 py-2.5"
             />
           </div>
-          <div className="flex bg-white/60 rounded-xl border border-white/40 p-1 flex-wrap">
+          <div className="grid grid-cols-3 bg-white/60 rounded-xl border border-white/40 p-1 flex-nowrap md:flex md:flex-wrap">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
