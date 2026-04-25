@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { fetchWithAuth } from "../../auth/auth";
+import { fetchWithAuth, getAuthToken, parseJwt } from "../../auth/auth";
 import { Spinner } from "../ui";
 import TeamEditForm from "./TeamEditForm";
 
@@ -7,6 +7,10 @@ export default function MyTeamRow({ team, onTeamUpdated, readOnly = false }) {
   const [editing, setEditing] = useState(false);
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState("");
+
+  const token = getAuthToken();
+  const userEmail = token ? parseJwt(token)?.email : null;
+  const isMyTeam = userEmail && team.manager?.email?.toLowerCase() === userEmail.toLowerCase();
 
   const handlePay = async () => {
     setPaying(true);
@@ -116,6 +120,11 @@ export default function MyTeamRow({ team, onTeamUpdated, readOnly = false }) {
                   />
                 </svg>
               </button>
+            )}
+            {readOnly && isMyTeam && (
+              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/20">
+                My Team
+              </span>
             )}
             <span
               className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${team.paid ? "bg-green-50 text-green-700 border-green-200" : "bg-orange-50 text-orange-600 border-orange-200"}`}

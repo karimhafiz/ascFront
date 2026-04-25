@@ -4,7 +4,7 @@ import { Button, GlassCard, Spinner } from "../ui";
 
 const INTERVAL_LABELS = { week: "week", month: "month" };
 
-export default function TicketPurchaseForm({ event, eventId, onTournamentSignup }) {
+export default function TicketPurchaseForm({ event, eventId, onTournamentSignup, isModal }) {
   const isSubscription = event.isReoccurring && event.stripePriceId && event.ticketPrice > 0;
 
   const [quantity, setQuantity] = useState("1");
@@ -77,9 +77,9 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup 
 
   const interval = INTERVAL_LABELS[event.subscriptionInterval] || "month";
 
-  return (
-    <GlassCard className="shadow-xl md:sticky md:top-20 hover:shadow-2xl transition-all duration-300">
-      <div className="card-body">
+  const content = (
+    <div className="card-body">
+      {!isModal && (
         <h2 className="card-title text-xl text-base-content">
           {event.isTournament
             ? "Team Registration"
@@ -87,122 +87,141 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup 
               ? "Subscribe"
               : "Purchase Tickets"}
         </h2>
-        <div className="space-y-4">
-          {event.isTournament && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
-              The tournament fee is charged <strong>per player</strong>. Spectators and supporters
-              are welcome to attend for free.
-            </div>
-          )}
-
-          {isSubscription && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-700">
-              <p className="font-semibold mb-1">Recurring {interval}ly subscription</p>
-              <p>
-                £{event.ticketPrice.toFixed(2)} / {interval} — cancel anytime from your profile.
-              </p>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-md font-medium mb-2 text-base-content">Your Email:</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="glass-input"
-              placeholder="Enter your email"
-              required
-            />
+      )}
+      <div className="space-y-4">
+        {event.isTournament && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
+            The tournament fee is a <strong>one-off team payment</strong> made by the team manager.
+            Spectators and supporters are welcome to attend for free.
           </div>
+        )}
 
-          {!event.isTournament && !isSubscription && (
-            <div>
-              <label className="block text-md font-medium mb-2 text-base-content">
-                Ticket Quantity:
-              </label>
-              <input
-                type="number"
-                min="1"
-                max={event.ticketsAvailable || 99}
-                value={quantity}
-                onChange={(e) => {
-                  setQuantity(e.target.value);
-                  setAwaitingConfirm(false);
-                }}
-                onBlur={(e) => {
-                  const val = parseInt(e.target.value, 10);
-                  setQuantity(String(isNaN(val) || val < 1 ? 1 : val));
-                }}
-                className="glass-input"
-              />
-              {event.ticketPrice > 0 && (
-                <p className="text-sm text-base-content/70 mt-1">
-                  Total: £{(event.ticketPrice * (parseInt(quantity) || 1)).toFixed(2)}
-                </p>
-              )}
-              {awaitingConfirm && (
-                <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-3">
-                  <p className="text-sm font-medium text-amber-700 mb-2">
-                    You're buying {quantity} tickets — are you sure?
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setAwaitingConfirm(false);
-                        setQuantity(1);
-                      }}
-                      className="flex-1 text-xs py-1.5 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-100 transition-all cursor-pointer"
-                    >
-                      Change
-                    </button>
-                    <button
-                      onClick={handleBuyTickets}
-                      className="flex-1 text-xs py-1.5 rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-all font-medium cursor-pointer"
-                    >
-                      Yes, continue
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {buyError && (
-            <p className="text-red-500 text-sm bg-red-50/50 rounded-xl p-2">{buyError}</p>
-          )}
-
-          <div className="pt-2">
-            <Button
-              variant="primary"
-              className="w-full"
-              onClick={handleBuyTickets}
-              disabled={isProcessing || (!isSubscription && event.ticketsAvailable === 0)}
-            >
-              {isProcessing ? (
-                <span className="flex items-center justify-center">
-                  <Spinner size="sm" />
-                  <span className="ml-3">Redirecting to payment...</span>
-                </span>
-              ) : !isSubscription && event.ticketsAvailable === 0 ? (
-                "Sold Out"
-              ) : event.isTournament ? (
-                "Register & Pay for Team"
-              ) : isSubscription ? (
-                `Subscribe £${event.ticketPrice.toFixed(2)}/${interval}`
-              ) : (
-                "Buy Tickets"
-              )}
-            </Button>
-          </div>
-
-          {!event.isTournament && (
-            <p className="text-xs text-center text-base-content/50 mt-2">
-              Secure payment via Stripe
+        {isSubscription && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-700">
+            <p className="font-semibold mb-1">Recurring {interval}ly subscription</p>
+            <p>
+              £{event.ticketPrice.toFixed(2)} / {interval} — cancel anytime from your profile.
             </p>
-          )}
+          </div>
+        )}
+
+        <div>
+          <label
+            htmlFor="ticket-email"
+            className="block text-md font-medium mb-2 text-base-content"
+          >
+            Your Email:
+          </label>
+          <input
+            id="ticket-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="glass-input"
+            placeholder="Enter your email"
+            autoComplete="email"
+            required
+          />
         </div>
+
+        {!event.isTournament && !isSubscription && (
+          <div>
+            <label
+              htmlFor="ticket-quantity"
+              className="block text-md font-medium mb-2 text-base-content"
+            >
+              Ticket Quantity:
+            </label>
+            <input
+              id="ticket-quantity"
+              type="number"
+              min="1"
+              max={event.ticketsAvailable || 99}
+              value={quantity}
+              onChange={(e) => {
+                setQuantity(e.target.value);
+                setAwaitingConfirm(false);
+              }}
+              onBlur={(e) => {
+                const val = parseInt(e.target.value, 10);
+                setQuantity(String(isNaN(val) || val < 1 ? 1 : val));
+              }}
+              className="glass-input"
+            />
+            {event.ticketPrice > 0 && (
+              <p className="text-sm text-base-content/70 mt-1">
+                Total: £{(event.ticketPrice * (parseInt(quantity) || 1)).toFixed(2)}
+              </p>
+            )}
+            {awaitingConfirm && (
+              <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                <p className="text-sm font-medium text-amber-700 mb-2">
+                  You're buying {quantity} tickets — are you sure?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setAwaitingConfirm(false);
+                      setQuantity(1);
+                    }}
+                    className="flex-1 text-sm py-2 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-100 transition-all cursor-pointer"
+                  >
+                    Change
+                  </button>
+                  <button
+                    onClick={handleBuyTickets}
+                    className="flex-1 text-sm py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-all font-medium cursor-pointer"
+                  >
+                    Yes, continue
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {buyError && (
+          <p className="text-red-500 text-sm bg-red-50/50 rounded-xl p-2" role="alert">
+            {buyError}
+          </p>
+        )}
+
+        <div className="pt-2">
+          <Button
+            variant="primary"
+            className="w-full"
+            onClick={handleBuyTickets}
+            disabled={isProcessing || (!isSubscription && event.ticketsAvailable === 0)}
+          >
+            {isProcessing ? (
+              <span className="flex items-center justify-center">
+                <Spinner size="sm" />
+                <span className="ml-3">Redirecting to payment...</span>
+              </span>
+            ) : !isSubscription && event.ticketsAvailable === 0 ? (
+              "Sold Out"
+            ) : event.isTournament ? (
+              "Register & Pay for Team"
+            ) : isSubscription ? (
+              `Subscribe £${event.ticketPrice.toFixed(2)}/${interval}`
+            ) : (
+              "Buy Tickets"
+            )}
+          </Button>
+        </div>
+
+        {!event.isTournament && (
+          <p className="text-xs text-center text-base-content/50 mt-2">Secure payment via Stripe</p>
+        )}
       </div>
+    </div>
+  );
+
+  if (isModal) return content;
+
+  return (
+    <GlassCard className="rounded-[1.75rem] shadow-xl h-full md:sticky md:top-20 hover:shadow-2xl transition-all duration-300">
+      {content}
     </GlassCard>
   );
 }
