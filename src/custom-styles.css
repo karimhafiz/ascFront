@@ -347,10 +347,6 @@ textarea.glass-input {
   color: var(--color-base-300) !important;
 }
 
-.glass-calendar .rbc-row {
-  min-height: 80px !important;
-}
-
 .glass-calendar .rbc-month-row {
   overflow: visible !important;
 }
@@ -495,11 +491,11 @@ textarea.glass-input {
   }
 
   .glass-calendar .rbc-calendar {
-    padding: 4px !important;
+    padding: 2px !important;
   }
 
   .glass-calendar .rbc-header {
-    padding: 4px 2px !important;
+    padding: 6px 2px !important;
     font-size: 0.7rem !important;
   }
 
@@ -508,32 +504,76 @@ textarea.glass-input {
     font-size: 0.7rem !important;
   }
 
-  .glass-calendar .rbc-event {
-    padding: 1px 4px !important;
-    font-size: 0.65rem !important;
+  /* Month view: turn events into colored pills */
+  .glass-calendar .rbc-month-view .rbc-event {
+    height: 4px !important;
+    max-height: 4px !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    border-radius: 2px !important;
+    border-left: none !important;
+    margin: 1px 2px !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
   }
 
+  .glass-calendar .rbc-month-view .rbc-event * {
+    display: none !important;
+  }
+
+  .glass-calendar .rbc-month-view .rbc-event:hover {
+    transform: none !important;
+    filter: brightness(1.15) !important;
+  }
+
+  /* Compact month rows so the full grid fits */
   .glass-calendar .rbc-row {
-    min-height: 50px !important;
+    min-height: auto !important;
+  }
+
+  .glass-calendar .rbc-month-row {
+    min-height: 40px !important;
+    overflow: hidden !important;
+  }
+
+  .glass-calendar .rbc-row-segment {
+    padding: 0 1px !important;
+  }
+
+  .glass-calendar .rbc-show-more {
+    display: none !important;
   }
 
   .glass-calendar .rbc-toolbar-label {
     font-size: 1rem !important;
   }
+
+  /* Day cells are tappable on mobile (handled by dateCellWrapper component) */
+  .glass-calendar .rbc-month-view .rbc-day-bg {
+    cursor: pointer !important;
+  }
 }
 
 @media (max-width: 480px) {
-  .glass-calendar .rbc-row {
-    min-height: 40px !important;
-  }
-
   .glass-calendar .rbc-header {
-    font-size: 0.6rem !important;
-    padding: 3px 1px !important;
+    font-size: 0.62rem !important;
+    padding: 4px 1px !important;
   }
 
-  .glass-calendar .rbc-event {
-    font-size: 0.55rem !important;
-    padding: 0 2px !important;
+  .glass-calendar .rbc-date-cell {
+    padding: 1px 3px !important;
+    font-size: 0.62rem !important;
+  }
+
+  .glass-calendar .rbc-month-view .rbc-event {
+    height: 3px !important;
+    max-height: 3px !important;
+    margin: 0.5px 1px !important;
+    border-radius: 1.5px !important;
+  }
+
+  .glass-calendar .rbc-month-row {
+    min-height: 34px !important;
   }
 }
