@@ -15,6 +15,10 @@ export default function Navbar() {
   const authenticated = isAuthenticated();
   const admin = isAdmin();
 
+  const canHover =
+    typeof window !== "undefined" &&
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
   const userEmail = (() => {
     try {
       const payload = parseJwt(getAuthToken());
@@ -92,8 +96,8 @@ export default function Navbar() {
           : "border-b border-transparent bg-white/60 py-3 backdrop-blur-xl lg:py-4"
       }`}
     >
-      <div className="page-section flex items-center justify-between px-4 lg:px-4 xl:px-6">
-        <Link to="/" className="group flex shrink-0 items-center space-x-2">
+      <div className="page-section flex items-center justify-between lg:justify-center xl:gap-16 md:gap-8 px-4 lg:px-4 xl:px-6">
+        <Link to="/" className="group flex shrink-0 items-center space-x-2 ">
           <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary via-primary to-primary/90 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105">
             ASC
           </div>
@@ -264,20 +268,20 @@ export default function Navbar() {
               ref={userDropdownRef}
               className="relative"
               onMouseEnter={() => {
-                if (window.innerWidth >= 1024) {
+                if (canHover) {
                   clearTimeout(userCloseTimer.current);
                   setUserDropdownOpen(true);
                 }
               }}
               onMouseLeave={() => {
-                if (window.innerWidth >= 1024) {
+                if (canHover) {
                   userCloseTimer.current = setTimeout(() => setUserDropdownOpen(false), 150);
                 }
               }}
             >
-              <div
+              <button
                 onClick={() => {
-                  if (window.innerWidth < 1024) {
+                  if (!canHover) {
                     setUserDropdownOpen((prev) => !prev);
                   }
                 }}
@@ -290,7 +294,7 @@ export default function Navbar() {
                 <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-primary text-xs font-bold text-white shadow-sm shadow-primary/20 xl:h-8 xl:w-8">
                   {userEmail ? userEmail[0].toUpperCase() : "?"}
                 </div>
-                <span className="max-w-[180px] truncate text-sm font-medium text-base-content">
+                <span className="hidden xl:block max-w-[180px] truncate text-sm font-medium text-base-content">
                   {userEmail}
                 </span>
                 <svg
@@ -302,7 +306,7 @@ export default function Navbar() {
                 >
                   <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.085l3.71-3.855a.75.75 0 1 1 1.08 1.04l-4.24 4.4a.75.75 0 0 1-1.08 0l-4.24-4.4a.75.75 0 0 1 .02-1.06z" />
                 </svg>
-              </div>
+              </button>
 
               {userDropdownOpen && (
                 <div className="absolute right-0 z-50 mt-2 hidden w-56 overflow-hidden rounded-3xl border border-white/60 bg-white/95 shadow-[0_30px_60px_-35px_rgba(16,38,58,0.7)] backdrop-blur-2xl animate-fadeIn lg:block">
