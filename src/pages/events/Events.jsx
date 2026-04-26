@@ -229,7 +229,7 @@ export default function EventPage() {
 
         {/* Calendar view */}
         {view === "calendar" && (
-          <div className="glass-card rounded-2xl shadow-xl backdrop-blur-md border border-white/30 p-6">
+          <div className="glass-card rounded-2xl shadow-xl backdrop-blur-md border border-white/30 p-3 sm:p-6">
             <RecurringEventsCalendar
               events={typeFiltered}
               title={

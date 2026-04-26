@@ -22,7 +22,7 @@ function mergeWithDefaults(saved) {
 
 function SectionHeader({ kicker, title, action }) {
   return (
-    <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="mb-8 flex flex-col items-center text-center gap-4 md:flex-row md:items-end md:justify-between md:text-left">
       <div className="max-w-2xl">
         <span className="section-kicker mb-4">{kicker}</span>
         <h2 className="section-heading">{title}</h2>
@@ -146,7 +146,9 @@ export default function Home() {
     }
   };
 
-  const upcomingEvents = (events || []).filter((event) => new Date(event.date) >= new Date());
+  const upcomingEvents = (events || [])
+    .filter((event) => new Date(event.date) >= new Date())
+    .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
   const availableCourses = (courses || []).filter((course) => course.enrollmentOpen).slice(0, 3);
   const heroImage = heroImagePreview || pageContent.heroImage;
 
@@ -356,7 +358,7 @@ export default function Home() {
           action={
             <Link
               to="/events/asc"
-              className="inline-flex items-center gap-2 rounded-full border border-base-300 bg-white/80 px-5 py-3 text-sm font-semibold text-base-content shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:text-primary"
+              className="self-center md:self-auto inline-flex items-center gap-2 rounded-full border border-base-300 bg-white/80 px-5 py-3 text-sm font-semibold text-base-content shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:text-primary"
             >
               View All Events
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -390,7 +392,7 @@ export default function Home() {
           action={
             <Link
               to="/courses"
-              className="inline-flex items-center gap-2 rounded-full border border-base-300 bg-white/80 px-5 py-3 text-sm font-semibold text-base-content shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:text-primary"
+              className="self-center md:self-auto inline-flex items-center gap-2 rounded-full border border-base-300 bg-white/80 px-5 py-3 text-sm font-semibold text-base-content shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:text-primary"
             >
               View All Courses
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
