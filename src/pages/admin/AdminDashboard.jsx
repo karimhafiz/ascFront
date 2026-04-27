@@ -68,6 +68,13 @@ export default function AdminDashboard() {
     }));
   };
 
+  const handleBanToggle = (userId, isBanned) => {
+    setData((prev) => ({
+      ...prev,
+      users: prev.users.map((u) => (u._id === userId ? { ...u, isBanned } : u)),
+    }));
+  };
+
   const visibleTabs = isAdmin ? TABS : TABS.filter((t) => t !== "Users");
 
   if (loading) {
@@ -120,13 +127,13 @@ export default function AdminDashboard() {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 bg-white/70 backdrop-blur-sm rounded-2xl border border-base-300 shadow-sm p-1.5 overflow-x-auto">
+            <div className="flex flex-wrap justify-center sm:flex-nowrap gap-1 bg-white/70 backdrop-blur-sm rounded-2xl border border-base-300 shadow-sm p-1.5">
               {visibleTabs.map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={
-                    "flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap cursor-pointer " +
+                    "basis-[30%] sm:basis-auto sm:flex-1 py-2 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer text-center " +
                     (activeTab === tab
                       ? "bg-gradient-to-r from-primary to-primary/70 text-white shadow-sm"
                       : "text-base-content/50 hover:text-base-content hover:bg-base-100")
@@ -136,7 +143,7 @@ export default function AdminDashboard() {
                   {tab === "Tickets" && data && (
                     <span
                       className={
-                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full " +
+                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full hidden sm:inline " +
                         (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
                       }
                     >
@@ -146,7 +153,7 @@ export default function AdminDashboard() {
                   {tab === "Teams" && data && (
                     <span
                       className={
-                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full " +
+                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full hidden sm:inline " +
                         (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
                       }
                     >
@@ -156,7 +163,7 @@ export default function AdminDashboard() {
                   {tab === "Courses" && data?.enrollments && (
                     <span
                       className={
-                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full " +
+                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full hidden sm:inline " +
                         (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
                       }
                     >
@@ -166,7 +173,7 @@ export default function AdminDashboard() {
                   {tab === "Users" && data?.users && (
                     <span
                       className={
-                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full " +
+                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full hidden sm:inline " +
                         (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
                       }
                     >
@@ -192,6 +199,7 @@ export default function AdminDashboard() {
               users={data.users}
               currentUserId={currentUserId}
               onRoleChange={handleRoleChange}
+              onBanToggle={handleBanToggle}
             />
           )}
         </div>
