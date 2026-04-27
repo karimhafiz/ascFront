@@ -3,7 +3,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import CoursesTab from "../../../src/components/admin/CoursesTab";
 import "@testing-library/jest-dom";
 
-// Mock window.open for print
 window.open = jest.fn(() => ({
   document: { write: jest.fn(), close: jest.fn() },
 }));
@@ -15,8 +14,7 @@ const enrollments = [
     buyerPhone: "07111222333",
     status: "paid",
     createdAt: "2026-03-10T10:00:00Z",
-    courseId: { title: "Yoga 101" },
-    participants: [{ name: "Jane", email: "jane@test.com" }],
+    courseId: { _id: "c1", title: "Yoga 101", instructor: "Sarah", category: "Fitness", price: 30 },
   },
   {
     _id: "e2",
@@ -24,8 +22,7 @@ const enrollments = [
     buyerPhone: "07444555666",
     status: "pending",
     createdAt: "2026-03-12T10:00:00Z",
-    courseId: { title: "Swimming" },
-    participants: [],
+    courseId: { _id: "c2", title: "Swimming", instructor: "Mike", category: "Sports", price: 0 },
   },
 ];
 
@@ -57,16 +54,32 @@ describe("CoursesTab", () => {
     jest.clearAllMocks();
   });
 
-  it("renders enrollments view by default", () => {
+  it("renders enrollments grouped by course by default", () => {
     render(<CoursesTab enrollments={enrollments} courses={courses} />);
-    expect(screen.getByText("student@test.com")).toBeInTheDocument();
     expect(screen.getByText("Yoga 101")).toBeInTheDocument();
+    expect(screen.getByText("Swimming")).toBeInTheDocument();
   });
 
-  it("shows enrollment status badges", () => {
+  it("shows enrollment count per course group", () => {
     render(<CoursesTab enrollments={enrollments} courses={courses} />);
+    expect(screen.getAllByText("1 enrollment").length).toBe(2);
+  });
+
+  it("course groups start collapsed", () => {
+    render(<CoursesTab enrollments={enrollments} courses={courses} />);
+    expect(screen.queryByText("student@test.com")).not.toBeInTheDocument();
+  });
+
+  it("expands course group to show enrollments", () => {
+    render(<CoursesTab enrollments={enrollments} courses={courses} />);
+    fireEvent.click(screen.getByText("Yoga 101"));
+    expect(screen.getByText("student@test.com")).toBeInTheDocument();
+  });
+
+  it("shows enrollment status badges when expanded", () => {
+    render(<CoursesTab enrollments={enrollments} courses={courses} />);
+    fireEvent.click(screen.getByText("Yoga 101"));
     expect(screen.getByText("Paid")).toBeInTheDocument();
-    expect(screen.getByText("Pending")).toBeInTheDocument();
   });
 
   it("shows 'No enrollments found' when empty", () => {
@@ -74,23 +87,30 @@ describe("CoursesTab", () => {
     expect(screen.getByText("No enrollments found")).toBeInTheDocument();
   });
 
+  it("switches to ungrouped view and shows flat table", () => {
+    render(<CoursesTab enrollments={enrollments} courses={courses} />);
+    fireEvent.click(screen.getByText("Ungrouped"));
+    expect(screen.getAllByText("student@test.com").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("learner@test.com").length).toBeGreaterThanOrEqual(1);
+  });
+
   it("switches to courses view", () => {
     render(<CoursesTab enrollments={enrollments} courses={courses} />);
-    fireEvent.click(screen.getByText("courses"));
+    fireEvent.click(screen.getByText("Courses"));
     expect(screen.getByText("Sarah")).toBeInTheDocument();
     expect(screen.getByText("Mike")).toBeInTheDocument();
   });
 
-  it("shows course enrollment status", () => {
+  it("shows course enrollment status in courses view", () => {
     render(<CoursesTab enrollments={enrollments} courses={courses} />);
-    fireEvent.click(screen.getByText("courses"));
+    fireEvent.click(screen.getByText("Courses"));
     expect(screen.getByText("Open")).toBeInTheDocument();
     expect(screen.getByText("Closed")).toBeInTheDocument();
   });
 
   it("shows 'Free' for zero-price courses", () => {
     render(<CoursesTab enrollments={enrollments} courses={courses} />);
-    fireEvent.click(screen.getByText("courses"));
+    fireEvent.click(screen.getByText("Courses"));
     expect(screen.getByText("Free")).toBeInTheDocument();
   });
 
@@ -99,15 +119,16 @@ describe("CoursesTab", () => {
     fireEvent.change(screen.getByPlaceholderText(/search/i), {
       target: { value: "student" },
     });
-    expect(screen.getByText("student@test.com")).toBeInTheDocument();
-    expect(screen.queryByText("learner@test.com")).not.toBeInTheDocument();
+    // Only the Yoga 101 group should remain (student@test.com matches)
+    expect(screen.getByText("Yoga 101")).toBeInTheDocument();
+    expect(screen.queryByText("Swimming")).not.toBeInTheDocument();
   });
 
-  it("has a print button on enrollment rows", () => {
+  it("has a print button when enrollment group is expanded", () => {
     render(<CoursesTab enrollments={enrollments} courses={courses} />);
-    const printBtns = screen.getAllByTitle("Print enrollment");
-    expect(printBtns.length).toBe(2);
-    fireEvent.click(printBtns[0]);
+    fireEvent.click(screen.getByText("Yoga 101"));
+    const printBtn = screen.getByTitle("Print enrollment");
+    fireEvent.click(printBtn);
     expect(window.open).toHaveBeenCalledWith("", "_blank");
   });
 });
