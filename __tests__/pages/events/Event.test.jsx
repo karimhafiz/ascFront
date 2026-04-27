@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import EventPage from "../../../src/pages/events/Event";
+import EventPage from "../../../src/pages/events/Events";
 import "@testing-library/jest-dom";
 
 const mockEvents = [

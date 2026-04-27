@@ -3,7 +3,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import TeamsTab from "../../../src/components/admin/TeamsTab";
 import "@testing-library/jest-dom";
 
-// Mock window.open for print
 window.open = jest.fn(() => ({
   document: { write: jest.fn(), close: jest.fn() },
 }));
@@ -12,12 +11,9 @@ const makeTeam = (overrides = {}) => ({
   _id: Math.random().toString(36).slice(2),
   name: "Test Team",
   paid: true,
-  event: { title: "Cup Final", date: "2026-06-15T00:00:00Z" },
+  event: { _id: "ev1", title: "Cup Final", date: "2026-06-15T00:00:00Z" },
   manager: { name: "John", email: "john@test.com", phone: "07123456789" },
-  members: [
-    { name: "Alice", email: "alice@test.com" },
-    { name: "Bob", email: "bob@test.com" },
-  ],
+  createdAt: "2026-03-01T00:00:00Z",
   ...overrides,
 });
 
@@ -31,47 +27,44 @@ describe("TeamsTab", () => {
     expect(screen.getByText("No team registrations found")).toBeInTheDocument();
   });
 
-  it("renders a team card with name and event", () => {
+  it("renders event group header in default By Event view", () => {
     render(<TeamsTab teams={[makeTeam()]} />);
+    expect(screen.getByText("Cup Final")).toBeInTheDocument();
+  });
+
+  it("shows team count per event group", () => {
+    const teams = [makeTeam({ _id: "t1", name: "Alpha" }), makeTeam({ _id: "t2", name: "Beta" })];
+    render(<TeamsTab teams={teams} />);
+    expect(screen.getByText("2 teams")).toBeInTheDocument();
+  });
+
+  it("event groups start collapsed", () => {
+    render(<TeamsTab teams={[makeTeam()]} />);
+    expect(screen.queryByText("Test Team")).not.toBeInTheDocument();
+  });
+
+  it("expands event group on click to show teams", () => {
+    render(<TeamsTab teams={[makeTeam()]} />);
+    fireEvent.click(screen.getByText("Cup Final"));
     expect(screen.getByText("Test Team")).toBeInTheDocument();
-    expect(screen.getByText(/Cup Final/)).toBeInTheDocument();
   });
 
-  it("shows paid status badge", () => {
+  it("shows paid status badge when expanded", () => {
     render(<TeamsTab teams={[makeTeam({ paid: true })]} />);
-    expect(screen.getByText("✓ Paid")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Cup Final"));
+    expect(screen.getByText("\u2713 Paid")).toBeInTheDocument();
   });
 
-  it("shows pending status badge for unpaid teams", () => {
+  it("shows pending status badge when expanded", () => {
     render(<TeamsTab teams={[makeTeam({ paid: false })]} />);
+    fireEvent.click(screen.getByText("Cup Final"));
     expect(screen.getByText("Pending")).toBeInTheDocument();
-  });
-
-  it("shows member count", () => {
-    render(<TeamsTab teams={[makeTeam()]} />);
-    expect(screen.getByText("2 members")).toBeInTheDocument();
-  });
-
-  it("expands members on 'Show members' click", () => {
-    render(<TeamsTab teams={[makeTeam()]} />);
-    fireEvent.click(screen.getByText("Show members"));
-    expect(screen.getByText("Alice")).toBeInTheDocument();
-    expect(screen.getByText("Bob")).toBeInTheDocument();
-  });
-
-  it("collapses members on 'Hide members' click", () => {
-    render(<TeamsTab teams={[makeTeam()]} />);
-    fireEvent.click(screen.getByText("Show members"));
-    expect(screen.getByText("Alice")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText("Hide members"));
-    expect(screen.queryByText("Alice")).not.toBeInTheDocument();
   });
 
   it("filters teams by search", () => {
     const teams = [
-      makeTeam({ _id: "1", name: "Alpha Squad" }),
-      makeTeam({ _id: "2", name: "Beta Team" }),
+      makeTeam({ _id: "1", name: "Alpha Squad", event: { _id: "ev1", title: "Event A" } }),
+      makeTeam({ _id: "2", name: "Beta Team", event: { _id: "ev2", title: "Event B" } }),
     ];
     render(<TeamsTab teams={teams} />);
 
@@ -79,12 +72,20 @@ describe("TeamsTab", () => {
       target: { value: "Alpha" },
     });
 
-    expect(screen.getByText("Alpha Squad")).toBeInTheDocument();
-    expect(screen.queryByText("Beta Team")).not.toBeInTheDocument();
+    expect(screen.getByText("Event A")).toBeInTheDocument();
+    expect(screen.queryByText("Event B")).not.toBeInTheDocument();
   });
 
-  it("has a print button that opens a new window", () => {
+  it("switches to All view and shows team cards", () => {
     render(<TeamsTab teams={[makeTeam()]} />);
+    fireEvent.click(screen.getByText("All"));
+    expect(screen.getByText("Test Team")).toBeInTheDocument();
+    expect(screen.getByText(/Cup Final/)).toBeInTheDocument();
+  });
+
+  it("has a print button in All view", () => {
+    render(<TeamsTab teams={[makeTeam()]} />);
+    fireEvent.click(screen.getByText("All"));
     fireEvent.click(screen.getByTitle("Print team details"));
     expect(window.open).toHaveBeenCalledWith("", "_blank");
   });
