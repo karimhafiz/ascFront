@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import TeamSignupForm from "../../components/teams/TeamSignupForm";
 import { slugToId } from "../../util/util";
 import { isAuthenticated, fetchWithAuth } from "../../auth/auth";
@@ -111,6 +111,8 @@ export default function EventDetails() {
   const isSubscription = event.isReoccurring && event.stripePriceId && event.ticketPrice > 0;
   const isFreeEvent = event.ticketPrice === 0 && !event.isTournament;
   const isSoldOut = event.ticketsAvailable === 0;
+  const loggedIn = isAuthenticated();
+  const requiresAuth = isSubscription || event.isTournament;
 
   const getActionButton = () => {
     if (isEventInPast) return null;
@@ -127,6 +129,13 @@ export default function EventDetails() {
         <span className="text-sm font-semibold text-red-500 bg-red-50 px-4 py-2 rounded-full whitespace-nowrap">
           Sold Out
         </span>
+      );
+    }
+    if (requiresAuth && !loggedIn) {
+      return (
+        <Link to="/login" className="btn btn-primary whitespace-nowrap hidden md:inline-flex">
+          {event.isTournament ? "Log in to register" : "Log in to subscribe"}
+        </Link>
       );
     }
     return (
@@ -252,14 +261,25 @@ export default function EventDetails() {
       </div>
 
       {/* Floating CTA — mobile only */}
-      {!isEventInPast && !mySubscription && !isFreeEvent && !isSoldOut && (
-        <button
-          onClick={() => setShowTicketModal(true)}
-          className="md:hidden fixed bottom-6 left-4 right-4 z-40 btn btn-primary shadow-xl text-base rounded-2xl py-3"
-        >
-          {event.isTournament ? "Register Team" : isSubscription ? "Subscribe" : "Buy Tickets"}
-        </button>
-      )}
+      {!isEventInPast &&
+        !mySubscription &&
+        !isFreeEvent &&
+        !isSoldOut &&
+        (requiresAuth && !loggedIn ? (
+          <Link
+            to="/login"
+            className="md:hidden fixed bottom-6 left-4 right-4 z-40 btn btn-primary shadow-xl text-base rounded-2xl py-3 text-center"
+          >
+            {event.isTournament ? "Log in to register" : "Log in to subscribe"}
+          </Link>
+        ) : (
+          <button
+            onClick={() => setShowTicketModal(true)}
+            className="md:hidden fixed bottom-6 left-4 right-4 z-40 btn btn-primary shadow-xl text-base rounded-2xl py-3"
+          >
+            {event.isTournament ? "Register Team" : isSubscription ? "Subscribe" : "Buy Tickets"}
+          </button>
+        ))}
 
       {/* Ticket/Registration modal */}
       {showTicketModal && (

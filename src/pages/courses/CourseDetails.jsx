@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAuthToken, isAuthenticated, parseJwt, fetchWithAuth } from "../../auth/auth";
 import { slugToId, validatePhone } from "../../util/util";
@@ -172,17 +172,26 @@ export default function CourseDetails() {
               isFull={isFull}
               actionButton={
                 !myEnrollment && course.enrollmentOpen && !isFull ? (
-                  <Button
-                    variant="primary"
-                    onClick={() => setShowEnrollModal(true)}
-                    className="whitespace-nowrap hidden md:inline-flex"
-                  >
-                    {course.price > 0
-                      ? course.isSubscription
-                        ? `Subscribe — £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "mo"}`
-                        : `Enroll — £${course.price}`
-                      : "Enroll for Free"}
-                  </Button>
+                  !loggedIn ? (
+                    <Link
+                      to="/login"
+                      className="btn btn-primary whitespace-nowrap hidden md:inline-flex"
+                    >
+                      Log in to enroll
+                    </Link>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      onClick={() => setShowEnrollModal(true)}
+                      className="whitespace-nowrap hidden md:inline-flex"
+                    >
+                      {course.price > 0
+                        ? course.isSubscription
+                          ? `Subscribe — £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "mo"}`
+                          : `Enroll — £${course.price}`
+                        : "Enroll for Free"}
+                    </Button>
+                  )
                 ) : !myEnrollment && isFull ? (
                   <span className="text-sm font-semibold text-red-500 bg-red-50 px-4 py-2 rounded-full whitespace-nowrap">
                     Full
@@ -259,18 +268,28 @@ export default function CourseDetails() {
       </div>
 
       {/* Floating enroll CTA — mobile only */}
-      {!myEnrollment && course.enrollmentOpen && !isFull && (
-        <button
-          onClick={() => setShowEnrollModal(true)}
-          className="md:hidden fixed bottom-6 left-4 right-4 z-40 btn btn-primary shadow-xl text-base rounded-2xl py-3"
-        >
-          {course.price > 0
-            ? course.isSubscription
-              ? `Subscribe — £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "month"}`
-              : `Enroll — £${course.price}`
-            : "Enroll for Free"}
-        </button>
-      )}
+      {!myEnrollment &&
+        course.enrollmentOpen &&
+        !isFull &&
+        (!loggedIn ? (
+          <Link
+            to="/login"
+            className="md:hidden fixed bottom-6 left-4 right-4 z-40 btn btn-primary shadow-xl text-base rounded-2xl py-3 text-center"
+          >
+            Log in to enroll
+          </Link>
+        ) : (
+          <button
+            onClick={() => setShowEnrollModal(true)}
+            className="md:hidden fixed bottom-6 left-4 right-4 z-40 btn btn-primary shadow-xl text-base rounded-2xl py-3"
+          >
+            {course.price > 0
+              ? course.isSubscription
+                ? `Subscribe — £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "month"}`
+                : `Enroll — £${course.price}`
+              : "Enroll for Free"}
+          </button>
+        ))}
 
       {/* Enrollment modal */}
       {showEnrollModal && (
@@ -311,158 +330,199 @@ export default function CourseDetails() {
               </div>
             )}
 
-            <div className="space-y-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                autoComplete="email"
-                className="glass-input text-sm w-full"
-              />
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Phone (07...)"
-                autoComplete="tel"
-                className="glass-input text-sm w-full"
-              />
-
-              {!multiMode && (
-                <div className="flex gap-3">
+            {!loggedIn ? (
+              <div className="space-y-3">
+                <p className="text-sm text-base-content/70 text-center">
+                  You need an account to enroll in courses.
+                </p>
+                <Button variant="primary" className="w-full" onClick={() => navigate("/login")}>
+                  Log in to enroll
+                </Button>
+                <p className="text-xs text-center text-base-content/50">
+                  Don't have an account?{" "}
+                  <button
+                    onClick={() => navigate("/register")}
+                    className="text-primary hover:underline cursor-pointer"
+                  >
+                    Sign up
+                  </button>
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="relative">
                   <input
-                    type="text"
-                    placeholder="Name *"
-                    value={participants[0]?.name || ""}
-                    onChange={(e) => updateParticipant(0, "name", e.target.value)}
-                    autoComplete="name"
-                    className="glass-input text-sm !w-auto flex-1 min-w-0"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled
+                    placeholder="Email"
+                    autoComplete="email"
+                    className="glass-input text-sm w-full"
+                    style={{ paddingRight: "2.5rem" }}
                   />
-                  <input
-                    type="number"
-                    placeholder="Age"
-                    min="1"
-                    value={participants[0]?.age || ""}
-                    onChange={(e) => updateParticipant(0, "age", e.target.value)}
-                    className="glass-input text-sm !w-20 min-w-0"
-                  />
+                  <span
+                    className="absolute right-3 top-1/2 -translate-y-1/2 opacity-40"
+                    title="Using your account email"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </span>
                 </div>
-              )}
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Phone (07...)"
+                  autoComplete="tel"
+                  className="glass-input text-sm w-full"
+                />
 
-              <button
-                type="button"
-                onClick={() => setMultiMode((m) => !m)}
-                className="text-xs text-primary hover:text-primary/80 font-medium flex items-center gap-1.5 cursor-pointer"
-              >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d={multiMode ? "M20 12H4" : "M12 4v16m8-8H4"}
-                  />
-                </svg>
-                {multiMode ? "Single enrollment" : "Multiple people"}
-              </button>
+                {!multiMode && (
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      placeholder="Name *"
+                      value={participants[0]?.name || ""}
+                      onChange={(e) => updateParticipant(0, "name", e.target.value)}
+                      autoComplete="name"
+                      className="glass-input text-sm !w-auto flex-1 min-w-0"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Age"
+                      min="1"
+                      value={participants[0]?.age || ""}
+                      onChange={(e) => updateParticipant(0, "age", e.target.value)}
+                      className="glass-input text-sm !w-20 min-w-0"
+                    />
+                  </div>
+                )}
 
-              {multiMode && (
-                <div className="space-y-2">
-                  {participants.map((p, i) => (
-                    <div key={i} className="flex gap-2 items-center">
-                      <input
-                        type="text"
-                        placeholder="Name *"
-                        value={p.name}
-                        onChange={(e) => updateParticipant(i, "name", e.target.value)}
-                        autoComplete="name"
-                        className="glass-input text-sm py-1.5 !w-auto flex-1 min-w-0"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Age"
-                        min="1"
-                        value={p.age}
-                        onChange={(e) => updateParticipant(i, "age", e.target.value)}
-                        className="glass-input text-sm py-1.5 !w-20 min-w-0"
-                      />
-                      {participants.length > 1 && (
-                        <button
-                          onClick={() => removeParticipant(i)}
-                          className="p-1.5 text-red-400 hover:text-red-600 cursor-pointer"
-                          aria-label={`Remove participant ${i + 1}`}
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+                <button
+                  type="button"
+                  onClick={() => setMultiMode((m) => !m)}
+                  className="text-xs text-primary hover:text-primary/80 font-medium flex items-center gap-1.5 cursor-pointer"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d={multiMode ? "M20 12H4" : "M12 4v16m8-8H4"}
+                    />
+                  </svg>
+                  {multiMode ? "Single enrollment" : "Multiple people"}
+                </button>
+
+                {multiMode && (
+                  <div className="space-y-2">
+                    {participants.map((p, i) => (
+                      <div key={i} className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          placeholder="Name *"
+                          value={p.name}
+                          onChange={(e) => updateParticipant(i, "name", e.target.value)}
+                          autoComplete="name"
+                          className="glass-input text-sm py-1.5 !w-auto flex-1 min-w-0"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Age"
+                          min="1"
+                          value={p.age}
+                          onChange={(e) => updateParticipant(i, "age", e.target.value)}
+                          className="glass-input text-sm py-1.5 !w-20 min-w-0"
+                        />
+                        {participants.length > 1 && (
+                          <button
+                            onClick={() => removeParticipant(i)}
+                            className="p-1.5 text-red-400 hover:text-red-600 cursor-pointer"
+                            aria-label={`Remove participant ${i + 1}`}
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={addParticipant}
+                        className="text-xs text-base-content/60 hover:text-base-content cursor-pointer"
+                      >
+                        + Add person
+                      </button>
+                      {course.price > 0 && (
+                        <span className="text-xs text-base-content/50">
+                          Total: £
+                          {(
+                            course.price * participants.filter((p) => p.name.trim()).length
+                          ).toFixed(2)}
+                        </span>
                       )}
                     </div>
-                  ))}
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={addParticipant}
-                      className="text-xs text-base-content/60 hover:text-base-content cursor-pointer"
-                    >
-                      + Add person
-                    </button>
-                    {course.price > 0 && (
-                      <span className="text-xs text-base-content/50">
-                        Total: £
-                        {(course.price * participants.filter((p) => p.name.trim()).length).toFixed(
-                          2
-                        )}
-                      </span>
-                    )}
                   </div>
-                </div>
-              )}
-
-              {enrollError && (
-                <p className="text-red-500 text-sm" role="alert">
-                  {enrollError}
-                </p>
-              )}
-
-              <Button
-                variant="primary"
-                className="w-full"
-                onClick={handleEnroll}
-                disabled={isProcessing}
-              >
-                {isProcessing ? (
-                  <span className="flex items-center justify-center">
-                    <Spinner size="sm" />
-                    <span className="ml-3">Redirecting to payment...</span>
-                  </span>
-                ) : course.price > 0 ? (
-                  course.isSubscription ? (
-                    `Subscribe £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "mo"}`
-                  ) : multiMode ? (
-                    `Pay £${(course.price * participants.filter((p) => p.name.trim()).length).toFixed(2)}`
-                  ) : (
-                    `Enroll — £${course.price}`
-                  )
-                ) : (
-                  "Enroll for Free"
                 )}
-              </Button>
-              {course.price > 0 && (
-                <p className="text-xs text-base-content/40 text-center">
-                  Secure payment via Stripe
-                </p>
-              )}
-            </div>
+
+                {enrollError && (
+                  <p className="text-red-500 text-sm" role="alert">
+                    {enrollError}
+                  </p>
+                )}
+
+                <Button
+                  variant="primary"
+                  className="w-full"
+                  onClick={handleEnroll}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <span className="flex items-center justify-center">
+                      <Spinner size="sm" />
+                      <span className="ml-3">Redirecting to payment...</span>
+                    </span>
+                  ) : course.price > 0 ? (
+                    course.isSubscription ? (
+                      `Subscribe £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "mo"}`
+                    ) : multiMode ? (
+                      `Pay £${(course.price * participants.filter((p) => p.name.trim()).length).toFixed(2)}`
+                    ) : (
+                      `Enroll — £${course.price}`
+                    )
+                  ) : (
+                    "Enroll for Free"
+                  )}
+                </Button>
+                {course.price > 0 && (
+                  <p className="text-xs text-base-content/40 text-center">
+                    Secure payment via Stripe
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

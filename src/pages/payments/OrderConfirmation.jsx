@@ -1,7 +1,7 @@
 import React from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getAuthToken } from "../../auth/auth";
+import { getAuthToken, isAuthenticated } from "../../auth/auth";
 import TicketCard from "../../components/tickets/TicketCard";
 import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
 
@@ -9,6 +9,7 @@ export default function OrderConfirmation() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const ticketId = searchParams.get("ticket_id");
+  const loggedIn = isAuthenticated();
 
   const {
     data: ticket,
@@ -24,7 +25,7 @@ export default function OrderConfirmation() {
       if (!res.ok) throw new Error("Failed to fetch ticket details");
       return res.json();
     },
-    enabled: !!ticketId,
+    enabled: !!ticketId && loggedIn,
     retry: 1,
   });
 
@@ -42,7 +43,7 @@ export default function OrderConfirmation() {
       if (!res.ok) return [ticket];
       return res.json();
     },
-    enabled: !!ticket?.paymentId,
+    enabled: !!ticket?.paymentId && loggedIn,
     retry: 0,
   });
 
@@ -56,7 +57,7 @@ export default function OrderConfirmation() {
       if (!res.ok) throw new Error("Failed to fetch receipt");
       return res.json();
     },
-    enabled: !!sessionId && !ticketId,
+    enabled: !!sessionId && !ticketId && loggedIn,
     retry: 1,
   });
 
@@ -96,7 +97,7 @@ export default function OrderConfirmation() {
     URL.revokeObjectURL(url);
   };
 
-  if (ticketLoading)
+  if (ticketLoading && loggedIn)
     return (
       <PageContainer center>
         <div className="flex flex-col items-center gap-3">
@@ -106,7 +107,7 @@ export default function OrderConfirmation() {
       </PageContainer>
     );
 
-  // Fallback — payment confirmed but ticket couldn't load
+  // Fallback — payment confirmed but ticket couldn't load (or guest checkout)
   if (ticketError || !ticket)
     return (
       <PageContainer center>
@@ -128,8 +129,9 @@ export default function OrderConfirmation() {
           </div>
           <h2 className="text-2xl font-bold text-green-600 mb-2">Payment Successful!</h2>
           <p className="text-base-content/50 text-sm mb-6">
-            Your payment was processed. Your ticket will appear in your profile shortly. A
-            confirmation email with your QR code has been sent to your inbox.
+            Your payment was processed.{" "}
+            {loggedIn ? "Your ticket will appear in your profile shortly. " : ""}A confirmation
+            email with your QR code has been sent to your inbox.
           </p>
           {receipt && (
             <div className="bg-base-100 rounded-xl p-4 mb-6 text-left text-sm space-y-1">
@@ -145,10 +147,25 @@ export default function OrderConfirmation() {
               </p>
             </div>
           )}
+          {!loggedIn && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left text-sm text-blue-700">
+              <p className="font-semibold mb-1">Want to view your tickets online?</p>
+              <p>
+                Create an account using the same email you purchased with, and your tickets will
+                appear automatically in your profile.
+              </p>
+            </div>
+          )}
           <div className="space-y-3">
-            <Button variant="primary" to="/profile" className="w-full">
-              View My Tickets
-            </Button>
+            {loggedIn ? (
+              <Button variant="primary" to="/profile" className="w-full">
+                View My Tickets
+              </Button>
+            ) : (
+              <Button variant="primary" to="/register" className="w-full">
+                Create an Account
+              </Button>
+            )}
             <Button variant="ghost" to="/events" className="w-full">
               Browse More Events
             </Button>
@@ -239,9 +256,15 @@ export default function OrderConfirmation() {
             </svg>
             Add to Calendar
           </Button>
-          <Button variant="ghost" to="/profile" className="w-full">
-            View All Tickets
-          </Button>
+          {loggedIn ? (
+            <Button variant="ghost" to="/profile" className="w-full">
+              View All Tickets
+            </Button>
+          ) : (
+            <Button variant="ghost" to="/events" className="w-full">
+              Browse More Events
+            </Button>
+          )}
         </div>
       </div>
     </PageContainer>
