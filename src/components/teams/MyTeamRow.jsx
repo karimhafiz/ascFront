@@ -2,6 +2,7 @@ import { useState } from "react";
 import { fetchWithAuth, getAuthToken, parseJwt } from "../../auth/auth";
 import { Spinner } from "../ui";
 import TeamEditForm from "./TeamEditForm";
+import { Link } from "react-router-dom";
 
 export default function MyTeamRow({ team, onTeamUpdated, readOnly = false }) {
   const [editing, setEditing] = useState(false);
@@ -65,7 +66,9 @@ export default function MyTeamRow({ team, onTeamUpdated, readOnly = false }) {
             <p className="font-semibold text-base-content truncate">{team.name}</p>
             {team.event?.title && (
               <p className="text-sm text-base-content/60 truncate mt-0.5">
-                {team.event.title}
+                <Link to={`/events/${team.event._id}`} className="hover:underline text-info">
+                  {team.event.title}
+                </Link>
                 {team.event.date && (
                   <span>
                     {" "}
