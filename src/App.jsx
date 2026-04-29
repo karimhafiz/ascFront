@@ -37,13 +37,13 @@ const CourseFormPage = lazy(() => import("./pages/courses/CourseFormPage"));
 const CourseRoot = lazy(() => import("./pages/courses/CourseRoot"));
 const SubscriptionConfirmation = lazy(() => import("./pages/events/SubscriptionConfirmation"));
 
-const fallback = (
+const Fallback = (
   <div className="flex justify-center items-center p-12">
     <span className="loading loading-spinner loading-lg" />
   </div>
 );
 
-const w = (C) => <Suspense fallback={fallback}>{createElement(C)}</Suspense>;
+const w = (C) => <Suspense fallback={Fallback}>{createElement(C)}</Suspense>;
 
 const router = createBrowserRouter([
   {
@@ -51,6 +51,7 @@ const router = createBrowserRouter([
     element: <Main />,
     id: "root",
     loader: combinedLoader,
+    HydrateFallback: Fallback,
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: w(Home) },
