@@ -7,8 +7,8 @@ export default function Footer() {
   return (
     <footer className="mt-16 border-t border-white/50 bg-neutral text-neutral-content">
       <div className="page-section grid grid-cols-1 gap-10 px-6 py-12 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="lg:col-span-1">
-          <div className="mb-4 flex items-center gap-2">
+        <div className="lg:col-span-1 text-center sm:text-left">
+          <div className="mb-4 flex items-center justify-center sm:justify-start gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary via-primary to-primary/90 text-sm font-bold text-white shadow-lg shadow-black/20">
               ASC
             </div>
@@ -16,17 +16,17 @@ export default function Footer() {
               Ayendah Sazan
             </span>
           </div>
-          <p className="max-w-xs text-sm leading-relaxed text-neutral-content/68">
+          <p className="max-w-xs mx-auto sm:mx-0 text-sm leading-relaxed text-neutral-content/68">
             A community-based organisation in Leeds dedicated to bringing people together through
             cultural, educational, and sporting events.
           </p>
         </div>
 
-        <div>
+        <div className="text-center sm:text-left">
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-white">
             Quick Links
           </h3>
-          <ul className="space-y-2 text-sm text-neutral-content/65">
+          <ul className="space-y-2 text-sm text-neutral-content/65 inline-block sm:block">
             {[
               { to: "/", label: "Home" },
               { to: "/about", label: "About Us" },
@@ -45,11 +45,11 @@ export default function Footer() {
           </ul>
         </div>
 
-        <div>
+        <div className="text-center sm:text-left">
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-white">
             Programmes
           </h3>
-          <ul className="space-y-2 text-sm text-neutral-content/65">
+          <ul className="space-y-2 text-sm text-neutral-content/65 inline-block sm:block">
             {[
               { to: "/events", label: "Events" },
               { to: "/courses", label: "Courses" },
@@ -67,12 +67,12 @@ export default function Footer() {
           </ul>
         </div>
 
-        <div>
+        <div className="text-center sm:text-left">
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-white">
             Get in Touch
           </h3>
           <ul className="space-y-3 text-sm text-neutral-content/68">
-            <li className="flex items-start gap-2">
+            <li className="flex items-start justify-center sm:justify-start gap-2">
               <svg
                 className="mt-0.5 h-4 w-4 flex-shrink-0 text-secondary"
                 fill="none"
