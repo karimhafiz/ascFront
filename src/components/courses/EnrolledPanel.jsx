@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { fetchWithAuth } from "../../auth/auth";
+import { validatePhone } from "../../util/util";
 import { Button } from "../ui";
 
 const INTERVAL_LABELS = { month: "month", year: "year" };
@@ -35,6 +36,10 @@ export default function EnrolledPanel({ course, enrollment, onChanged }) {
   const [cancellingSubscription, setCancellingSubscription] = useState(false);
   const [reactivatingSubscription, setReactivatingSubscription] = useState(false);
   const [subscriptionError, setSubscriptionError] = useState("");
+  const [editingPhone, setEditingPhone] = useState(false);
+  const [phoneValue, setPhoneValue] = useState(enrollment.buyerPhone || "");
+  const [savingPhone, setSavingPhone] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
 
   const isCancelled = enrollment.subscriptionStatus === "cancelled";
 
@@ -114,6 +119,37 @@ export default function EnrolledPanel({ course, enrollment, onChanged }) {
     }
   };
 
+  const handleSavePhone = async () => {
+    setPhoneError("");
+    if (!phoneValue.trim()) {
+      setPhoneError("Phone number is required.");
+      return;
+    }
+    if (!validatePhone(phoneValue)) {
+      setPhoneError("Please enter a valid UK phone number.");
+      return;
+    }
+    try {
+      setSavingPhone(true);
+      const res = await fetchWithAuth(
+        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ buyerPhone: phoneValue.trim() }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update phone");
+      setEditingPhone(false);
+      onChanged();
+    } catch (err) {
+      setPhoneError(err.message);
+    } finally {
+      setSavingPhone(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -174,6 +210,58 @@ export default function EnrolledPanel({ course, enrollment, onChanged }) {
           </span>
           {enrollment.currentPeriodEnd && (
             <span className="text-blue-600">Renews {formatDate(enrollment.currentPeriodEnd)}</span>
+          )}
+        </div>
+      )}
+
+      {enrollment.buyerPhone && (
+        <div>
+          <p className="text-sm font-semibold text-base-content mb-1.5">Phone</p>
+          {editingPhone ? (
+            <div className="space-y-2">
+              <input
+                type="tel"
+                value={phoneValue}
+                onChange={(e) => setPhoneValue(e.target.value)}
+                className="glass-input text-sm w-full"
+                placeholder="Phone (07...)"
+                autoComplete="tel"
+              />
+              {phoneError && (
+                <p className="text-red-500 text-xs" role="alert">
+                  {phoneError}
+                </p>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSavePhone}
+                  disabled={savingPhone}
+                  className="text-xs font-medium text-primary hover:text-primary/80 cursor-pointer"
+                >
+                  {savingPhone ? "Saving..." : "Save"}
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingPhone(false);
+                    setPhoneValue(enrollment.buyerPhone || "");
+                    setPhoneError("");
+                  }}
+                  className="text-xs font-medium text-base-content/50 hover:text-base-content cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-base-content/70">{enrollment.buyerPhone}</span>
+              <button
+                onClick={() => setEditingPhone(true)}
+                className="text-xs text-primary hover:text-primary/80 font-medium cursor-pointer"
+              >
+                Edit
+              </button>
+            </div>
           )}
         </div>
       )}
