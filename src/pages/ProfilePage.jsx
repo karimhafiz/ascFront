@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isAuthenticated, fetchWithAuth } from "../auth/auth";
-import { optimizeCloudinaryUrl, toSlug } from "../util/util";
+import { optimizeCloudinaryUrl, toSlug, validatePhone } from "../util/util";
 import { Button, Spinner } from "../components/ui";
 import MyTeamRow from "../components/teams/MyTeamRow";
 
@@ -484,6 +484,11 @@ function EnrollmentRow({ enrollment }) {
   const [savingEdit, setSavingEdit] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const [toast, setToast] = useState(null);
+  const [editingPhone, setEditingPhone] = useState(false);
+  const [phoneValue, setPhoneValue] = useState(enrollment.buyerPhone || "");
+  const [savingPhone, setSavingPhone] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
+  const [currentPhone, setCurrentPhone] = useState(enrollment.buyerPhone || "");
   const course = enrollment.courseId;
   if (!course) return null;
   const gradient = CATEGORY_COLORS[course.category] || CATEGORY_COLORS.Other;
@@ -494,6 +499,38 @@ function EnrollmentRow({ enrollment }) {
   const showToast = (message, type = "error") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 4000);
+  };
+
+  const handleSavePhone = async () => {
+    setPhoneError("");
+    if (!phoneValue.trim()) {
+      setPhoneError("Phone number is required.");
+      return;
+    }
+    if (!validatePhone(phoneValue)) {
+      setPhoneError("Please enter a valid UK phone number.");
+      return;
+    }
+    setSavingPhone(true);
+    try {
+      const res = await fetchWithAuth(
+        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ buyerPhone: phoneValue.trim() }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update phone");
+      setCurrentPhone(phoneValue.trim());
+      setEditingPhone(false);
+      showToast("Phone number updated", "success");
+    } catch (err) {
+      setPhoneError(err.message);
+    } finally {
+      setSavingPhone(false);
+    }
   };
 
   const handleCancel = () => {
@@ -666,7 +703,7 @@ function EnrollmentRow({ enrollment }) {
             {" · "}
             {participants.length} participant{participants.length !== 1 ? "s" : ""}
             {isSubscription && ` · ${INTERVAL_ADJ[course.billingInterval] || "Monthly"}`}
-            {enrollment.buyerPhone && ` · ${enrollment.buyerPhone}`}
+            {currentPhone && ` · ${currentPhone}`}
           </p>
         </div>
         <div className="flex flex-col items-end justify-center px-5 gap-2 flex-shrink-0">
@@ -756,6 +793,55 @@ function EnrollmentRow({ enrollment }) {
           )}
         </div>
       )}
+
+      {/* Phone edit */}
+      <div className="px-5 py-2.5 border-t border-base-100">
+        {editingPhone ? (
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-base-content/70">Phone</label>
+            <input
+              type="tel"
+              value={phoneValue}
+              onChange={(e) => setPhoneValue(e.target.value)}
+              className="input input-sm input-bordered w-full text-xs"
+              placeholder="Phone (07...)"
+              autoComplete="tel"
+            />
+            {phoneError && <p className="text-red-500 text-xs">{phoneError}</p>}
+            <div className="flex gap-2">
+              <button
+                onClick={handleSavePhone}
+                disabled={savingPhone}
+                className="btn btn-xs btn-primary text-[10px]"
+              >
+                {savingPhone ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={() => {
+                  setEditingPhone(false);
+                  setPhoneValue(currentPhone);
+                  setPhoneError("");
+                }}
+                className="btn btn-xs btn-ghost text-[10px]"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-base-content/50">Phone: {currentPhone || "Not set"}</span>
+            {!cancelDone && (
+              <button
+                onClick={() => setEditingPhone(true)}
+                className="text-xs text-primary hover:text-primary/80 font-medium cursor-pointer"
+              >
+                {currentPhone ? "Edit" : "Add"}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Footer — participants toggle + view course */}
       <div className="flex items-center justify-between border-t border-base-100 px-5 py-2.5">

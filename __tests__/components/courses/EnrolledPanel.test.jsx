@@ -1,13 +1,11 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import EnrolledPanel from "../../../src/components/courses/EnrolledPanel";
 import "@testing-library/jest-dom";
 
-const mockFetchWithAuth = jest.fn();
-
 jest.mock("../../../src/auth/auth", () => ({
-  fetchWithAuth: (...args) => mockFetchWithAuth(...args),
+  fetchWithAuth: jest.fn(),
 }));
 
 const baseCourse = {
@@ -39,104 +37,19 @@ function renderPanel(props = {}) {
   );
 }
 
-describe("EnrolledPanel — Phone editing", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("displays the phone number with an Edit button", () => {
+describe("EnrolledPanel — Phone display", () => {
+  it("displays the phone number with an Edit in Profile link", () => {
     renderPanel();
     expect(screen.getByText("07123456789")).toBeInTheDocument();
-    expect(screen.getByText("Edit")).toBeInTheDocument();
+    const link = screen.getByText("Edit in Profile");
+    expect(link).toBeInTheDocument();
+    expect(link.closest("a")).toHaveAttribute("href", "/profile");
   });
 
   it("does not show phone section when buyerPhone is absent", () => {
     renderPanel({ enrollment: { ...baseEnrollment, buyerPhone: "" } });
     expect(screen.queryByText("Phone")).not.toBeInTheDocument();
-    expect(screen.queryByText("Edit")).not.toBeInTheDocument();
-  });
-
-  it("shows input field when Edit is clicked", () => {
-    renderPanel();
-    fireEvent.click(screen.getByText("Edit"));
-    expect(screen.getByPlaceholderText("Phone (07...)")).toBeInTheDocument();
-    expect(screen.getByText("Save")).toBeInTheDocument();
-    expect(screen.getByText("Cancel")).toBeInTheDocument();
-  });
-
-  it("cancels editing and restores original value", () => {
-    renderPanel();
-    fireEvent.click(screen.getByText("Edit"));
-    const input = screen.getByPlaceholderText("Phone (07...)");
-    fireEvent.change(input, { target: { value: "07999999999" } });
-    fireEvent.click(screen.getByText("Cancel"));
-    expect(screen.getByText("07123456789")).toBeInTheDocument();
-    expect(screen.queryByPlaceholderText("Phone (07...)")).not.toBeInTheDocument();
-  });
-
-  it("shows error for empty phone", async () => {
-    renderPanel();
-    fireEvent.click(screen.getByText("Edit"));
-    const input = screen.getByPlaceholderText("Phone (07...)");
-    fireEvent.change(input, { target: { value: "" } });
-    fireEvent.click(screen.getByText("Save"));
-    expect(screen.getByText("Phone number is required.")).toBeInTheDocument();
-    expect(mockFetchWithAuth).not.toHaveBeenCalled();
-  });
-
-  it("shows error for invalid UK phone", async () => {
-    renderPanel();
-    fireEvent.click(screen.getByText("Edit"));
-    const input = screen.getByPlaceholderText("Phone (07...)");
-    fireEvent.change(input, { target: { value: "12345" } });
-    fireEvent.click(screen.getByText("Save"));
-    expect(screen.getByText("Please enter a valid UK phone number.")).toBeInTheDocument();
-    expect(mockFetchWithAuth).not.toHaveBeenCalled();
-  });
-
-  it("saves valid phone and calls onChanged", async () => {
-    const onChanged = jest.fn();
-    mockFetchWithAuth.mockResolvedValueOnce({
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          message: "Enrollment updated successfully.",
-          enrollment: { ...baseEnrollment, buyerPhone: "07999888777" },
-        }),
-    });
-
-    renderPanel({ onChanged });
-    fireEvent.click(screen.getByText("Edit"));
-    const input = screen.getByPlaceholderText("Phone (07...)");
-    fireEvent.change(input, { target: { value: "07999888777" } });
-    fireEvent.click(screen.getByText("Save"));
-
-    await waitFor(() => {
-      expect(mockFetchWithAuth).toHaveBeenCalledWith(
-        expect.stringContaining("courses/enrollments/e1"),
-        expect.objectContaining({
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ buyerPhone: "07999888777" }),
-        })
-      );
-    });
-    await waitFor(() => expect(onChanged).toHaveBeenCalled());
-  });
-
-  it("shows backend error message on failure", async () => {
-    mockFetchWithAuth.mockResolvedValueOnce({
-      ok: false,
-      json: () => Promise.resolve({ error: "Something went wrong" }),
-    });
-
-    renderPanel();
-    fireEvent.click(screen.getByText("Edit"));
-    const input = screen.getByPlaceholderText("Phone (07...)");
-    fireEvent.change(input, { target: { value: "07111222333" } });
-    fireEvent.click(screen.getByText("Save"));
-
-    expect(await screen.findByText("Something went wrong")).toBeInTheDocument();
+    expect(screen.queryByText("Edit in Profile")).not.toBeInTheDocument();
   });
 });
 
