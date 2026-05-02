@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchWithAuth } from "../../auth/auth";
+import { fetchWithAuth, isAdmin, isModerator } from "../../auth/auth";
 import { Button, PageContainer, Spinner, GlassCard } from "../../components/ui";
 
 const TICKET_CODE_RE = /^TKT-[A-Z2-9]{6}$/;
@@ -56,6 +56,7 @@ export default function TicketVerify() {
   const [justCheckedIn, setJustCheckedIn] = useState(false);
 
   const invalidFormat = !TICKET_CODE_RE.test(ticketCode);
+  const isStaff = isAdmin() || isModerator();
 
   const {
     data: ticket,
@@ -64,7 +65,7 @@ export default function TicketVerify() {
   } = useQuery({
     queryKey: ["verify-ticket", ticketCode],
     queryFn: () => fetchTicket(ticketCode),
-    enabled: !invalidFormat,
+    enabled: !invalidFormat && isStaff,
   });
 
   const checkInMutation = useMutation({
@@ -87,7 +88,7 @@ export default function TicketVerify() {
 
   if (invalidFormat) {
     statusText = "Invalid Code Format";
-  } else if (isAuthError) {
+  } else if (!isStaff || isAuthError) {
     statusColor = "bg-amber-500";
     statusIcon = "🔒";
     statusText = "Authentication Required";
@@ -141,7 +142,7 @@ export default function TicketVerify() {
                   Ticket codes must follow the format <span className="font-mono">TKT-XXXXXX</span>.
                 </p>
               </div>
-            ) : isAuthError ? (
+            ) : !isStaff || isAuthError ? (
               <div className="px-6 py-8 text-center">
                 <p className="text-lg font-semibold text-base-content mb-2">
                   Authentication Required
