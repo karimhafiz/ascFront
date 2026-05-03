@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { clearAuth, getAuthToken, isAdmin, isAuthenticated, parseJwt } from "../../auth/auth";
 
+const DEFAULT_VENUE_ID = import.meta.env.VITE_COMMUNITY_CENTRE_VENUE_ID || "";
+
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -30,6 +32,9 @@ export default function Navbar() {
   };
 
   const isActive = (path) => location.pathname === path;
+  const isVenueActive =
+    location.pathname === "/venue-booking" || location.pathname.startsWith("/venues/book/");
+  const venueLink = DEFAULT_VENUE_ID ? `/venues/book/${DEFAULT_VENUE_ID}` : "/venue-booking";
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -233,6 +238,21 @@ export default function Navbar() {
               </svg>
               Contact
               {indicator(isActive("/contact"))}
+            </Link>
+          </li>
+          <li>
+            <Link to={venueLink} className={linkClass(isVenueActive)} onClick={closeMenu}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="mr-1.5 h-4 w-4 xl:h-5 xl:w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 11-2 0V5H5v11a1 1 0 11-2 0V4z" />
+                <path d="M7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm0 4a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
+              </svg>
+              Book Venue
+              {indicator(isActive("/venue-booking"))}
             </Link>
           </li>
           {!authenticated && (
