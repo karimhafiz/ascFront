@@ -49,6 +49,18 @@ export default function OrderConfirmation() {
 
   const groupCount = groupTickets?.length ?? 1;
 
+  // Guest order — fetch tickets via session ID (no auth needed)
+  const { data: guestOrder, isLoading: guestLoading } = useQuery({
+    queryKey: ["guest-order", sessionId],
+    queryFn: async () => {
+      const res = await fetch(`${import.meta.env.VITE_DEV_URI}payments/guest-order/${sessionId}`);
+      if (!res.ok) throw new Error("Failed to fetch order");
+      return res.json();
+    },
+    enabled: !!sessionId && !loggedIn,
+    retry: 1,
+  });
+
   // Fallback receipt if no ticket_id
   const { data: receipt } = useQuery({
     queryKey: ["receipt", sessionId],
@@ -97,7 +109,7 @@ export default function OrderConfirmation() {
     URL.revokeObjectURL(url);
   };
 
-  if (ticketLoading && loggedIn)
+  if ((ticketLoading && loggedIn) || (guestLoading && !loggedIn))
     return (
       <PageContainer center>
         <div className="flex flex-col items-center gap-3">
@@ -107,7 +119,95 @@ export default function OrderConfirmation() {
       </PageContainer>
     );
 
-  // Fallback — payment confirmed but ticket couldn't load (or guest checkout)
+  // Guest checkout — show ticket card(s) above the "create account" prompt
+  if (!loggedIn && guestOrder?.tickets?.length > 0) {
+    const guestTicket = guestOrder.tickets[0];
+    return (
+      <PageContainer>
+        <div className="max-w-lg mx-auto py-10 px-4">
+          {/* Success banner */}
+          <div className="mb-6 bg-white rounded-2xl shadow-sm border border-green-100 p-6 text-center">
+            <div className="w-12 h-12 rounded-full bg-green-100/50 flex items-center justify-center mx-auto mb-3">
+              <svg
+                className="w-6 h-6 text-green-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-green-600 mb-1">Payment Successful!</h1>
+            <p className="text-sm text-base-content/50">
+              Your ticket is confirmed. A confirmation email with your QR code has been sent to your
+              inbox. Screenshot or print the ticket below for offline access.
+            </p>
+          </div>
+
+          {/* Ticket card */}
+          <div className="mb-6">
+            <TicketCard
+              ticket={guestTicket}
+              ticketsInGroup={guestOrder.quantity > 1 ? guestOrder.quantity : undefined}
+            />
+            {guestOrder.tickets.length > 1 && (
+              <div className="mt-3 text-center">
+                <p className="text-sm text-base-content/50">
+                  Showing{" "}
+                  <span className="font-semibold text-base-content/70">
+                    ticket 1 of {guestOrder.tickets.length}
+                  </span>{" "}
+                  from this order. All tickets were sent to your email.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Create account prompt */}
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left text-sm text-blue-700">
+            <p className="font-semibold mb-1">Want to view your tickets online?</p>
+            <p>
+              Create an account using the same email you purchased with, and your tickets will
+              appear automatically in your profile.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Button variant="primary" onClick={() => window.print()} className="w-full">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                />
+              </svg>
+              Print Ticket
+            </Button>
+            <Button variant="primary" to="/register" className="w-full">
+              Create an Account
+            </Button>
+            <Button variant="ghost" to="/events" className="w-full">
+              Browse More Events
+            </Button>
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  // Fallback — payment confirmed but ticket couldn't load
   if (ticketError || !ticket)
     return (
       <PageContainer center>
@@ -144,15 +244,6 @@ export default function OrderConfirmation() {
               </p>
               <p className="text-base-content">
                 <span className="font-medium">Email:</span> {receipt.customerEmail}
-              </p>
-            </div>
-          )}
-          {!loggedIn && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left text-sm text-blue-700">
-              <p className="font-semibold mb-1">Want to view your tickets online?</p>
-              <p>
-                Create an account using the same email you purchased with, and your tickets will
-                appear automatically in your profile.
               </p>
             </div>
           )}
