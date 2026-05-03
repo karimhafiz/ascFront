@@ -21,7 +21,7 @@ export default function Main() {
     <div className="professional-shell min-h-[calc(100vh-72px)]">
       <ScrollToTop />
       <Navbar />
-      <main className="relative">
+      <main className="relative min-h-screen">
         <Outlet />
       </main>
       {!hideFooter && <Footer />}
