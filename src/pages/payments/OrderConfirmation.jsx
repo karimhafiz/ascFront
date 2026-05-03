@@ -58,7 +58,6 @@ export default function OrderConfirmation() {
       return res.json();
     },
     enabled: !!sessionId && !loggedIn,
-    retry: 1,
   });
 
   // Fallback receipt if no ticket_id
