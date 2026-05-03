@@ -57,7 +57,7 @@ export default function EventCard({ event }) {
         <GlassCard className="flex h-full flex-col overflow-hidden rounded-[1.75rem] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-strong)]">
           <Link to={`/events/${slug}`} className="block">
             {event.images && event.images.length > 0 ? (
-              <div className="relative h-52 overflow-hidden">
+              <div className="relative overflow-hidden">
                 <img
                   src={optimizeCloudinaryUrl(event.images[0])}
                   alt={event.title}
