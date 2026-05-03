@@ -4,9 +4,9 @@ import { getAuthToken, refreshAccessToken, isAuthenticated } from "../auth/auth"
 const API = import.meta.env.VITE_DEV_URI;
 
 export async function combinedLoader() {
-  // Try to restore session if no token in memory
+  // Try to restore session if no token in memory (non-blocking)
   if (!getAuthToken()) {
-    await refreshAccessToken();
+    refreshAccessToken();
   }
 
   const [response, courseResponse] = await Promise.all([
