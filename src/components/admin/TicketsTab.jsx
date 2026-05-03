@@ -217,6 +217,9 @@ export default function TicketsTab({ tickets }) {
                         <thead>
                           <tr className="bg-base-100/50 text-left">
                             <th className="px-3 sm:px-4 py-2 text-xs font-medium text-base-content/50">
+                              Buyer Name
+                            </th>
+                            <th className="px-3 sm:px-4 py-2 text-xs font-medium text-base-content/50">
                               Buyer Email
                             </th>
                             <th className="px-3 sm:px-4 py-2 text-xs font-medium text-base-content/50">
@@ -249,6 +252,9 @@ export default function TicketsTab({ tickets }) {
                                   window.open(`/tickets/${first.ticketCode}`, "_blank")
                                 }
                               >
+                                <td className="px-3 sm:px-4 py-3 text-base-content/70 truncate max-w-[120px] sm:max-w-none">
+                                  {first.user?.name || "Unknown"}
+                                </td>
                                 <td className="px-3 sm:px-4 py-3 text-base-content/70 truncate max-w-[120px] sm:max-w-none">
                                   {first.buyerEmail}
                                 </td>
