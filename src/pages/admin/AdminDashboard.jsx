@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -20,21 +21,16 @@ import RevenueTab from "../../components/admin/RevenueTab";
 import TeamsTab from "../../components/admin/TeamsTab";
 import CoursesTab from "../../components/admin/CoursesTab";
 import UsersTab from "../../components/admin/UsersTab";
-
-function getRole() {
-  return getAuthRole();
-}
+import { API } from "../../api/apiClient";
+import { queryKeys } from "../../api/queryKeys";
 
 const TABS = ["Tickets", "Revenue", "Teams", "Courses", "Users"];
 
 export default function AdminDashboard() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("Tickets");
   const navigate = useNavigate();
 
-  const role = getRole();
+  const role = getAuthRole();
   const isAdmin = role === "admin";
 
   let currentUserId = null;
@@ -48,31 +44,44 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!role || (role !== "admin" && role !== "moderator")) {
       navigate("/");
-      return;
     }
+  }, [role, navigate]);
 
-    fetchWithAuth(import.meta.env.VITE_DEV_URI + "admin/dashboard")
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Failed to load dashboard");
-        return res.json();
-      })
-      .then(setData)
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [navigate, role]);
+  const {
+    data,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: queryKeys.admin.dashboard,
+    queryFn: async () => {
+      const res = await fetchWithAuth(`${API}admin/dashboard`);
+      if (!res.ok) throw new Error("Failed to load dashboard");
+      return res.json();
+    },
+    enabled: role === "admin" || role === "moderator",
+  });
+
+  const error = queryError?.message;
+
+  const queryClient = useQueryClient();
 
   const handleRoleChange = (userId, newRole) => {
-    setData((prev) => ({
-      ...prev,
-      users: prev.users.map((u) => (u._id === userId ? { ...u, role: newRole } : u)),
-    }));
+    queryClient.setQueryData(queryKeys.admin.dashboard, (prev) =>
+      prev
+        ? {
+            ...prev,
+            users: prev.users.map((u) => (u._id === userId ? { ...u, role: newRole } : u)),
+          }
+        : prev
+    );
   };
 
   const handleBanToggle = (userId, isBanned) => {
-    setData((prev) => ({
-      ...prev,
-      users: prev.users.map((u) => (u._id === userId ? { ...u, isBanned } : u)),
-    }));
+    queryClient.setQueryData(queryKeys.admin.dashboard, (prev) =>
+      prev
+        ? { ...prev, users: prev.users.map((u) => (u._id === userId ? { ...u, isBanned } : u)) }
+        : prev
+    );
   };
 
   const visibleTabs = isAdmin ? TABS : TABS.filter((t) => t !== "Users");

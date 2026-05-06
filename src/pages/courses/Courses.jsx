@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { Link, useRouteLoaderData } from "react-router-dom";
+import { Link } from "react-router-dom";
 import CourseCard from "../../components/courses/CourseCard";
 import { isAdmin, isModerator } from "../../auth/auth";
+import { useCourses } from "../../hooks/useCourses";
+import { Spinner } from "../../components/ui";
 
 const CATEGORIES = ["All", "Language", "Religious", "Academic", "Arts", "Other"];
 
 export default function CoursesPage() {
-  const { courses } = useRouteLoaderData("root");
+  const { data: courses = [], isLoading } = useCourses();
   const canManage = isAdmin() || isModerator();
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
@@ -22,6 +24,14 @@ export default function CoursesPage() {
 
   const open = filtered.filter((c) => c.enrollmentOpen);
   const closed = filtered.filter((c) => !c.enrollmentOpen);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

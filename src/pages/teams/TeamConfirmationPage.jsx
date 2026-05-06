@@ -1,49 +1,46 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSearchParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { FaUsers, FaTrophy, FaCalendarAlt, FaMapMarkerAlt } from "react-icons/fa";
 import { toSlug } from "../../util/util";
 import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
+import { API } from "../../api/apiClient";
+import { queryKeys } from "../../api/queryKeys";
 
 export default function TeamConfirmationPage() {
   const [searchParams] = useSearchParams();
-  const [team, setTeam] = useState(null);
-  const [event, setEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const teamId = searchParams.get("teamId");
 
-  const teamId = searchParams.get("teamId"); // session_id no longer needed — backend verified payment before redirecting here
+  const {
+    data: teamData,
+    isLoading: teamLoading,
+    error: teamError,
+  } = useQuery({
+    queryKey: queryKeys.teams.detail(teamId),
+    queryFn: async () => {
+      const res = await fetch(`${API}teams/${teamId}`);
+      if (!res.ok) throw new Error("Failed to fetch team details");
+      return res.json();
+    },
+    enabled: !!teamId,
+  });
 
-  useEffect(() => {
-    if (!teamId) {
-      setError("Team ID not found in URL");
-      setLoading(false);
-      return;
-    }
+  const team = teamData?.team;
 
-    async function fetchTeamDetails() {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_DEV_URI}teams/${teamId}`);
-        if (!response.ok) throw new Error("Failed to fetch team details");
+  const { data: eventData } = useQuery({
+    queryKey: queryKeys.events.detail(team?.event),
+    queryFn: async () => {
+      const res = await fetch(`${API}events/${team.event}`);
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: !!team?.event,
+  });
 
-        const data = await response.json();
-        setTeam(data.team);
+  const event = eventData?.event || eventData;
 
-        if (data.team?.event) {
-          const eventRes = await fetch(`${import.meta.env.VITE_DEV_URI}events/${data.team.event}`);
-          if (eventRes.ok) {
-            const eventData = await eventRes.json();
-            setEvent(eventData.event || eventData); // handle both wrapped and direct responses
-          }
-        }
-        setLoading(false);
-      } catch (err) {
-        setError(err.message || "Failed to load team details");
-        setLoading(false);
-      }
-    }
-
-    fetchTeamDetails();
-  }, [teamId]);
+  const loading = teamLoading;
+  const error = !teamId ? "Team ID not found in URL" : teamError?.message;
 
   if (loading) {
     return (
@@ -159,7 +156,7 @@ export default function TeamConfirmationPage() {
 
             {/* What's next */}
             <GlassCard className="p-6">
-              <h2 className="text-lg font-bold text-base-content mb-3">What's Next?</h2>
+              <h2 className="text-lg font-bold text-base-content mb-3">What&apos;s Next?</h2>
               <ul className="space-y-2 text-sm text-base-content/70">
                 <li className="flex items-start gap-2">
                   <span className="text-base-content/50 mt-0.5">•</span> Prepare your team for the

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { useRouteLoaderData } from "react-router-dom";
 import EventCard from "../../components/events/EventCard";
 import RecurringEventsCalendar from "../../components/events/RecurringEventsCalendar";
+import { useEvents } from "../../hooks/useEvents";
+import { Spinner } from "../../components/ui";
 
 const TYPE_TABS = [
   { key: "all", label: "All Events" },
@@ -10,7 +11,7 @@ const TYPE_TABS = [
 ];
 
 export default function EventPage() {
-  const { events } = useRouteLoaderData("root");
+  const { data: events = [], isLoading } = useEvents();
   const [view, setView] = useState("cards");
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
@@ -68,6 +69,14 @@ export default function EventPage() {
       setSort({ key, dir: "asc" });
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

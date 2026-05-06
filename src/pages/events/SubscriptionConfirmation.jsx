@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "../../components/ui";
 import { toSlug } from "../../util/util";
+import { useEvent } from "../../hooks/useEvents";
 
 const INTERVAL_ADJ = { week: "weekly", month: "monthly" };
 
@@ -10,15 +10,7 @@ export default function SubscriptionConfirmation() {
   const eventId = searchParams.get("eventId");
   const isReactivated = searchParams.get("reactivated") === "true";
 
-  const { data: event, isLoading } = useQuery({
-    queryKey: ["event", eventId],
-    queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}events/${eventId}`);
-      if (!res.ok) throw new Error("Failed to fetch");
-      return res.json();
-    },
-    enabled: !!eventId,
-  });
+  const { data: event, isLoading } = useEvent(eventId);
 
   return (
     <div className="min-h-screen py-12 px-4">

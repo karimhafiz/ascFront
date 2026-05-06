@@ -11,6 +11,7 @@ import EventInfoGrid from "../../components/events/EventInfoGrid";
 import TicketPurchaseForm from "../../components/events/TicketPurchaseForm";
 import SubscribedPanel from "../../components/events/SubscribedPanel";
 import MyTeamsSection from "../../components/events/MyTeamsSection";
+import { useEvent } from "../../hooks/useEvents";
 
 export default function EventDetails() {
   const { eventSlug } = useParams();
@@ -31,20 +32,7 @@ export default function EventDetails() {
     return () => document.removeEventListener("keydown", handleEsc);
   }, [showTicketModal]);
 
-  const {
-    data: event,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["event", eventId],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_DEV_URI}events/${eventId}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch event details");
-      }
-      return response.json();
-    },
-  });
+  const { data: event, isLoading, error } = useEvent(eventId);
 
   const isTournament = event && event.isTournament;
 

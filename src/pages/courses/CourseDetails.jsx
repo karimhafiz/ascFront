@@ -8,6 +8,7 @@ import { PageContainer, Button, GlassCard, Spinner } from "../../components/ui";
 import EnrolledPanel from "../../components/courses/EnrolledPanel";
 import CourseInfoGrid from "../../components/courses/CourseInfoGrid";
 import CourseDetailsBanner from "../../components/courses/CourseDetailsBanner";
+import { useCourse } from "../../hooks/useCourses";
 
 const INTERVAL_LABELS = { month: "month", year: "year" };
 
@@ -47,18 +48,7 @@ export default function CourseDetails() {
       return updated;
     });
 
-  const {
-    data: course,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["course", courseId],
-    queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}courses/${courseId}`);
-      if (!res.ok) throw new Error("Failed to fetch course");
-      return res.json();
-    },
-  });
+  const { data: course, isLoading, error } = useCourse(courseId);
 
   const { data: enrollmentData } = useQuery({
     queryKey: ["my-enrollment", courseId],

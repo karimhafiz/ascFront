@@ -1,12 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useRouteLoaderData } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import CourseCard from "../../components/courses/CourseCard";
 import EventCard from "../../components/events/EventCard";
 import Button from "../../components/ui/Button";
 import { fetchWithAuth, isAdmin, isModerator } from "../../auth/auth";
 import { compressImage } from "../../util/compressImage";
+import { useEvents } from "../../hooks/useEvents";
+import { useCourses } from "../../hooks/useCourses";
+import { API } from "../../api/apiClient";
+import { queryKeys } from "../../api/queryKeys";
 
 const DEFAULTS = {
   heroTitle: "Welcome to Ayendah Sazan",
@@ -33,8 +38,9 @@ function SectionHeader({ kicker, title, action }) {
 }
 
 export default function Home() {
-  const { events, courses } = useRouteLoaderData("root");
-  const [pageContent, setPageContent] = useState(DEFAULTS);
+  const { data: events } = useEvents();
+  const { data: courses } = useCourses();
+  const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(DEFAULTS);
   const [heroImagePreview, setHeroImagePreview] = useState(null);
@@ -47,18 +53,18 @@ export default function Home() {
 
   const canEdit = isAdmin() || isModerator();
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_DEV_URI}pageContent/home`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data && Object.keys(data).length > 0) {
-          const merged = mergeWithDefaults(data);
-          setPageContent(merged);
-          setDraft(merged);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  const { data: rawPageContent } = useQuery({
+    queryKey: queryKeys.pageContent.home,
+    queryFn: async () => {
+      const r = await fetch(`${API}pageContent/home`);
+      return r.json();
+    },
+  });
+
+  const pageContent =
+    rawPageContent && Object.keys(rawPageContent).length > 0
+      ? mergeWithDefaults(rawPageContent)
+      : DEFAULTS;
 
   const handleEdit = () => {
     setDraft({ ...pageContent });
@@ -80,15 +86,14 @@ export default function Home() {
     setResetting(true);
     setSaveError(null);
     try {
-      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}pageContent/home`, {
+      const res = await fetchWithAuth(`${API}pageContent/home`, {
         method: "DELETE",
       });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         throw new Error(body?.message || `Server error (${res.status})`);
       }
-      setPageContent(DEFAULTS);
-      setDraft(DEFAULTS);
+      queryClient.setQueryData(queryKeys.pageContent.home, {});
       setHeroImagePreview(null);
       setHeroImageFile(null);
       setEditing(false);
@@ -124,7 +129,7 @@ export default function Home() {
       );
       if (heroImageFile) formData.append("heroImage", heroImageFile);
 
-      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}pageContent/home`, {
+      const res = await fetchWithAuth(`${API}pageContent/home`, {
         method: "PUT",
         body: formData,
       });
@@ -134,8 +139,7 @@ export default function Home() {
       }
 
       const { pageContent: saved } = await res.json();
-      const merged = mergeWithDefaults(saved);
-      setPageContent(merged);
+      queryClient.setQueryData(queryKeys.pageContent.home, saved);
       setEditing(false);
       setHeroImagePreview(null);
       setHeroImageFile(null);

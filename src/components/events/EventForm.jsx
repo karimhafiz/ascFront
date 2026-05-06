@@ -1,16 +1,15 @@
 import React, { useState } from "react";
-import { Form, useNavigate, useNavigation, useActionData } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../ui";
+import { useEventMutation } from "../../hooks/useEventMutation";
 
 const EventForm = ({ method, event = {} }) => {
-  const [base64Image, setBase64Image] = useState(event.image || null); // Pre-fill with existing image if editing
-  const [isReoccurring, setIsReoccurring] = useState(event.isReoccurring || false); // Manage isReoccurring state dynamically
+  const [base64Image, setBase64Image] = useState(event.image || null);
+  const [isReoccurring, setIsReoccurring] = useState(event.isReoccurring || false);
 
-  const data = useActionData();
   const navigate = useNavigate();
-  const navigation = useNavigation();
-
-  const isSubmitting = navigation.state === "submitting";
+  const { eventSlug } = useParams();
+  const mutation = useEventMutation(method, eventSlug);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -35,6 +34,12 @@ const EventForm = ({ method, event = {} }) => {
     navigate("..");
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    mutation.mutate(formData);
+  };
+
   const labelClass = "glass-label";
   const fieldClass = "glass-input";
   const selectClass = "glass-input glass-select";
@@ -47,7 +52,7 @@ const EventForm = ({ method, event = {} }) => {
         {method === "PATCH" ? "Edit Event" : "Create New Event"}
       </h1>
 
-      {data && data.errors && (
+      {mutation.error && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50/90 backdrop-blur-sm px-5 py-4 text-red-700">
           <div className="flex items-center gap-2 mb-2">
             <svg
@@ -66,17 +71,13 @@ const EventForm = ({ method, event = {} }) => {
             <p className="font-semibold text-sm">Please fix the following:</p>
           </div>
           <ul className="list-disc list-inside space-y-1 ml-7">
-            {Object.values(data.errors).map((err, index) => (
-              <li key={index} className="text-sm">
-                {err}
-              </li>
-            ))}
+            <li className="text-sm">{mutation.error.message}</li>
           </ul>
         </div>
       )}
 
-      <Form
-        method={method}
+      <form
+        onSubmit={handleSubmit}
         className="space-y-6"
         encType="multipart/form-data"
         data-testid="event-form"
@@ -439,19 +440,24 @@ const EventForm = ({ method, event = {} }) => {
 
         {/* Form Actions */}
         <div className="form-actions flex justify-end space-x-4 mt-6">
-          <Button type="button" variant="ghost" onClick={cancelHandler} disabled={isSubmitting}>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={cancelHandler}
+            disabled={mutation.isPending}
+          >
             Cancel
           </Button>
           <Button
             type="submit"
             variant="primary"
-            disabled={isSubmitting}
-            className={isSubmitting ? "loading" : ""}
+            disabled={mutation.isPending}
+            className={mutation.isPending ? "loading" : ""}
           >
-            {isSubmitting ? "Submitting..." : "Save"}
+            {mutation.isPending ? "Submitting..." : "Save"}
           </Button>
         </div>
-      </Form>
+      </form>
     </div>
   );
 };

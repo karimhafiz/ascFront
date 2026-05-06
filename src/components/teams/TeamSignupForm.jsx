@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "../../auth/auth";
 import { validatePhone } from "../../util/util";
 import { Button, Spinner } from "../ui";
+import { API } from "../../api/apiClient";
+import { queryKeys } from "../../api/queryKeys";
 
 export default function TeamSignupForm({ eventId, managerId, onClose }) {
   const [name, setName] = useState("");
@@ -10,19 +13,17 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
   const [managerName, setManagerName] = useState("");
   const [managerEmail, setManagerEmail] = useState(managerId || "");
   const [managerPhone, setManagerPhone] = useState("");
-  const [unpaidTeams, setUnpaidTeams] = useState([]);
-  const [loadingUnpaid, setLoadingUnpaid] = useState(false);
 
-  // Fetch unpaid teams for this manager + event when email is available
-  useEffect(() => {
-    if (!managerEmail || !eventId) return;
-    setLoadingUnpaid(true);
-    fetchWithAuth(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/unpaid`)
-      .then((r) => r.json())
-      .then((data) => setUnpaidTeams(data.teams || []))
-      .catch(() => {})
-      .finally(() => setLoadingUnpaid(false));
-  }, [managerEmail, eventId]);
+  const { data: unpaidData, isLoading: loadingUnpaid } = useQuery({
+    queryKey: queryKeys.teams.unpaid(eventId),
+    queryFn: async () => {
+      const r = await fetchWithAuth(`${API}teams/event/${eventId}/unpaid`);
+      return r.json();
+    },
+    enabled: !!managerEmail && !!eventId,
+  });
+
+  const unpaidTeams = unpaidData?.teams || [];
 
   const handleResumeTeam = async (team) => {
     setLoading(true);

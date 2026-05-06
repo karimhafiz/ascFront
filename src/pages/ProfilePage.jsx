@@ -1,9 +1,12 @@
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { isAuthenticated, fetchWithAuth } from "../auth/auth";
 import { optimizeCloudinaryUrl, toSlug, validatePhone } from "../util/util";
 import { Button, Spinner } from "../components/ui";
 import MyTeamRow from "../components/teams/MyTeamRow";
+import { API } from "../api/apiClient";
+import { queryKeys } from "../api/queryKeys";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
@@ -23,32 +26,34 @@ const INTERVAL_ADJ = { month: "Monthly", year: "Yearly", week: "Weekly" };
 const TABS = ["Orders", "Teams", "Subscriptions"];
 
 export default function ProfilePage() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("Orders");
   const navigate = useNavigate();
-
-  const loadProfile = useCallback(async () => {
-    try {
-      const res = await fetchWithAuth(import.meta.env.VITE_DEV_URI + "users/profile");
-      if (!res.ok) throw new Error("Failed to load profile");
-      const json = await res.json();
-      setData(json);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
     if (!isAuthenticated()) {
       navigate("/login");
-      return;
     }
-    loadProfile();
-  }, [navigate, loadProfile]);
+  }, [navigate]);
+
+  const queryClient = useQueryClient();
+
+  const {
+    data,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: queryKeys.profile,
+    queryFn: async () => {
+      const res = await fetchWithAuth(`${API}users/profile`);
+      if (!res.ok) throw new Error("Failed to load profile");
+      return res.json();
+    },
+    enabled: isAuthenticated(),
+  });
+
+  const error = queryError?.message;
+
+  const refreshProfile = () => queryClient.invalidateQueries({ queryKey: queryKeys.profile });
 
   // Group tickets by paymentId so bulk purchases show as one order
   // Hooks must be called before any early returns
@@ -227,7 +232,7 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-4">
                 {teams.map((team) => (
-                  <MyTeamRow key={team._id} team={team} onTeamUpdated={loadProfile} />
+                  <MyTeamRow key={team._id} team={team} onTeamUpdated={refreshProfile} />
                 ))}
               </div>
             ))}
@@ -272,7 +277,7 @@ export default function ProfilePage() {
                         <EventSubscriptionRow
                           key={sub._id}
                           subscription={sub}
-                          onAction={loadProfile}
+                          onAction={refreshProfile}
                         />
                       ))}
                     </div>
