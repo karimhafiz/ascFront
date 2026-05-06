@@ -11,7 +11,7 @@ jest.mock("react-router-dom", () => {
   };
 });
 
-jest.mock("../../../src/auth/authActions", () => ({
+jest.mock("../../../src/hooks/useAuth", () => ({
   googleLogin: jest.fn(() => Promise.resolve({ role: null })),
 }));
 

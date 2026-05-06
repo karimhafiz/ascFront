@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import TeamSignupForm from "../../../src/components/teams/TeamSignupForm";
 import "@testing-library/jest-dom";
 
@@ -12,6 +13,11 @@ jest.mock("../../../src/auth/auth", () => ({
   ),
 }));
 
+function renderWithQuery(ui) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+}
+
 describe("TeamSignupForm", () => {
   const mockOnClose = jest.fn();
 
@@ -21,7 +27,7 @@ describe("TeamSignupForm", () => {
 
   it("should render the form with all fields", async () => {
     await act(async () => {
-      render(<TeamSignupForm eventId="e1" onClose={mockOnClose} />);
+      renderWithQuery(<TeamSignupForm eventId="e1" onClose={mockOnClose} />);
     });
 
     expect(screen.getByText("Team Sign Up")).toBeInTheDocument();
@@ -33,7 +39,7 @@ describe("TeamSignupForm", () => {
 
   it("should call onClose when close button is clicked", async () => {
     await act(async () => {
-      render(<TeamSignupForm eventId="e1" onClose={mockOnClose} />);
+      renderWithQuery(<TeamSignupForm eventId="e1" onClose={mockOnClose} />);
     });
 
     fireEvent.click(screen.getByLabelText("Close"));
@@ -42,7 +48,9 @@ describe("TeamSignupForm", () => {
 
   it("should pre-fill manager email from prop", async () => {
     await act(async () => {
-      render(<TeamSignupForm eventId="e1" managerId="mgr@test.com" onClose={mockOnClose} />);
+      renderWithQuery(
+        <TeamSignupForm eventId="e1" managerId="mgr@test.com" onClose={mockOnClose} />
+      );
     });
 
     const emailInput = screen.getByPlaceholderText("Manager Email");
@@ -51,14 +59,14 @@ describe("TeamSignupForm", () => {
 
   it("should show submit button with correct text", async () => {
     await act(async () => {
-      render(<TeamSignupForm eventId="e1" onClose={mockOnClose} />);
+      renderWithQuery(<TeamSignupForm eventId="e1" onClose={mockOnClose} />);
     });
     expect(screen.getByText("Register Team")).toBeInTheDocument();
   });
 
   it("should have required fields", async () => {
     await act(async () => {
-      render(<TeamSignupForm eventId="e1" onClose={mockOnClose} />);
+      renderWithQuery(<TeamSignupForm eventId="e1" onClose={mockOnClose} />);
     });
 
     expect(screen.getByPlaceholderText("Team Name")).toBeRequired();
