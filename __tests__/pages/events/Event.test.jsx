@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import EventPage from "../../../src/pages/events/Events";
 import "@testing-library/jest-dom";
 
@@ -43,10 +44,8 @@ const mockEvents = [
   },
 ];
 
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useRouteLoaderData: jest.fn(() => ({ events: mockEvents, token: null })),
-  useNavigate: jest.fn(() => jest.fn()),
+jest.mock("../../../src/hooks/useEvents", () => ({
+  useEvents: jest.fn(() => ({ data: mockEvents, isLoading: false })),
 }));
 
 jest.mock("../../../src/auth/auth", () => ({
@@ -55,10 +54,13 @@ jest.mock("../../../src/auth/auth", () => ({
 }));
 
 function renderPage() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <MemoryRouter>
-      <EventPage />
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <EventPage />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 }
 

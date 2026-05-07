@@ -1,16 +1,25 @@
-import React from "react";
-import { Form, useActionData, useNavigation, Navigate, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Navigate, Link } from "react-router-dom";
 import GoogleLogin from "../../components/auth/GoogleLogin";
 import { isAuthenticated } from "../../auth/auth";
+import { useSignup } from "../../hooks/useAuth";
 
 const Signup = () => {
-  const data = useActionData();
-  const navigation = useNavigation();
-  const isSubmitting = navigation.state === "submitting";
+  const signupMutation = useSignup();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   if (isAuthenticated()) {
     return <Navigate to="/" replace />;
   }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    signupMutation.mutate({ name, email, password });
+  };
+
+  const error = signupMutation.error;
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-64px)] py-8">
@@ -26,7 +35,7 @@ const Signup = () => {
           Create Account
         </h1>
 
-        <Form method="post" action="/signup" className="space-y-7 relative z-10">
+        <form onSubmit={handleSubmit} className="space-y-7 relative z-10">
           <div className="form-control">
             <label className="label mb-1">
               <span className="glass-label text-lg">Name</span>
@@ -34,7 +43,8 @@ const Signup = () => {
             <div className="relative">
               <input
                 type="text"
-                name="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="Your full name"
                 className="glass-input py-3"
                 required
@@ -48,7 +58,8 @@ const Signup = () => {
             <div className="relative">
               <input
                 type="email"
-                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 className="glass-input py-3"
                 required
@@ -62,7 +73,8 @@ const Signup = () => {
             <div className="relative">
               <input
                 type="password"
-                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 className="glass-input py-3"
                 required
@@ -73,11 +85,11 @@ const Signup = () => {
           <button
             type="submit"
             className={`btn w-full text-base font-medium py-3 mt-6 rounded-xl btn-primary border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] hover:border-2 hover:border-white transition-all ${
-              isSubmitting ? "opacity-70" : ""
+              signupMutation.isPending ? "opacity-70" : ""
             }`}
-            disabled={isSubmitting}
+            disabled={signupMutation.isPending}
           >
-            {isSubmitting ? (
+            {signupMutation.isPending ? (
               <span className="flex items-center justify-center">
                 <svg
                   className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -105,25 +117,25 @@ const Signup = () => {
               "Sign Up"
             )}
           </button>
-        </Form>
+        </form>
 
-        {data && data.message && (
+        {error && (
           <div
             className={`mt-6 backdrop-blur-sm border rounded-xl p-4 relative z-10 ${
-              data.message.includes("Google")
+              error.message?.includes("Google")
                 ? "bg-blue-50/70 border-blue-200"
                 : "bg-red-50/70 border-red-200 animate-pulse"
             }`}
           >
             <p
               className={`text-center font-medium ${
-                data.message.includes("Google") ? "text-blue-600" : "text-red-500"
+                error.message?.includes("Google") ? "text-blue-600" : "text-red-500"
               }`}
             >
-              {data.message}
+              {error.message}
             </p>
-            {data.message.includes("Google") && (
-              <p className="text-center text-sm text-blue-400 mt-1">Use the button below ↓</p>
+            {error.message?.includes("Google") && (
+              <p className="text-center text-sm text-blue-400 mt-1">Use the button below</p>
             )}
           </div>
         )}

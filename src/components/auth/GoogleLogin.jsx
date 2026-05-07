@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { googleLogin } from "../../auth/authActions";
+import { googleLogin } from "../../hooks/useAuth";
 
 const GoogleLogin = () => {
   const navigate = useNavigate();

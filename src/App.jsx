@@ -7,10 +7,6 @@ import Main from "./components/common/Main";
 import ErrorPage from "./pages/Errorpage";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import ModeratorRoute from "./components/common/ModeratorRoute";
-import { loginAction, signupAction, logoutAction } from "./auth/authActions";
-import { combinedLoader, eventDetailLoader } from "./loaders/loaders";
-import { eventAction } from "./api/eventActions";
-import { courseAction } from "./api/courseActions";
 
 const Home = lazy(() => import("./pages/content/Home"));
 const About = lazy(() => import("./pages/content/About"));
@@ -49,9 +45,6 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Main />,
-    id: "root",
-    loader: combinedLoader,
-    HydrateFallback: Fallback,
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: w(Home) },
@@ -72,8 +65,8 @@ const router = createBrowserRouter([
           {
             element: <ModeratorRoute />,
             children: [
-              { path: "new", element: w(CourseFormPage), action: courseAction },
-              { path: ":courseSlug/edit", element: w(CourseFormPage), action: courseAction },
+              { path: "new", element: w(CourseFormPage) },
+              { path: ":courseSlug/edit", element: w(CourseFormPage) },
             ],
           },
         ],
@@ -89,19 +82,17 @@ const router = createBrowserRouter([
           { path: "sports", element: w(SportsPage) },
           {
             path: ":eventSlug",
-            id: "event-detail",
-            loader: eventDetailLoader,
             children: [
               { index: true, element: w(EventDetails) },
               {
                 element: <ModeratorRoute />,
-                children: [{ path: "edit", element: w(EditEvent), action: eventAction }],
+                children: [{ path: "edit", element: w(EditEvent) }],
               },
             ],
           },
           {
             element: <ModeratorRoute />,
-            children: [{ path: "new", element: w(NewEvent), action: eventAction }],
+            children: [{ path: "new", element: w(NewEvent) }],
           },
         ],
       },
@@ -111,9 +102,8 @@ const router = createBrowserRouter([
         errorElement: <ErrorPage />,
         children: [{ index: true, element: w(AdminDashboard) }],
       },
-      { path: "login", element: w(Login), action: loginAction },
-      { path: "signup", element: w(Signup), action: signupAction },
-      { path: "logout", action: logoutAction },
+      { path: "login", element: w(Login) },
+      { path: "signup", element: w(Signup) },
     ],
   },
 ]);
