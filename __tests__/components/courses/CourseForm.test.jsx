@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CourseForm from "../../../src/components/courses/CourseForm";
 import "@testing-library/jest-dom";
 
@@ -8,24 +9,27 @@ jest.mock("react-router-dom", () => {
   const actual = jest.requireActual("react-router-dom");
   return {
     ...actual,
-    useActionData: jest.fn(() => undefined),
     useNavigate: jest.fn(() => jest.fn()),
-    useNavigation: jest.fn(() => ({ state: "idle" })),
+    useParams: jest.fn(() => ({})),
   };
 });
 
+jest.mock("../../../src/auth/auth", () => ({ fetchWithAuth: jest.fn() }));
+jest.mock("../../../src/util/compressImage", () => ({ compressImage: jest.fn((f) => f) }));
+
 function renderForm(props = {}) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
   const router = createMemoryRouter(
-    [
-      {
-        path: "/",
-        element: <CourseForm method="POST" course={{}} {...props} />,
-        action: async () => null,
-      },
-    ],
+    [{ path: "/", element: <CourseForm method="POST" course={{}} {...props} /> }],
     { initialEntries: ["/"] }
   );
-  return render(<RouterProvider router={router} />);
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  );
 }
 
 describe("CourseForm", () => {

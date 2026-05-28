@@ -1,17 +1,11 @@
-import { googleLogin, logoutAction } from "../../src/auth/authActions";
-import { setAuth, clearAuth } from "../../src/auth/auth";
+import { googleLogin } from "../../src/hooks/useAuth";
+import { setAuth } from "../../src/auth/auth";
 
 // Mock auth module
 jest.mock("../../src/auth/auth", () => ({
   setAuth: jest.fn(),
   clearAuth: jest.fn(),
   getAuthToken: jest.fn(() => null),
-}));
-
-// Mock redirect to avoid React Router internals needing full Response API
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  redirect: jest.fn((url) => ({ redirectUrl: url, status: 302 })),
 }));
 
 // Mock global fetch
@@ -53,33 +47,6 @@ describe("Auth Actions", () => {
       });
 
       await expect(googleLogin("bad-token")).rejects.toThrow("Google login failed");
-    });
-  });
-
-  describe("logoutAction", () => {
-    it("should call logout API and clear auth", async () => {
-      fetch.mockResolvedValue({ ok: true });
-
-      const result = await logoutAction();
-
-      expect(fetch).toHaveBeenCalledWith(
-        expect.stringContaining("users/logout"),
-        expect.objectContaining({
-          method: "POST",
-          credentials: "include",
-        })
-      );
-      expect(clearAuth).toHaveBeenCalled();
-      expect(result.status).toBe(302);
-    });
-
-    it("should clear auth even if API call fails", async () => {
-      fetch.mockRejectedValue(new Error("Network error"));
-
-      const result = await logoutAction();
-
-      expect(clearAuth).toHaveBeenCalled();
-      expect(result.status).toBe(302);
     });
   });
 });

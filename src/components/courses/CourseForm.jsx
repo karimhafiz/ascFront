@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import { Form, useNavigate, useNavigation, useActionData } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../ui";
+import { useCourseMutation } from "../../hooks/useCourseMutation";
 
 const CATEGORIES = ["Language", "Religious", "Academic", "Arts", "Other"];
 
 const CourseForm = ({ method, course = {} }) => {
   const [previewImage, setPreviewImage] = useState(null);
-  const data = useActionData();
   const navigate = useNavigate();
-  const navigation = useNavigation();
-  const isSubmitting = navigation.state === "submitting";
+  const { courseSlug } = useParams();
+  const mutation = useCourseMutation(method, courseSlug);
 
   const labelClass = "glass-label";
   const fieldClass = "glass-input";
@@ -25,13 +25,19 @@ const CourseForm = ({ method, course = {} }) => {
     }
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    mutation.mutate(formData);
+  };
+
   return (
     <div className="max-w-3xl mx-auto rounded-xl border border-white/30 bg-white/90 backdrop-blur-md p-4 sm:p-8 shadow-xl">
       <h1 className="mb-6 text-center text-3xl font-bold tracking-tight text-slate-900">
         {method === "PUT" ? "Edit Course" : "Create New Course"}
       </h1>
 
-      {data?.errors && (
+      {mutation.error && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50/90 backdrop-blur-sm px-5 py-4 text-red-700">
           <div className="flex items-center gap-2 mb-2">
             <svg
@@ -50,16 +56,12 @@ const CourseForm = ({ method, course = {} }) => {
             <p className="font-semibold text-sm">Please fix the following:</p>
           </div>
           <ul className="list-disc list-inside space-y-1 ml-7">
-            {Object.values(data.errors).map((err, i) => (
-              <li key={i} className="text-sm">
-                {err}
-              </li>
-            ))}
+            <li className="text-sm">{mutation.error.message}</li>
           </ul>
         </div>
       )}
 
-      <Form method={method} className="space-y-6" encType="multipart/form-data">
+      <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Title */}
           <div className="form-control md:col-span-2">
@@ -273,15 +275,15 @@ const CourseForm = ({ method, course = {} }) => {
             type="button"
             variant="ghost"
             onClick={() => navigate(-1)}
-            disabled={isSubmitting}
+            disabled={mutation.isPending}
           >
             Cancel
           </Button>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save Course"}
+          <Button type="submit" variant="primary" disabled={mutation.isPending}>
+            {mutation.isPending ? "Saving..." : "Save Course"}
           </Button>
         </div>
-      </Form>
+      </form>
     </div>
   );
 };

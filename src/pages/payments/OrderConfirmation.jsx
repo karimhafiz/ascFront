@@ -1,7 +1,7 @@
 import React from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getAuthToken } from "../../auth/auth";
+import { getAuthToken, isAuthenticated } from "../../auth/auth";
 import TicketCard from "../../components/tickets/TicketCard";
 import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
 
@@ -9,6 +9,7 @@ export default function OrderConfirmation() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const ticketId = searchParams.get("ticket_id");
+  const loggedIn = isAuthenticated();
 
   const {
     data: ticket,
@@ -24,7 +25,7 @@ export default function OrderConfirmation() {
       if (!res.ok) throw new Error("Failed to fetch ticket details");
       return res.json();
     },
-    enabled: !!ticketId,
+    enabled: !!ticketId && loggedIn,
     retry: 1,
   });
 
@@ -42,11 +43,22 @@ export default function OrderConfirmation() {
       if (!res.ok) return [ticket];
       return res.json();
     },
-    enabled: !!ticket?.paymentId,
+    enabled: !!ticket?.paymentId && loggedIn,
     retry: 0,
   });
 
   const groupCount = groupTickets?.length ?? 1;
+
+  // Guest order — fetch tickets via session ID (no auth needed)
+  const { data: guestOrder, isLoading: guestLoading } = useQuery({
+    queryKey: ["guest-order", sessionId],
+    queryFn: async () => {
+      const res = await fetch(`${import.meta.env.VITE_DEV_URI}payments/guest-order/${sessionId}`);
+      if (!res.ok) throw new Error("Failed to fetch order");
+      return res.json();
+    },
+    enabled: !!sessionId && !loggedIn,
+  });
 
   // Fallback receipt if no ticket_id
   const { data: receipt } = useQuery({
@@ -56,7 +68,7 @@ export default function OrderConfirmation() {
       if (!res.ok) throw new Error("Failed to fetch receipt");
       return res.json();
     },
-    enabled: !!sessionId && !ticketId,
+    enabled: !!sessionId && !ticketId && loggedIn,
     retry: 1,
   });
 
@@ -96,7 +108,7 @@ export default function OrderConfirmation() {
     URL.revokeObjectURL(url);
   };
 
-  if (ticketLoading)
+  if ((ticketLoading && loggedIn) || (guestLoading && !loggedIn))
     return (
       <PageContainer center>
         <div className="flex flex-col items-center gap-3">
@@ -105,6 +117,94 @@ export default function OrderConfirmation() {
         </div>
       </PageContainer>
     );
+
+  // Guest checkout — show ticket card(s) above the "create account" prompt
+  if (!loggedIn && guestOrder?.tickets?.length > 0) {
+    const guestTicket = guestOrder.tickets[0];
+    return (
+      <PageContainer>
+        <div className="max-w-lg mx-auto py-10 px-4">
+          {/* Success banner */}
+          <div className="mb-6 bg-white rounded-2xl shadow-sm border border-green-100 p-6 text-center">
+            <div className="w-12 h-12 rounded-full bg-green-100/50 flex items-center justify-center mx-auto mb-3">
+              <svg
+                className="w-6 h-6 text-green-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-green-600 mb-1">Payment Successful!</h1>
+            <p className="text-sm text-base-content/50">
+              Your ticket is confirmed. A confirmation email with your QR code has been sent to your
+              inbox. Screenshot or print the ticket below for offline access.
+            </p>
+          </div>
+
+          {/* Ticket card */}
+          <div className="mb-6">
+            <TicketCard
+              ticket={guestTicket}
+              ticketsInGroup={guestOrder.quantity > 1 ? guestOrder.quantity : undefined}
+            />
+            {guestOrder.tickets.length > 1 && (
+              <div className="mt-3 text-center">
+                <p className="text-sm text-base-content/50">
+                  Showing{" "}
+                  <span className="font-semibold text-base-content/70">
+                    ticket 1 of {guestOrder.tickets.length}
+                  </span>{" "}
+                  from this order. All tickets were sent to your email.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Create account prompt */}
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left text-sm text-blue-700">
+            <p className="font-semibold mb-1">Want to view your tickets online?</p>
+            <p>
+              Create an account using the same email you purchased with, and your tickets will
+              appear automatically in your profile.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Button variant="primary" onClick={() => window.print()} className="w-full">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                />
+              </svg>
+              Print Ticket
+            </Button>
+            <Button variant="primary" to="/register" className="w-full">
+              Create an Account
+            </Button>
+            <Button variant="ghost" to="/events" className="w-full">
+              Browse More Events
+            </Button>
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
 
   // Fallback — payment confirmed but ticket couldn't load
   if (ticketError || !ticket)
@@ -128,8 +228,9 @@ export default function OrderConfirmation() {
           </div>
           <h2 className="text-2xl font-bold text-green-600 mb-2">Payment Successful!</h2>
           <p className="text-base-content/50 text-sm mb-6">
-            Your payment was processed. Your ticket will appear in your profile shortly. A
-            confirmation email with your QR code has been sent to your inbox.
+            Your payment was processed.{" "}
+            {loggedIn ? "Your ticket will appear in your profile shortly. " : ""}A confirmation
+            email with your QR code has been sent to your inbox.
           </p>
           {receipt && (
             <div className="bg-base-100 rounded-xl p-4 mb-6 text-left text-sm space-y-1">
@@ -146,9 +247,15 @@ export default function OrderConfirmation() {
             </div>
           )}
           <div className="space-y-3">
-            <Button variant="primary" to="/profile" className="w-full">
-              View My Tickets
-            </Button>
+            {loggedIn ? (
+              <Button variant="primary" to="/profile" className="w-full">
+                View My Tickets
+              </Button>
+            ) : (
+              <Button variant="primary" to="/register" className="w-full">
+                Create an Account
+              </Button>
+            )}
             <Button variant="ghost" to="/events" className="w-full">
               Browse More Events
             </Button>
@@ -239,9 +346,15 @@ export default function OrderConfirmation() {
             </svg>
             Add to Calendar
           </Button>
-          <Button variant="ghost" to="/profile" className="w-full">
-            View All Tickets
-          </Button>
+          {loggedIn ? (
+            <Button variant="ghost" to="/profile" className="w-full">
+              View All Tickets
+            </Button>
+          ) : (
+            <Button variant="ghost" to="/events" className="w-full">
+              Browse More Events
+            </Button>
+          )}
         </div>
       </div>
     </PageContainer>

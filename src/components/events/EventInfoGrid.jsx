@@ -1,31 +1,40 @@
 import { getNextRecurringDate, capitalize } from "../../util/util";
 import { Badge, GlassCard } from "../ui";
 
-export default function EventInfoGrid({ event }) {
+export default function EventInfoGrid({ event, actionButton }) {
   return (
-    <GlassCard className="shadow-xl">
+    <GlassCard className="rounded-[1.75rem] shadow-xl">
       <div className="card-body">
-        <h2 className="card-title text-xl text-base-content">Event Details:</h2>
-        {(event.isReoccurring || event.typeOfEvent) && (
-          <div className="flex flex-wrap items-center gap-2">
-            {event.typeOfEvent && (
-              <Badge color={event.typeOfEvent === "Sports" ? "accent" : "primary"}>
-                {event.typeOfEvent}
-              </Badge>
-            )}
-            {event.isReoccurring && event.dayOfWeek && (
-              <Badge color="secondary">↻ Weekly · {capitalize(event.dayOfWeek)}s</Badge>
+        <h2 className="card-title text-xl text-base-content justify-center md:justify-start">
+          {event.title}
+        </h2>
+        <div className="flex items-center justify-center gap-3 mx-auto md:mx-0 md:flex-row md:justify-between">
+          <div className="text-center  md:text-left">
+            {(event.isReoccurring || event.typeOfEvent) && (
+              <div className="flex flex-wrap items-center  gap-2 mt-1">
+                {event.typeOfEvent && (
+                  <Badge color={event.typeOfEvent === "Sports" ? "accent" : "primary"}>
+                    {event.typeOfEvent}
+                  </Badge>
+                )}
+                {event.isReoccurring && event.dayOfWeek && (
+                  <Badge color="secondary">↻ Weekly · {capitalize(event.dayOfWeek)}s</Badge>
+                )}
+              </div>
             )}
           </div>
-        )}
-        <div className="space-y-4">
+          {actionButton && (
+            <div className="w-full md:w-auto [&>*]:w-full [&>*]:md:w-auto">{actionButton}</div>
+          )}
+        </div>
+        <div className="space-y-4 mt-2">
           {event.isReoccurring &&
             (() => {
               const next = getNextRecurringDate(event);
               if (!next) return null;
               return (
                 <div className="flex items-start">
-                  <div className="bg-gradient-to-br from-secondary to-primary text-white p-3 rounded-xl mr-4 shadow-md">
+                  <div className="bg-gradient-to-br from-secondary to-primary text-white p-3 rounded-xl mr-4 shadow-md flex-shrink-0">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-6 w-6"
@@ -57,7 +66,7 @@ export default function EventInfoGrid({ event }) {
               );
             })()}
           <div className="flex items-start">
-            <div className="bg-gradient-to-br from-primary to-secondary text-white p-3 rounded-xl mr-4 shadow-md">
+            <div className="bg-gradient-to-br from-primary to-secondary text-white p-3 rounded-xl mr-4 shadow-md flex-shrink-0">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
@@ -86,7 +95,7 @@ export default function EventInfoGrid({ event }) {
           </div>
 
           <div className="flex items-start">
-            <div className="bg-gradient-to-br from-primary to-secondary text-white p-3 rounded-xl mr-4 shadow-md">
+            <div className="bg-gradient-to-br from-primary to-secondary text-white p-3 rounded-xl mr-4 shadow-md flex-shrink-0">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
@@ -118,7 +127,7 @@ export default function EventInfoGrid({ event }) {
 
           {event.ticketPrice > 0 && (
             <div className="flex items-start">
-              <div className="bg-gradient-to-br from-secondary to-primary text-white p-3 rounded-xl mr-4 shadow-md">
+              <div className="bg-gradient-to-br from-secondary to-primary text-white p-3 rounded-xl mr-4 shadow-md flex-shrink-0">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
@@ -141,7 +150,7 @@ export default function EventInfoGrid({ event }) {
                 <p className="text-base-content/70">£{event.ticketPrice}</p>
                 {event.isTournament && (
                   <p className="text-xs text-base-content/50 mt-0.5">
-                    Per player — spectators enter free
+                    Per team — paid by manager · spectators enter free
                   </p>
                 )}
               </div>
@@ -150,7 +159,7 @@ export default function EventInfoGrid({ event }) {
 
           {event.ticketsAvailable !== undefined && (
             <div className="flex items-start">
-              <div className="bg-gradient-to-br from-green-500 to-teal-600 text-white p-3 rounded-xl mr-4 shadow-md">
+              <div className="bg-gradient-to-br from-green-500 to-teal-600 text-white p-3 rounded-xl mr-4 shadow-md flex-shrink-0">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"

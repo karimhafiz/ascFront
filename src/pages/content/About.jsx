@@ -242,11 +242,11 @@ export default function About() {
     setDraft({ ...draft, activityCards: cards });
   };
 
-  const handleCardImageChange = async (index, file) => {
+  const handleCardImageChange = async (cardId, file) => {
     if (!file) return;
     const compressed = await compressImage(file);
-    setCardImageFiles((prev) => ({ ...prev, [index]: compressed }));
-    setCardImagePreviews((prev) => ({ ...prev, [index]: URL.createObjectURL(compressed) }));
+    setCardImageFiles((prev) => ({ ...prev, [cardId]: compressed }));
+    setCardImagePreviews((prev) => ({ ...prev, [cardId]: URL.createObjectURL(compressed) }));
   };
 
   const handleSave = async () => {
@@ -285,8 +285,8 @@ export default function About() {
           getInvolvedText: draft.getInvolvedText,
         })
       );
-      Object.entries(cardImageFiles).forEach(([index, file]) => {
-        formData.append(`activityImage_${index}`, file);
+      Object.entries(cardImageFiles).forEach(([cardId, file]) => {
+        formData.append(`activityImage_${cardId}`, file);
       });
 
       const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}pageContent/about`, {
@@ -539,11 +539,12 @@ export default function About() {
 
         <div className="grid gap-6 lg:grid-cols-2">
           {cards.map((card, index) => {
-            const imgSrc = cardImagePreviews[index] || card.image;
+            const cardId = card._id || index;
+            const imgSrc = cardImagePreviews[cardId] || card.image;
 
             return (
               <ActivityCard
-                key={index}
+                key={cardId}
                 card={card}
                 index={index}
                 imgSrc={imgSrc}
@@ -552,7 +553,7 @@ export default function About() {
                 onDescriptionChange={(value) => updateCard(index, "description", value)}
                 onImagePick={(file) => {
                   if (file instanceof File) {
-                    handleCardImageChange(index, file);
+                    handleCardImageChange(cardId, file);
                   } else {
                     cardImageRefs.current[index]?.click();
                   }

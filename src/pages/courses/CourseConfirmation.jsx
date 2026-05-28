@@ -1,7 +1,7 @@
 import React from "react";
 import { useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "../../components/ui";
+import { useCourse } from "../../hooks/useCourses";
 
 export default function CourseConfirmation() {
   const [searchParams] = useSearchParams();
@@ -9,15 +9,7 @@ export default function CourseConfirmation() {
   const isFree = searchParams.get("free") === "true";
   const isReactivated = searchParams.get("reactivated") === "true";
 
-  const { data: course, isLoading } = useQuery({
-    queryKey: ["course", courseId],
-    queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}courses/${courseId}`);
-      if (!res.ok) throw new Error("Failed to fetch");
-      return res.json();
-    },
-    enabled: !!courseId,
-  });
+  const { data: course, isLoading } = useCourse(courseId);
 
   return (
     <div className="min-h-screen py-12 px-4">

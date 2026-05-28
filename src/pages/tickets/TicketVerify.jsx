@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchWithAuth } from "../../auth/auth";
+import { fetchWithAuth, isAdmin, isModerator } from "../../auth/auth";
 import { Button, PageContainer, Spinner, GlassCard } from "../../components/ui";
 
 const TICKET_CODE_RE = /^TKT-[A-Z2-9]{6}$/;
@@ -56,6 +56,7 @@ export default function TicketVerify() {
   const [justCheckedIn, setJustCheckedIn] = useState(false);
 
   const invalidFormat = !TICKET_CODE_RE.test(ticketCode);
+  const isStaff = isAdmin() || isModerator();
 
   const {
     data: ticket,
@@ -64,7 +65,7 @@ export default function TicketVerify() {
   } = useQuery({
     queryKey: ["verify-ticket", ticketCode],
     queryFn: () => fetchTicket(ticketCode),
-    enabled: !invalidFormat,
+    enabled: !invalidFormat && isStaff,
   });
 
   const checkInMutation = useMutation({
@@ -82,30 +83,25 @@ export default function TicketVerify() {
 
   let status = "invalid";
   let statusColor = "bg-red-500";
-  let statusIcon = "❌";
   let statusText = "Invalid Ticket";
 
   if (invalidFormat) {
     statusText = "Invalid Code Format";
-  } else if (isAuthError) {
-    statusColor = "bg-amber-500";
-    statusIcon = "🔒";
+  } else if (!isStaff || isAuthError) {
+    statusColor = "bg-slate-500";
     statusText = "Authentication Required";
   } else if (displayTicket && !error) {
     if (justCheckedIn) {
       status = "just-checked-in";
       statusColor = "bg-green-500";
-      statusIcon = "✅";
       statusText = "Checked In Successfully!";
     } else if (displayTicket.checkedIn) {
       status = "already-checked-in";
-      statusColor = "bg-amber-500";
-      statusIcon = "⚠️";
+      statusColor = "bg-orange-500";
       statusText = "Already Checked In";
     } else {
       status = "valid";
-      statusColor = "bg-green-500";
-      statusIcon = "✅";
+      statusColor = "bg-amber-500";
       statusText = "Valid — Ready to Check In";
     }
   }
@@ -128,7 +124,6 @@ export default function TicketVerify() {
               <div
                 className={`inline-flex items-center justify-center gap-2 ${statusColor} text-white font-bold py-3 px-6 rounded-full text-lg w-full`}
               >
-                <span>{statusIcon}</span>
                 <span>{statusText}</span>
               </div>
             </div>
@@ -141,7 +136,7 @@ export default function TicketVerify() {
                   Ticket codes must follow the format <span className="font-mono">TKT-XXXXXX</span>.
                 </p>
               </div>
-            ) : isAuthError ? (
+            ) : !isStaff || isAuthError ? (
               <div className="px-6 py-8 text-center">
                 <p className="text-lg font-semibold text-base-content mb-2">
                   Authentication Required
@@ -208,8 +203,8 @@ export default function TicketVerify() {
 
                 {/* Already checked in warning */}
                 {status === "already-checked-in" && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                    <p className="text-sm text-amber-900">
+                  <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4">
+                    <p className="text-sm text-orange-900">
                       <span className="font-semibold">Checked in on:</span>{" "}
                       {formatDateTime(
                         displayTicket?.checkedInAt || displayTicket?.originalCheckedInAt
@@ -223,7 +218,23 @@ export default function TicketVerify() {
                   <>
                     <hr className="border-base-200" />
                     <div className="bg-green-50 border border-green-200 rounded-2xl p-5 text-center">
-                      <p className="text-4xl mb-2">🎉</p>
+                      <div className="flex justify-center mb-2">
+                        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                          <svg
+                            className="w-7 h-7 text-green-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2.5}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </div>
+                      </div>
                       <p className="text-lg font-bold text-green-800">Welcome!</p>
                       <p className="text-sm text-green-700 mt-1">
                         {displayTicket?.user?.name || displayTicket?.buyerEmail} has been checked

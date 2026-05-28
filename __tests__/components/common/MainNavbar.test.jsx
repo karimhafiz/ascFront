@@ -4,6 +4,21 @@ import { MemoryRouter } from "react-router-dom";
 import Navbar from "../../../src/components/common/MainNavbar";
 import "@testing-library/jest-dom";
 
+// Mock matchMedia for jsdom
+Object.defineProperty(window, "matchMedia", {
+  writable: true,
+  value: jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
 jest.mock("../../../src/auth/auth", () => ({
   isAuthenticated: jest.fn(),
   isAdmin: jest.fn(),
@@ -89,7 +104,6 @@ describe("MainNavbar", () => {
     parseJwt.mockReturnValue({ email: "alice@test.com" });
     getAuthToken.mockReturnValue("some-token");
 
-    // Profile dropdown uses onClick only on mobile (< 1024px)
     Object.defineProperty(window, "innerWidth", { value: 500, writable: true });
     renderNavbar();
     await act(async () => {

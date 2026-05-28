@@ -1,25 +1,29 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import googleLogo from "../../assets/google.svg";
-import { googleLogin } from "../../auth/authActions";
+import { googleLogin } from "../../hooks/useAuth";
 
 const GoogleLogin = () => {
   const navigate = useNavigate();
-  const hiddenBtnRef = useRef(null);
+  const gsiBtnRef = useRef(null);
+  const gsiReady = useRef(false);
 
-  const handleCredentialResponse = async (response) => {
-    if (!response?.credential) return;
-    try {
-      const { role } = await googleLogin(response.credential);
-      navigate(role === "admin" ? "/admin" : "/");
-      //eslint-disable-next-line no-unused-vars
-    } catch (err) {
-      // error already logged
-    }
-  };
+  const handleCredentialResponse = useCallback(
+    async (response) => {
+      if (!response?.credential) return;
+      try {
+        const { role } = await googleLogin(response.credential);
+        navigate(role === "admin" ? "/admin" : "/");
+        //eslint-disable-next-line no-unused-vars
+      } catch (err) {
+        // error already logged
+      }
+    },
+    [navigate]
+  );
 
-  useEffect(() => {
-    if (!window.google?.accounts?.id || !hiddenBtnRef.current) return;
+  const renderGsiButton = useCallback(() => {
+    if (!window.google?.accounts?.id || !gsiBtnRef.current || gsiReady.current) return;
+    gsiReady.current = true;
 
     window.google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
@@ -28,36 +32,26 @@ const GoogleLogin = () => {
       auto_select: false,
     });
 
-    // render Google's real button into the hidden div
-    window.google.accounts.id.renderButton(hiddenBtnRef.current, {
+    window.google.accounts.id.renderButton(gsiBtnRef.current, {
       type: "standard",
-      theme: "outline",
+      theme: "filled_blue",
       size: "large",
+      shape: "pill",
+      width: gsiBtnRef.current.offsetWidth,
     });
-    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [handleCredentialResponse]);
 
-  const handleClick = () => {
-    // click Google's hidden button to trigger the real popup
-    hiddenBtnRef.current?.querySelector("div[role=button]")?.click();
-  };
+  useEffect(() => {
+    if (window.google?.accounts?.id) {
+      renderGsiButton();
+    } else {
+      const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+      script?.addEventListener("load", renderGsiButton);
+      return () => script?.removeEventListener("load", renderGsiButton);
+    }
+  }, [renderGsiButton]);
 
-  return (
-    <>
-      {/* hidden Google button — GSI needs a real DOM target */}
-      <div ref={hiddenBtnRef} className="absolute opacity-0 pointer-events-none" />
-
-      {/* your styled button */}
-      <button
-        type="button"
-        onClick={handleClick}
-        className="flex items-center justify-center btn btn-primary w-full text-base font-medium py-3 mt-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
-      >
-        <img src={googleLogo} alt="Google" className="h-5 w-5 mr-3" width="20" height="20" />
-        Continue with Google
-      </button>
-    </>
-  );
+  return <div ref={gsiBtnRef} className="mt-6 flex justify-center" />;
 };
 
 export default GoogleLogin;

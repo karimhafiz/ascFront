@@ -1,11 +1,11 @@
-import React from "react";
-import { useRouteLoaderData } from "react-router-dom";
+import React, { useState } from "react";
 import RecurringEventsCalendar from "../../components/events/RecurringEventsCalendar";
 import EventCard from "../../components/events/EventCard";
-import { useState } from "react";
+import { useEvents } from "../../hooks/useEvents";
+import { Spinner } from "../../components/ui";
 
 export default function SportsPage() {
-  const { events } = useRouteLoaderData("root");
+  const { data: events = [], isLoading } = useEvents();
   const currentDate = new Date();
   const [successMsg] = useState("");
 
@@ -17,6 +17,14 @@ export default function SportsPage() {
 
   const upcomingTournaments = tournaments.filter((event) => new Date(event.date) >= currentDate);
   const pastTournaments = tournaments.filter((event) => new Date(event.date) < currentDate);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">

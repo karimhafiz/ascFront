@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Login from "../../../src/pages/auth/Login";
 import "@testing-library/jest-dom";
 
@@ -11,19 +12,21 @@ jest.mock("../../../src/auth/auth", () => ({
 
 jest.mock("../../../src/components/auth/GoogleLogin", () => () => <div>Google Login Button</div>);
 
-jest.mock("react-router-dom", () => {
-  const actual = jest.requireActual("react-router-dom");
-  return {
-    ...actual,
-    useActionData: jest.fn(() => undefined),
-    useNavigation: jest.fn(() => ({ state: "idle" })),
-  };
-});
+jest.mock("../../../src/hooks/useAuth", () => ({
+  useLogin: jest.fn(() => ({
+    mutate: jest.fn(),
+    isPending: false,
+    error: null,
+  })),
+}));
 
 const { isAuthenticated } = require("../../../src/auth/auth");
-const { useActionData } = require("react-router-dom");
+const { useLogin } = require("../../../src/hooks/useAuth");
 
 function renderLogin() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
   const router = createMemoryRouter(
     [
       { path: "/login", element: <Login /> },
@@ -31,13 +34,17 @@ function renderLogin() {
     ],
     { initialEntries: ["/login"] }
   );
-  return render(<RouterProvider router={router} />);
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  );
 }
 
 describe("Login Page", () => {
   beforeEach(() => {
     isAuthenticated.mockReturnValue(false);
-    useActionData.mockReturnValue(undefined);
+    useLogin.mockReturnValue({ mutate: jest.fn(), isPending: false, error: null });
   });
 
   it("should render login form", () => {
@@ -58,16 +65,21 @@ describe("Login Page", () => {
     expect(screen.getByText("Home")).toBeInTheDocument();
   });
 
-  it("should display error message from action data", () => {
-    useActionData.mockReturnValue({ message: "Invalid credentials" });
+  it("should display error message from mutation error", () => {
+    useLogin.mockReturnValue({
+      mutate: jest.fn(),
+      isPending: false,
+      error: { message: "Invalid credentials" },
+    });
     renderLogin();
     expect(screen.getByText("Invalid credentials")).toBeInTheDocument();
   });
 
   it("should display Google conflict message", () => {
-    useActionData.mockReturnValue({
-      message: "This account uses Google Sign-In.",
-      authMethod: "google",
+    useLogin.mockReturnValue({
+      mutate: jest.fn(),
+      isPending: false,
+      error: { message: "This account uses Google Sign-In.", authMethod: "google" },
     });
     renderLogin();
     expect(screen.getByText("This account uses Google Sign-In.")).toBeInTheDocument();

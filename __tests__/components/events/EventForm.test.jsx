@@ -1,38 +1,32 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import EventForm from "../../../src/components/events/EventForm";
 import "@testing-library/jest-dom";
 
-jest.mock("../../../src/auth/auth", () => ({ getAuthToken: jest.fn() }));
-// At the top of your EventForm.test.jsx
+jest.mock("../../../src/auth/auth", () => ({ getAuthToken: jest.fn(), fetchWithAuth: jest.fn() }));
+jest.mock("../../../src/util/compressImage", () => ({ compressImage: jest.fn((f) => f) }));
 jest.mock("react-router-dom", () => {
   const actual = jest.requireActual("react-router-dom");
   return {
     ...actual,
-    useActionData: jest.fn(() => undefined),
     useNavigate: jest.fn(() => jest.fn()),
-    useNavigation: jest.fn(() => ({ state: "idle" })),
-    useSubmit: jest.fn(),
-    Form: ({ children, ...props }) => <form {...props}>{children}</form>,
+    useParams: jest.fn(() => ({})),
   };
 });
 
 describe("EventForm Component", () => {
   function renderWithRouter(ui, { route = "/" } = {}) {
-    const router = createMemoryRouter(
-      [
-        {
-          path: route,
-          element: ui,
-          action: async () => null,
-        },
-      ],
-      {
-        initialEntries: [route],
-      }
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    const router = createMemoryRouter([{ path: route, element: ui }], { initialEntries: [route] });
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
     );
-    return render(<RouterProvider router={router} />);
   }
 
   it("should render the form with all fields", () => {

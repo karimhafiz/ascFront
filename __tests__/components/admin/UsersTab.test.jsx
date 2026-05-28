@@ -3,7 +3,6 @@ import { render, screen, fireEvent, act } from "@testing-library/react";
 import UsersTab from "../../../src/components/admin/UsersTab";
 import "@testing-library/jest-dom";
 
-// Mock auth
 jest.mock("../../../src/auth/auth", () => ({
   getAuthToken: () => "mock-token",
   fetchWithAuth: jest.fn(() =>
@@ -22,6 +21,7 @@ const users = [
     name: "Admin User",
     email: "admin@test.com",
     role: "admin",
+    isBanned: false,
     createdAt: "2025-01-01T00:00:00Z",
   },
   {
@@ -29,6 +29,7 @@ const users = [
     name: "Mod User",
     email: "mod@test.com",
     role: "moderator",
+    isBanned: false,
     createdAt: "2025-06-01T00:00:00Z",
   },
   {
@@ -36,6 +37,7 @@ const users = [
     name: "Regular User",
     email: "user@test.com",
     role: "user",
+    isBanned: false,
     createdAt: "2026-01-01T00:00:00Z",
   },
 ];
@@ -46,56 +48,96 @@ describe("UsersTab", () => {
   });
 
   it("renders all users", () => {
-    render(<UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} />);
-    expect(screen.getByText("Admin User")).toBeInTheDocument();
-    expect(screen.getByText("Mod User")).toBeInTheDocument();
-    expect(screen.getByText("Regular User")).toBeInTheDocument();
+    render(
+      <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
+    );
+    expect(screen.getAllByText("Admin User").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Mod User").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Regular User").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("shows 'you' label for current user instead of role dropdown", () => {
-    render(<UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} />);
-    expect(screen.getByText("you")).toBeInTheDocument();
+  it("shows 'you' label for current user", () => {
+    render(
+      <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
+    );
+    expect(screen.getAllByText("you").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders role dropdowns for other users", () => {
-    render(<UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} />);
+    render(
+      <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
+    );
     const selects = screen.getAllByRole("combobox");
-    // 2 other users should have dropdowns
-    expect(selects).toHaveLength(2);
+    // 2 other users x 2 layouts (mobile + desktop) = 4
+    expect(selects).toHaveLength(4);
   });
 
   it("shows 'No users found' when empty", () => {
-    render(<UsersTab users={[]} currentUserId="u1" onRoleChange={jest.fn()} />);
-    expect(screen.getByText("No users found")).toBeInTheDocument();
+    render(
+      <UsersTab users={[]} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
+    );
+    expect(screen.getAllByText("No users found").length).toBeGreaterThanOrEqual(1);
   });
 
   it("filters users by search", () => {
-    render(<UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} />);
+    render(
+      <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
+    );
     fireEvent.change(screen.getByPlaceholderText(/search/i), {
       target: { value: "mod" },
     });
-    expect(screen.getByText("Mod User")).toBeInTheDocument();
+    expect(screen.getAllByText("Mod User").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("Regular User")).not.toBeInTheDocument();
   });
 
-  it("calls onRoleChange after successful role update", async () => {
+  it("opens confirm modal on role change and calls onRoleChange after confirm", async () => {
     const onRoleChange = jest.fn();
-    render(<UsersTab users={users} currentUserId="u1" onRoleChange={onRoleChange} />);
+    render(
+      <UsersTab
+        users={users}
+        currentUserId="u1"
+        onRoleChange={onRoleChange}
+        onBanToggle={jest.fn()}
+      />
+    );
 
     const selects = screen.getAllByRole("combobox");
+    // Change role on one of the selects (triggers confirm modal)
+    fireEvent.change(selects[0], { target: { value: "admin" } });
+
+    // Confirm modal should appear
+    expect(screen.getByText("Promote user?")).toBeInTheDocument();
+
+    // Click confirm
     await act(async () => {
-      fireEvent.change(selects[0], { target: { value: "admin" } });
+      fireEvent.click(screen.getByText("Promote"));
     });
 
     expect(fetchWithAuth).toHaveBeenCalled();
     expect(onRoleChange).toHaveBeenCalledWith("u2", "admin");
   });
 
-  it("shows role badges with correct text", () => {
-    render(<UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} />);
-    // Role text appears in badges and dropdowns, so use getAllByText
+  it("shows role badges", () => {
+    render(
+      <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
+    );
     expect(screen.getAllByText("admin").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("moderator").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("user").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("shows ban buttons for non-current users", () => {
+    render(
+      <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
+    );
+    const banButtons = screen.getAllByText("Ban");
+    expect(banButtons.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("shows Active status for non-banned users", () => {
+    render(
+      <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
+    );
+    expect(screen.getAllByText("Active").length).toBeGreaterThanOrEqual(1);
   });
 });

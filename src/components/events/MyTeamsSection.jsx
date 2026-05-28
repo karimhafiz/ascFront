@@ -5,7 +5,7 @@ export default function MyTeamsSection({ teams }) {
   if (!teams?.length) return null;
 
   return (
-    <GlassCard className="shadow-xl">
+    <GlassCard className="rounded-[1.75rem] shadow-xl">
       <div className="card-body">
         <h2 className="card-title text-xl text-base-content">Teams ({teams.length})</h2>
 
@@ -36,7 +36,7 @@ export default function MyTeamsSection({ teams }) {
             <div className="min-w-0">
               <p className="font-semibold text-base-content text-sm">Need to make changes?</p>
               <p className="text-xs text-base-content/60">
-                Edit team name, manager details, or members from your profile.
+                Edit team details or complete pending payments from your profile.
               </p>
             </div>
           </div>

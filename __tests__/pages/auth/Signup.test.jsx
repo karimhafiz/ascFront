@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Signup from "../../../src/pages/auth/Signup";
 import "@testing-library/jest-dom";
 
@@ -11,19 +12,21 @@ jest.mock("../../../src/auth/auth", () => ({
 
 jest.mock("../../../src/components/auth/GoogleLogin", () => () => <div>Google Login Button</div>);
 
-jest.mock("react-router-dom", () => {
-  const actual = jest.requireActual("react-router-dom");
-  return {
-    ...actual,
-    useActionData: jest.fn(() => undefined),
-    useNavigation: jest.fn(() => ({ state: "idle" })),
-  };
-});
+jest.mock("../../../src/hooks/useAuth", () => ({
+  useSignup: jest.fn(() => ({
+    mutate: jest.fn(),
+    isPending: false,
+    error: null,
+  })),
+}));
 
 const { isAuthenticated } = require("../../../src/auth/auth");
-const { useActionData } = require("react-router-dom");
+const { useSignup } = require("../../../src/hooks/useAuth");
 
 function renderSignup() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
   const router = createMemoryRouter(
     [
       { path: "/signup", element: <Signup /> },
@@ -31,13 +34,17 @@ function renderSignup() {
     ],
     { initialEntries: ["/signup"] }
   );
-  return render(<RouterProvider router={router} />);
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  );
 }
 
 describe("Signup Page", () => {
   beforeEach(() => {
     isAuthenticated.mockReturnValue(false);
-    useActionData.mockReturnValue(undefined);
+    useSignup.mockReturnValue({ mutate: jest.fn(), isPending: false, error: null });
   });
 
   it("should render signup form", () => {
@@ -59,8 +66,12 @@ describe("Signup Page", () => {
     expect(screen.getByText("Home")).toBeInTheDocument();
   });
 
-  it("should display error message from action data", () => {
-    useActionData.mockReturnValue({ message: "Email already in use." });
+  it("should display error message from mutation error", () => {
+    useSignup.mockReturnValue({
+      mutate: jest.fn(),
+      isPending: false,
+      error: { message: "Email already in use." },
+    });
     renderSignup();
     expect(screen.getByText("Email already in use.")).toBeInTheDocument();
   });

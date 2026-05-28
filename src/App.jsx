@@ -7,16 +7,12 @@ import Main from "./components/common/Main";
 import ErrorPage from "./pages/Errorpage";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import ModeratorRoute from "./components/common/ModeratorRoute";
-import { loginAction, signupAction, logoutAction } from "./auth/authActions";
-import { combinedLoader, eventDetailLoader } from "./loaders/loaders";
-import { eventAction } from "./api/eventActions";
-import { courseAction } from "./api/courseActions";
 
 const Home = lazy(() => import("./pages/content/Home"));
 const About = lazy(() => import("./pages/content/About"));
 const Contact = lazy(() => import("./pages/content/Contact"));
 const VenueBooking = lazy(() => import("./pages/content/VenueBooking"));
-const EventPage = lazy(() => import("./pages/events/Event"));
+const EventPage = lazy(() => import("./pages/events/Events"));
 const EventDetails = lazy(() => import("./pages/events/EventDetails"));
 const NewEvent = lazy(() => import("./pages/events/NewEvent"));
 const EditEvent = lazy(() => import("./pages/events/EditEvent"));
@@ -36,21 +32,20 @@ const CourseConfirmation = lazy(() => import("./pages/courses/CourseConfirmation
 const CourseDetails = lazy(() => import("./pages/courses/CourseDetails"));
 const CourseFormPage = lazy(() => import("./pages/courses/CourseFormPage"));
 const CourseRoot = lazy(() => import("./pages/courses/CourseRoot"));
+const SubscriptionConfirmation = lazy(() => import("./pages/events/SubscriptionConfirmation"));
 
-const fallback = (
+const Fallback = () => (
   <div className="flex justify-center items-center p-12">
     <span className="loading loading-spinner loading-lg" />
   </div>
 );
 
-const w = (C) => <Suspense fallback={fallback}>{createElement(C)}</Suspense>;
+const w = (C) => <Suspense fallback={<Fallback />}>{createElement(C)}</Suspense>;
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Main />,
-    id: "root",
-    loader: combinedLoader,
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: w(Home) },
@@ -73,13 +68,14 @@ const router = createBrowserRouter([
           {
             element: <ModeratorRoute />,
             children: [
-              { path: "new", element: w(CourseFormPage), action: courseAction },
-              { path: ":courseSlug/edit", element: w(CourseFormPage), action: courseAction },
+              { path: "new", element: w(CourseFormPage) },
+              { path: ":courseSlug/edit", element: w(CourseFormPage) },
             ],
           },
         ],
       },
       { path: "course-confirmation", element: w(CourseConfirmation) },
+      { path: "subscription-confirmation", element: w(SubscriptionConfirmation) },
       {
         path: "events",
         element: w(EventRoot),
@@ -89,19 +85,17 @@ const router = createBrowserRouter([
           { path: "sports", element: w(SportsPage) },
           {
             path: ":eventSlug",
-            id: "event-detail",
-            loader: eventDetailLoader,
             children: [
               { index: true, element: w(EventDetails) },
               {
                 element: <ModeratorRoute />,
-                children: [{ path: "edit", element: w(EditEvent), action: eventAction }],
+                children: [{ path: "edit", element: w(EditEvent) }],
               },
             ],
           },
           {
             element: <ModeratorRoute />,
-            children: [{ path: "new", element: w(NewEvent), action: eventAction }],
+            children: [{ path: "new", element: w(NewEvent) }],
           },
         ],
       },
@@ -111,9 +105,8 @@ const router = createBrowserRouter([
         errorElement: <ErrorPage />,
         children: [{ index: true, element: w(AdminDashboard) }],
       },
-      { path: "login", element: w(Login), action: loginAction },
-      { path: "signup", element: w(Signup), action: signupAction },
-      { path: "logout", action: logoutAction },
+      { path: "login", element: w(Login) },
+      { path: "signup", element: w(Signup) },
     ],
   },
 ]);

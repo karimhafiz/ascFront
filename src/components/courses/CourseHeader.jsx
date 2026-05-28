@@ -1,10 +1,9 @@
 import React from "react";
-import { useRouteLoaderData, useLocation, useParams } from "react-router-dom";
-import { isAdmin, isModerator } from "../../auth/auth";
+import { useLocation, useParams } from "react-router-dom";
+import { isAdmin, isModerator, isAuthenticated } from "../../auth/auth";
 import { Button } from "../ui";
 
 const CourseHeader = () => {
-  const { token } = useRouteLoaderData("root");
   const location = useLocation();
   const { courseSlug } = useParams();
 
@@ -12,7 +11,7 @@ const CourseHeader = () => {
     return null;
   }
 
-  if (!token || (!isAdmin() && !isModerator())) {
+  if (!isAuthenticated() || (!isAdmin() && !isModerator())) {
     return null;
   }
 

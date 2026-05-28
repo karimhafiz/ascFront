@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { useRouteLoaderData } from "react-router-dom";
 import EventCard from "../../components/events/EventCard";
 import RecurringEventsCalendar from "../../components/events/RecurringEventsCalendar";
+import { useEvents } from "../../hooks/useEvents";
+import { Spinner } from "../../components/ui";
 
 const TYPE_TABS = [
   { key: "all", label: "All Events" },
@@ -10,7 +11,7 @@ const TYPE_TABS = [
 ];
 
 export default function EventPage() {
-  const { events } = useRouteLoaderData("root");
+  const { data: events = [], isLoading } = useEvents();
   const [view, setView] = useState("cards");
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
@@ -69,6 +70,14 @@ export default function EventPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <Spinner />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -83,7 +92,7 @@ export default function EventPage() {
         {/* View toggle + type tabs + search */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           {/* View toggle */}
-          <div className="flex bg-white/60 rounded-xl border border-white/40 p-1">
+          <div className="flex bg-white/60 rounded-xl border border-white/40 p-1 mx-auto md:mx-0">
             <button
               onClick={() => setView("cards")}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
@@ -123,7 +132,7 @@ export default function EventPage() {
           </div>
 
           {/* Type filter tabs */}
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap mx-auto md:mx-0">
             {TYPE_TABS.map((tab) => (
               <button
                 key={tab.key}
@@ -141,7 +150,7 @@ export default function EventPage() {
 
           {/* Search + Sort (cards view only) */}
           {view === "cards" && (
-            <div className="flex items-center gap-2 flex-1">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center flex-1 ">
               <div className="relative flex-1">
                 <svg
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/50"
@@ -164,12 +173,12 @@ export default function EventPage() {
                   className="glass-input pl-9 py-2.5"
                 />
               </div>
-              <div className="flex bg-white/60 rounded-xl border border-white/40 p-1">
+              <div className="flex bg-white/60 rounded-xl border border-white/40 p-1 overflow-x-auto mx-auto md:mx-0">
                 {SORT_OPTIONS.map((opt) => (
                   <button
                     key={opt.key}
                     onClick={() => handleSort(opt.key)}
-                    className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                    className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
                       sort.key === opt.key
                         ? "bg-gradient-to-r from-primary to-secondary text-white shadow-md"
                         : "text-base-content hover:bg-white/80"
@@ -229,7 +238,7 @@ export default function EventPage() {
 
         {/* Calendar view */}
         {view === "calendar" && (
-          <div className="glass-card rounded-2xl shadow-xl backdrop-blur-md border border-white/30 p-6">
+          <div className="glass-card rounded-2xl shadow-xl backdrop-blur-md border border-white/30 p-3 sm:p-6">
             <RecurringEventsCalendar
               events={typeFiltered}
               title={
