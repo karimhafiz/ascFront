@@ -2,8 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { clearAuth, getAuthToken, isAdmin, isAuthenticated, parseJwt } from "../../auth/auth";
 
-const DEFAULT_VENUE_ID = import.meta.env.VITE_COMMUNITY_CENTRE_VENUE_ID || "";
-
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -36,9 +34,8 @@ export default function Navbar() {
   };
 
   const isActive = (path) => location.pathname === path;
-  const isVenueActive =
-    location.pathname === "/venue-booking" || location.pathname.startsWith("/venues/book/");
-  const venueLink = DEFAULT_VENUE_ID ? `/venues/book/${DEFAULT_VENUE_ID}` : "/venue-booking";
+  const isVenueActive = location.pathname.startsWith("/venues");
+  const venueLink = "/venues/booking";
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -95,13 +92,13 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed left-0 right-0 top-0 z-50 h-[72px] transition-all duration-300 ${
+      className={` w-full fixed left-0 right-0 top-0 z-50 h-18 transition-all duration-300 ${
         scrolled
           ? "border-b border-white/60 bg-white/88 py-2 shadow-[0_18px_50px_-30px_rgba(16,38,58,0.5)] backdrop-blur-2xl"
           : "border-b border-transparent bg-white/60 py-3 backdrop-blur-xl lg:py-4"
       }`}
     >
-      <div className="page-section flex items-center justify-between lg:justify-center xl:gap-16 md:gap-8 px-4 lg:px-4 xl:px-6">
+      <div className=" flex items-center justify-between lg:justify-center xl:gap-16 md:gap-8 px-4 lg:px-4 xl:px-6">
         <Link to="/" className="group flex shrink-0 items-center space-x-2 ">
           <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary via-primary to-primary/90 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105">
             ASC
@@ -256,7 +253,7 @@ export default function Navbar() {
                 <path d="M7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm0 4a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
               </svg>
               Book Venue
-              {indicator(isActive("/venue-booking"))}
+              {indicator(isVenueActive)}
             </Link>
           </li>
           {!authenticated && (
@@ -311,10 +308,10 @@ export default function Navbar() {
                     : "hover:bg-base-200/80 hover:shadow-sm"
                 }`}
               >
-                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-primary text-xs font-bold text-white shadow-sm shadow-primary/20 xl:h-8 xl:w-8">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-primary text-xs font-bold text-white shadow-sm shadow-primary/20 xl:h-8 xl:w-8">
                   {userEmail ? userEmail[0].toUpperCase() : "?"}
                 </div>
-                <span className="hidden xl:block max-w-[180px] truncate text-sm font-medium text-base-content">
+                <span className="hidden xl:block max-w-45 truncate text-sm font-medium text-base-content">
                   {userEmail}
                 </span>
                 <svg

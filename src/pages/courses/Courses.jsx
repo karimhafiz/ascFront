@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import CourseCard from "../../components/courses/CourseCard";
-import { isAdmin, isModerator } from "../../auth/auth";
 import { useCourses } from "../../hooks/useCourses";
 import { Spinner } from "../../components/ui";
 
@@ -9,7 +7,6 @@ const CATEGORIES = ["All", "Language", "Religious", "Academic", "Arts", "Other"]
 
 export default function CoursesPage() {
   const { data: courses = [], isLoading } = useCourses();
-  const canManage = isAdmin() || isModerator();
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
 
@@ -46,27 +43,6 @@ export default function CoursesPage() {
       </div>
 
       <div className="container mx-auto p-6">
-        {/* Manage bar */}
-        {canManage && (
-          <div className="flex items-center justify-between mb-6 glass-card px-6 py-4 rounded-2xl border border-white/30 shadow-md">
-            <p className="text-sm text-base-content/70 font-medium">Manage Courses</p>
-            <Link
-              to="/courses/new"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-medium shadow transition-all"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              Create Course
-            </Link>
-          </div>
-        )}
-
         {/* Search + filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <div className="relative flex-1">
