@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, useParams } from "react-router-dom";
+import { slugToId } from "../../util/util";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, GlassCard, PageContainer, Spinner } from "../../components/ui";
 import { fetchWithAuth } from "../../auth/auth";
@@ -22,17 +23,20 @@ const INITIAL_FORM = {
 };
 
 export default function VenueFormPage() {
-  const { venueId } = useParams();
+  const { venueSlug } = useParams();
+  const venueId = venueSlug ? slugToId(venueSlug) : null;
   const isEditing = !!venueId;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState(INITIAL_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [loaded, setLoaded] = useState(false);
 
-  const { isLoading, error: loadError } = useQuery({
+  const {
+    data: venue,
+    isLoading,
+    error: loadError,
+  } = useQuery({
     queryKey: ["venue", venueId],
     queryFn: async () => {
       const response = await fetch(`${API}venues/${venueId}`);
@@ -41,25 +45,29 @@ export default function VenueFormPage() {
       return data;
     },
     enabled: isEditing,
-    onSuccess: (data) => {
-      if (!loaded) {
-        setFormData({
-          name: data.name || "",
-          description: data.description || "",
-          street: data.street || "",
-          city: data.city || "",
-          postCode: data.postCode || "",
-          capacity: data.capacity ?? "",
-          pricePerHour: data.pricePerHour ?? "",
-          amenities: data.amenities?.join(", ") || "",
-          rules: data.rules || "",
-          cancellationPolicy: data.cancellationPolicy || "",
-          isActive: data.isActive ?? true,
-        });
-        setLoaded(true);
-      }
-    },
   });
+
+  const venueToForm = (v) => ({
+    name: v.name || "",
+    description: v.description || "",
+    street: v.street || "",
+    city: v.city || "",
+    postCode: v.postCode || "",
+    capacity: v.capacity ?? "",
+    pricePerHour: v.pricePerHour ?? "",
+    amenities: v.amenities?.join(", ") || "",
+    rules: v.rules || "",
+    cancellationPolicy: v.cancellationPolicy || "",
+    isActive: v.isActive ?? true,
+  });
+
+  const [formData, setFormData] = useState(() =>
+    isEditing && venue ? venueToForm(venue) : INITIAL_FORM
+  );
+
+  useEffect(() => {
+    if (venue) setFormData(venueToForm(venue));
+  }, [venue]);
 
   const set = (field) => (e) =>
     setFormData((prev) => ({

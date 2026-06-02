@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { clearAuth, getAuthToken, isAdmin, isAuthenticated, parseJwt } from "../../auth/auth";
+import { useAuthState } from "../../auth/useAuthState";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,6 +12,8 @@ export default function Navbar() {
   const userCloseTimer = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useAuthState(); // re-render when token is set/cleared
 
   const authenticated = isAuthenticated();
   const admin = isAdmin();

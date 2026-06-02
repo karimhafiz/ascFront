@@ -1,11 +1,14 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, GlassCard, PageContainer, Spinner } from "../../components/ui";
 import { fetchWithAuth, isAuthenticated } from "../../auth/auth";
+import { slugToId, formatDate } from "../../util/util";
 
 const API = import.meta.env.VITE_DEV_URI;
+
+const minDate = formatDate(new Date());
 
 const INITIAL_FORM = {
   numberOfAttendees: "",
@@ -14,15 +17,14 @@ const INITIAL_FORM = {
 };
 
 export default function VenueBookingDetail() {
-  const { venueId } = useParams();
+  const { venueSlug } = useParams();
+  const venueId = slugToId(venueSlug);
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(minDate);
   const [selectedSlotId, setSelectedSlotId] = useState("");
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  const minDate = useMemo(() => new Date().toISOString().split("T")[0], []);
 
   const {
     data: venue,
@@ -60,7 +62,6 @@ export default function VenueBookingDetail() {
   });
 
   const selectedSlot = slots.find((slot) => slot._id === selectedSlotId);
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     setErrorMessage("");
@@ -230,8 +231,7 @@ export default function VenueBookingDetail() {
                   Choose a slot and continue to checkout
                 </h2>
                 <p className="text-base leading-7 text-base-content/70">
-                  Each slot is a 4-hour booking window. You will be redirected to secure Stripe
-                  checkout after submitting.
+                  Select an available time slot and continue to secure Stripe checkout.
                 </p>
               </div>
 
@@ -253,6 +253,46 @@ export default function VenueBookingDetail() {
                     required
                   />
                 </div>
+
+                {venue?.weeklySchedule?.length > 0 && (
+                  <div>
+                    <label className="glass-label">Typical Availability</label>
+                    <div className="rounded-2xl border border-base-300 bg-base-100 px-4 py-3 space-y-1.5">
+                      {[
+                        "monday",
+                        "tuesday",
+                        "wednesday",
+                        "thursday",
+                        "friday",
+                        "saturday",
+                        "sunday",
+                      ]
+                        .filter((day) => venue.weeklySchedule.some((s) => s.dayOfWeek === day))
+                        .map((day) => (
+                          <div key={day} className="flex items-start gap-3 text-sm">
+                            <span className="w-24 shrink-0 font-semibold capitalize text-base-content">
+                              {day}
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {venue.weeklySchedule
+                                .filter((s) => s.dayOfWeek === day)
+                                .map((s, i) => (
+                                  <span
+                                    key={i}
+                                    className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary"
+                                  >
+                                    {s.startTime} – {s.endTime}
+                                  </span>
+                                ))}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                    <p className="mt-1.5 text-xs text-base-content/50">
+                      Actual availability depends on the date selected.
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <label className="glass-label">Available Slots *</label>
@@ -276,27 +316,33 @@ export default function VenueBookingDetail() {
                     <div className="grid gap-3">
                       {slots.map((slot) => {
                         const checked = selectedSlotId === slot._id;
+                        const booked = !slot.isAvailable;
                         return (
                           <label
                             key={slot._id}
-                            className={`flex cursor-pointer items-center justify-between rounded-2xl border px-4 py-4 transition-all ${
-                              checked
-                                ? "border-primary bg-primary/6 shadow-sm shadow-primary/10"
-                                : "border-base-300 bg-white hover:border-primary/20"
+                            className={`flex items-center justify-between rounded-2xl border px-4 py-4 transition-all ${
+                              booked
+                                ? "cursor-not-allowed border-base-300 bg-base-200 opacity-60"
+                                : checked
+                                  ? "cursor-pointer border-primary bg-primary/6 shadow-sm shadow-primary/10"
+                                  : "cursor-pointer border-base-300 bg-white hover:border-primary/20"
                             }`}
                           >
                             <div>
-                              <p className="text-base font-semibold text-base-content">
-                                {slot.startTime} - {slot.endTime}
+                              <p
+                                className={`text-base font-semibold ${booked ? "text-base-content/50" : "text-base-content"}`}
+                              >
+                                {slot.startTime} – {slot.endTime}
                               </p>
-                              <p className="text-sm text-base-content/60">4-hour booking window</p>
+                              {booked && <p className="text-xs text-red-500">Unavailable</p>}
                             </div>
                             <input
                               type="radio"
                               name="slot"
                               className="radio radio-primary"
                               checked={checked}
-                              onChange={() => setSelectedSlotId(slot._id)}
+                              disabled={booked}
+                              onChange={() => !booked && setSelectedSlotId(slot._id)}
                             />
                           </label>
                         );

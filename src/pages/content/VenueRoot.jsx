@@ -3,7 +3,7 @@ import { Outlet, useParams } from "react-router-dom";
 import ManageHeader from "../../components/common/ManageHeader";
 
 export default function VenueRoot() {
-  const { venueId } = useParams();
+  const { venueSlug } = useParams();
   return (
     <>
       <ManageHeader
@@ -12,7 +12,7 @@ export default function VenueRoot() {
         hideOnPaths={/\/venues\/(new|[^/]+\/edit)/}
         createTo="/venues/new"
         createLabel="Create Venue"
-        editTo={venueId ? `/venues/${venueId}/edit` : undefined}
+        editTo={venueSlug ? `/venues/${venueSlug}/edit` : undefined}
         editLabel="Edit Venue"
       />
       <Outlet />

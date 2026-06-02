@@ -3,10 +3,14 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { GlassCard, PageContainer, Spinner } from "../../components/ui";
+import { toSlug } from "../../util/util";
+import { isAdmin, isModerator } from "../../auth/auth";
 
 const API = import.meta.env.VITE_DEV_URI;
 
 export default function VenueBooking() {
+  const canManage = isAdmin() || isModerator();
+
   const {
     data: venues = [],
     isLoading,
@@ -104,12 +108,22 @@ export default function VenueBooking() {
                   </div>
                 )}
 
-                <Link
-                  to={`/venues/book/${venue._id}`}
-                  className="btn btn-primary mt-auto w-full rounded-2xl"
-                >
-                  Book this Venue
-                </Link>
+                <div className="mt-auto flex flex-col gap-2">
+                  <Link
+                    to={`/venues/book/${toSlug(venue.name, venue._id)}`}
+                    className="btn btn-primary w-full rounded-2xl"
+                  >
+                    Book this Venue
+                  </Link>
+                  {canManage && (
+                    <Link
+                      to={`/venues/${toSlug(venue.name, venue._id)}/slots`}
+                      className="btn btn-ghost w-full rounded-2xl border border-base-300 text-sm"
+                    >
+                      Manage Slots
+                    </Link>
+                  )}
+                </div>
               </GlassCard>
             ))}
           </div>

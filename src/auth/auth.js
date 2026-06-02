@@ -5,6 +5,18 @@ let _accessToken = null;
 let _expiration = null;
 let _user = null; // { id, name, email, role }
 
+// ── Subscribers — notified whenever auth state changes ──
+const _subscribers = new Set();
+
+export function subscribeToAuth(fn) {
+  _subscribers.add(fn);
+  return () => _subscribers.delete(fn);
+}
+
+function _notify() {
+  _subscribers.forEach((fn) => fn());
+}
+
 export function getAuthToken() {
   return _accessToken;
 }
@@ -22,12 +34,14 @@ export function setAuth(accessToken, user) {
     _expiration = null;
   }
   _user = user || null;
+  _notify();
 }
 
 export function clearAuth() {
   _accessToken = null;
   _expiration = null;
   _user = null;
+  _notify();
 }
 
 // ── Refresh token flow (cookie-based) ──
@@ -69,8 +83,6 @@ export async function refreshAccessToken() {
 
   return _refreshPromise;
 }
-
-// ── Token utilities ──
 
 export function parseJwt(token) {
   if (!token) return null;

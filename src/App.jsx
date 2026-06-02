@@ -14,7 +14,9 @@ const Contact = lazy(() => import("./pages/content/Contact"));
 const VenueBooking = lazy(() => import("./pages/content/VenueBooking"));
 const VenueBookingDetail = lazy(() => import("./pages/content/VenueBookingDetail"));
 const VenueFormPage = lazy(() => import("./pages/content/VenueFormPage"));
+const VenueSlotManagement = lazy(() => import("./pages/content/VenueSlotManagement"));
 const VenueRoot = lazy(() => import("./pages/content/VenueRoot"));
+const VenueBookingConfirmation = lazy(() => import("./pages/venues/VenueBookingConfirmation"));
 const EventPage = lazy(() => import("./pages/events/Events"));
 const EventDetails = lazy(() => import("./pages/events/EventDetails"));
 const NewEvent = lazy(() => import("./pages/events/NewEvent"));
@@ -53,6 +55,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: w(Home) },
       { path: "cancel", element: w(CancelPage) },
+      { path: "venue-booking-confirmation", element: w(VenueBookingConfirmation) },
       { path: "team-confirmation", element: w(TeamConfirmationPage) },
       { path: "order-confirmation", element: w(OrderConfirmation) },
       { path: "about", element: w(About) },
@@ -62,12 +65,13 @@ const router = createBrowserRouter([
         element: w(VenueRoot),
         children: [
           { path: "booking", element: w(VenueBooking) },
-          { path: "book/:venueId", element: w(VenueBookingDetail) },
+          { path: "book/:venueSlug", element: w(VenueBookingDetail) },
           {
             element: <ModeratorRoute />,
             children: [
               { path: "new", element: w(VenueFormPage) },
-              { path: ":venueId/edit", element: w(VenueFormPage) },
+              { path: ":venueSlug/edit", element: w(VenueFormPage) },
+              { path: ":venueSlug/slots", element: w(VenueSlotManagement) },
             ],
           },
         ],
