@@ -31,7 +31,7 @@ export default function CourseConfirmation() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-base-content">
-            {isReactivated ? "Subscription Reactivated!" : "Enrollment Confirmed!"}
+            {isReactivated ? "Enrollment Reactivated!" : "Enrollment Confirmed!"}
           </h1>
           <p className="text-base-content/70 mt-2">
             {isReactivated

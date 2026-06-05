@@ -23,10 +23,10 @@ function formatCurrency(amount) {
 
 const INTERVAL_ADJ = { month: "Monthly", year: "Yearly", week: "Weekly" };
 
-const TABS = ["Orders", "Teams", "Subscriptions"];
+const TABS = ["Tickets", "Teams", "Enrollments", "Venues"];
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState("Orders");
+  const [activeTab, setActiveTab] = useState("Tickets");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export default function ProfilePage() {
 
   // Group tickets by paymentId so bulk purchases show as one order
   // Hooks must be called before any early returns
-  const orders = useMemo(() => {
+  const Tickets = useMemo(() => {
     if (!data) return [];
     const groups = {};
     for (const ticket of data.tickets) {
@@ -90,7 +90,7 @@ export default function ProfilePage() {
       </div>
     );
 
-  const { user, teams, enrollments = [], eventSubscriptions = [] } = data;
+  const { user, teams, enrollments = [], eventSubscriptions = [], venueBookings = [] } = data;
   const initials = user.name
     ? user.name
         .split(" ")
@@ -125,8 +125,8 @@ export default function ProfilePage() {
             </div>
             <div className="flex gap-4 mt-1 text-sm text-base-content/50">
               <span>
-                <strong className="text-base-content">{orders.length}</strong> order
-                {orders.length !== 1 ? "s" : ""}
+                <strong className="text-base-content">{Tickets.length}</strong> order
+                {Tickets.length !== 1 ? "s" : ""}
               </span>
               <span>·</span>
               <span>
@@ -138,7 +138,12 @@ export default function ProfilePage() {
                 <strong className="text-base-content">
                   {enrollments.length + eventSubscriptions.length}
                 </strong>{" "}
-                sub{enrollments.length + eventSubscriptions.length !== 1 ? "s" : ""}
+                enrollment{enrollments.length + eventSubscriptions.length !== 1 ? "s" : ""}
+              </span>
+              <span>·</span>
+              <span>
+                <strong className="text-base-content">{venueBookings.length}</strong> venue
+                {venueBookings.length !== 1 ? "s" : ""}
               </span>
             </div>
           </div>
@@ -165,11 +170,13 @@ export default function ProfilePage() {
                       : "bg-base-200 text-base-content/50"
                   }`}
                 >
-                  {tab === "Orders"
-                    ? orders.length
+                  {tab === "Tickets"
+                    ? Tickets.length
                     : tab === "Teams"
                       ? teams.length
-                      : enrollments.length + eventSubscriptions.length}
+                      : tab === "Venues"
+                        ? venueBookings.length
+                        : enrollments.length + eventSubscriptions.length}
                 </span>
               </button>
             ))}
@@ -178,8 +185,8 @@ export default function ProfilePage() {
 
         {/* ── Tab Content ── */}
         <div className="pb-16">
-          {activeTab === "Orders" &&
-            (orders.length === 0 ? (
+          {activeTab === "Tickets" &&
+            (Tickets.length === 0 ? (
               <div className="text-center py-20">
                 <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-4">
                   <svg
@@ -196,14 +203,14 @@ export default function ProfilePage() {
                     />
                   </svg>
                 </div>
-                <p className="text-base-content/50 mb-4">No ticket orders yet.</p>
+                <p className="text-base-content/50 mb-4">No ticket Tickets yet.</p>
                 <Button variant="primary" size="sm" to="/events/asc">
                   Browse events
                 </Button>
               </div>
             ) : (
               <div className="space-y-4">
-                {orders.map((group) => (
+                {Tickets.map((group) => (
                   <OrderRow key={group[0].paymentId || group[0]._id} tickets={group} />
                 ))}
               </div>
@@ -237,7 +244,7 @@ export default function ProfilePage() {
               </div>
             ))}
 
-          {activeTab === "Subscriptions" &&
+          {activeTab === "Enrollments" &&
             (enrollments.length === 0 && eventSubscriptions.length === 0 ? (
               <div className="text-center py-20">
                 <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-4">
@@ -255,7 +262,7 @@ export default function ProfilePage() {
                     />
                   </svg>
                 </div>
-                <p className="text-base-content/50 mb-4">No subscriptions yet.</p>
+                <p className="text-base-content/50 mb-4">No enrollments yet.</p>
                 <div className="flex gap-3 justify-center">
                   <Button variant="primary" size="sm" to="/events/asc">
                     Browse events
@@ -295,6 +302,36 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 )}
+              </div>
+            ))}
+          {activeTab === "Venues" &&
+            (venueBookings.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-4">
+                  <svg
+                    className="w-7 h-7 text-base-content/30"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                    />
+                  </svg>
+                </div>
+                <p className="text-base-content/50 mb-4">No venue bookings yet.</p>
+                <Button variant="primary" size="sm" to="/venues">
+                  Browse venues
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {venueBookings.map((booking) => (
+                  <VenueBookingRow key={booking._id} booking={booking} />
+                ))}
               </div>
             ))}
         </div>
@@ -704,7 +741,7 @@ function EnrollmentRow({ enrollment }) {
             <p className="text-xs text-base-content/50 mt-1">{course.schedule}</p>
           )}
           <p className="text-xs text-base-content/50 mt-1 font-mono">
-            {enrollment._id.slice(-8).toUpperCase()}
+            {enrollment.enrollmentCode ?? enrollment._id.slice(-8).toUpperCase()}
             {" · "}
             {participants.length} participant{participants.length !== 1 ? "s" : ""}
             {isSubscription && ` · ${INTERVAL_ADJ[course.billingInterval] || "Monthly"}`}
@@ -750,7 +787,7 @@ function EnrollmentRow({ enrollment }) {
         </div>
       </div>
 
-      {/* Subscription info bar */}
+      {/* Enrollment info bar */}
       {isSubscription && (
         <div
           className={`px-5 py-2.5 text-xs flex items-center justify-between border-t ${cancelDone ? "bg-orange-50 border-orange-100" : "bg-blue-50 border-blue-100"}`}
@@ -793,7 +830,7 @@ function EnrollmentRow({ enrollment }) {
               disabled={cancelling}
               className="text-xs text-red-500 hover:text-red-700 font-medium hover:underline transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
-              {cancelling ? "Cancelling..." : "Cancel subscription"}
+              {cancelling ? "Cancelling..." : "Cancel enrollment"}
             </button>
           )}
         </div>
@@ -1130,6 +1167,180 @@ function EnrollmentRow({ enrollment }) {
   );
 }
 
+const BOOKING_STATUS_STYLES = {
+  confirmed: "bg-green-50 text-green-700 border-green-200",
+  pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  completed: "bg-blue-50 text-blue-600 border-blue-200",
+  cancelled: "bg-red-50 text-red-600 border-red-200",
+};
+
+function VenueBookingRow({ booking }) {
+  const [expanded, setExpanded] = useState(false);
+  const slot = booking.slot;
+  const venue = booking.venue;
+  const status = booking.status;
+
+  const slotDateStr = slot?.date
+    ? new Date(slot.date).toLocaleDateString("en-GB", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "—";
+
+  return (
+    <div className="bg-white rounded-2xl border border-base-300 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+      <div className="flex">
+        {/* Date block */}
+        <div className="w-16 flex-shrink-0 bg-gradient-to-b from-primary to-primary/70 flex flex-col items-center justify-center text-white py-4">
+          <span className="text-xs font-semibold uppercase opacity-80">
+            {slot?.date ? new Date(slot.date).toLocaleString("en-GB", { month: "short" }) : "—"}
+          </span>
+          <span className="text-2xl font-bold leading-tight">
+            {slot?.date ? new Date(slot.date).getDate() : "—"}
+          </span>
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 px-5 py-4 flex flex-col justify-center min-w-0">
+          <p className="font-semibold text-base-content truncate text-base">
+            {venue?.name ?? "Venue"}
+          </p>
+          <p className="text-sm text-base-content/50 mt-0.5">
+            {slotDateStr}
+            {slot?.startTime && slot?.endTime && (
+              <span>
+                {" "}
+                · {slot.startTime}–{slot.endTime}
+              </span>
+            )}
+            {venue?.city && <span> · {venue.city}</span>}
+          </p>
+          {booking.eventName && booking.eventName !== "N/A" && (
+            <p className="text-xs text-base-content/50 mt-1">{booking.eventName}</p>
+          )}
+          <p className="text-xs text-base-content/50 mt-1 font-mono">
+            {booking.bookingCode ?? `#${booking._id.slice(-8).toUpperCase()}`} ·{" "}
+            {booking.numberOfAttendees} attendee{booking.numberOfAttendees !== 1 ? "s" : ""}
+          </p>
+        </div>
+
+        {/* Price + status */}
+        <div className="flex flex-col items-end justify-center px-5 gap-2 flex-shrink-0">
+          <span className="text-sm font-semibold text-base-content">
+            {formatCurrency(booking.totalPrice)}
+          </span>
+          <span
+            className={`text-xs font-medium px-2.5 py-0.5 rounded-full border capitalize ${
+              BOOKING_STATUS_STYLES[status] ?? "bg-base-200 text-base-content/50 border-base-300"
+            }`}
+          >
+            {status}
+          </span>
+        </div>
+      </div>
+
+      {/* Expand toggle */}
+      <div className="border-t border-base-100 px-5 py-2.5">
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="flex items-center gap-1.5 text-xs font-medium text-base-content/70 hover:text-base-content transition-colors cursor-pointer"
+        >
+          <svg
+            className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+          {expanded ? "Hide details" : "View details"}
+        </button>
+      </div>
+
+      {/* Expanded details */}
+      {expanded && (
+        <div className="px-5 pb-5 space-y-3">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+            <div>
+              <p className="text-xs text-base-content/40 uppercase tracking-wide font-medium mb-0.5">
+                Venue
+              </p>
+              <p className="text-base-content font-medium">{venue?.name ?? "—"}</p>
+              {(venue?.street || venue?.city) && (
+                <p className="text-xs text-base-content/50">
+                  {[venue.street, venue.city].filter(Boolean).join(", ")}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-xs text-base-content/40 uppercase tracking-wide font-medium mb-0.5">
+                Date &amp; Time
+              </p>
+              <p className="text-base-content">{slotDateStr}</p>
+              {slot?.startTime && slot?.endTime && (
+                <p className="text-xs text-base-content/50">
+                  {slot.startTime} – {slot.endTime}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-xs text-base-content/40 uppercase tracking-wide font-medium mb-0.5">
+                Attendees
+              </p>
+              <p className="text-base-content">{booking.numberOfAttendees}</p>
+            </div>
+            <div>
+              <p className="text-xs text-base-content/40 uppercase tracking-wide font-medium mb-0.5">
+                Total Paid
+              </p>
+              <p className="text-base-content font-medium">{formatCurrency(booking.totalPrice)}</p>
+            </div>
+            {booking.eventName && booking.eventName !== "N/A" && (
+              <div>
+                <p className="text-xs text-base-content/40 uppercase tracking-wide font-medium mb-0.5">
+                  Event Name
+                </p>
+                <p className="text-base-content">{booking.eventName}</p>
+              </div>
+            )}
+            {booking.eventDescription && (
+              <div className="col-span-2">
+                <p className="text-xs text-base-content/40 uppercase tracking-wide font-medium mb-0.5">
+                  Description
+                </p>
+                <p className="text-base-content/70 text-xs">{booking.eventDescription}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-xs text-base-content/40 uppercase tracking-wide font-medium mb-0.5">
+                Status
+              </p>
+              <span
+                className={`text-xs font-medium px-2 py-0.5 rounded-full border capitalize ${
+                  BOOKING_STATUS_STYLES[status] ??
+                  "bg-base-200 text-base-content/50 border-base-300"
+                }`}
+              >
+                {status}
+              </span>
+            </div>
+            <div>
+              <p className="text-xs text-base-content/40 uppercase tracking-wide font-medium mb-0.5">
+                Reference
+              </p>
+              <p className="font-mono text-xs text-base-content/70">
+                {booking.bookingCode ?? `#${booking._id.slice(-8).toUpperCase()}`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EventSubscriptionRow({ subscription, onAction }) {
   const [cancelling, setCancelling] = useState(false);
   const [cancelDone, setCancelDone] = useState(subscription.subscriptionStatus === "cancelled");
@@ -1264,7 +1475,7 @@ function EventSubscriptionRow({ subscription, onAction }) {
         </div>
       </div>
 
-      {/* Subscription info bar */}
+      {/* Enrollment info bar */}
       <div
         className={`px-5 py-2.5 text-xs flex items-center justify-between border-t ${cancelDone ? "bg-orange-50 border-orange-100" : "bg-blue-50 border-blue-100"}`}
       >
@@ -1282,7 +1493,7 @@ function EventSubscriptionRow({ subscription, onAction }) {
             </span>
           ) : (
             <span className="text-blue-600">
-              {INTERVAL_ADJ[interval] || "Monthly"} subscription
+              {INTERVAL_ADJ[interval] || "Monthly"} enrollment
               {periodEnd && (
                 <span className="text-blue-400 ml-1">
                   · renews{" "}

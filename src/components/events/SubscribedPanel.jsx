@@ -11,7 +11,7 @@ const STATUS_STYLES = {
 };
 
 const STATUS_LABELS = {
-  active: "Active Subscription",
+  active: "Active Enrollment",
   past_due: "Past Due",
 };
 
@@ -84,7 +84,7 @@ export default function SubscribedPanel({ event, subscription, onChanged }) {
         </svg>
       </div>
 
-      <h2 className="text-lg font-bold text-base-content">You're Subscribed</h2>
+      <h2 className="text-lg font-bold text-base-content">You're Enrolled</h2>
 
       <span
         className={`text-xs font-semibold px-3 py-1 rounded-full ${
@@ -98,7 +98,7 @@ export default function SubscribedPanel({ event, subscription, onChanged }) {
 
       {subscription.subscriptionId && isCancelled && (
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 text-xs text-orange-700 w-full">
-          <p className="font-semibold">Subscription cancelled</p>
+          <p className="font-semibold">Enrollment cancelled</p>
           <p className="mt-1">
             Access until{" "}
             {subscription.currentPeriodEnd ? (
@@ -115,7 +115,7 @@ export default function SubscribedPanel({ event, subscription, onChanged }) {
       {subscription.subscriptionId && !isCancelled && (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700 w-full space-y-1">
           <p className="font-semibold">
-            {INTERVAL_ADJ[event.subscriptionInterval] || "Monthly"} Subscription
+            {INTERVAL_ADJ[event.subscriptionInterval] || "Monthly"} Enrollment
           </p>
           <p>
             £{event.ticketPrice.toFixed(2)} / {interval}
@@ -136,7 +136,7 @@ export default function SubscribedPanel({ event, subscription, onChanged }) {
                 disabled={reactivatingSubscription}
                 className="text-sm w-full"
               >
-                {reactivatingSubscription ? "Reactivating..." : "Reactivate Subscription"}
+                {reactivatingSubscription ? "Reactivating..." : "Reactivate Enrollment"}
               </Button>
             ) : (
               <Button
@@ -145,7 +145,7 @@ export default function SubscribedPanel({ event, subscription, onChanged }) {
                 disabled={cancellingSubscription}
                 className="text-sm w-full"
               >
-                {cancellingSubscription ? "Cancelling..." : "Cancel Subscription"}
+                {cancellingSubscription ? "Cancelling..." : "Cancel Enrollment"}
               </Button>
             )}
             {subscriptionError && (

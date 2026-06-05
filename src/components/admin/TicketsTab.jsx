@@ -273,9 +273,7 @@ export default function TicketsTab({ tickets }) {
                                   {formatDate(first.createdAt)}
                                 </td>
                                 <td className="px-3 sm:px-4 py-3 font-mono text-[11px] text-base-content/40 hidden md:table-cell">
-                                  {first.paymentId
-                                    ? "\u2026" + first.paymentId.slice(-8)
-                                    : "\u2014"}
+                                  {first.ticketCode ?? "\u2014"}
                                 </td>
                                 <td className="px-3 sm:px-4 py-3">
                                   <div className="flex items-center justify-center">
@@ -391,7 +389,7 @@ export default function TicketsTab({ tickets }) {
                             {formatDate(first.createdAt)}
                           </td>
                           <td className="px-3 sm:px-4 py-3 font-mono text-[11px] text-base-content/40 hidden lg:table-cell">
-                            {first.paymentId ? "\u2026" + first.paymentId.slice(-8) : "\u2014"}
+                            {first.ticketCode ?? "\u2014"}
                           </td>
                           <td className="px-3 sm:px-4 py-3">
                             <div className="flex items-center justify-center gap-1">

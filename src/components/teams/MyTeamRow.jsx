@@ -64,6 +64,9 @@ export default function MyTeamRow({ team, onTeamUpdated, readOnly = false }) {
 
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-base-content truncate">{team.name}</p>
+            {team.teamCode && (
+              <p className="font-mono text-[11px] text-base-content/40">{team.teamCode}</p>
+            )}
             {team.event?.title && (
               <p className="text-sm text-base-content/60 truncate mt-0.5">
                 <Link to={`/events/${team.event._id}`} className="hover:underline text-info">

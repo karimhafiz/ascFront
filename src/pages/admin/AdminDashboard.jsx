@@ -21,10 +21,11 @@ import RevenueTab from "../../components/admin/RevenueTab";
 import TeamsTab from "../../components/admin/TeamsTab";
 import CoursesTab from "../../components/admin/CoursesTab";
 import UsersTab from "../../components/admin/UsersTab";
+import VenuesTab from "../../components/admin/VenuesTab";
 import { API } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
 
-const TABS = ["Tickets", "Revenue", "Teams", "Courses", "Users"];
+const TABS = ["Tickets", "Revenue", "Teams", "Courses", "Venues", "Users"];
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("Tickets");
@@ -179,6 +180,16 @@ export default function AdminDashboard() {
                       {data.enrollments.length}
                     </span>
                   )}
+                  {tab === "Venues" && data?.venueBookings && (
+                    <span
+                      className={
+                        "ml-1.5 text-xs px-1.5 py-0.5 rounded-full hidden sm:inline " +
+                        (activeTab === tab ? "bg-white/20" : "bg-base-200 text-base-content/50")
+                      }
+                    >
+                      {data.venueBookings.length}
+                    </span>
+                  )}
                   {tab === "Users" && data?.users && (
                     <span
                       className={
@@ -203,6 +214,7 @@ export default function AdminDashboard() {
           {activeTab === "Courses" && (
             <CoursesTab enrollments={data.enrollments ?? []} courses={data.courses ?? []} />
           )}
+          {activeTab === "Venues" && <VenuesTab venueBookings={data.venueBookings ?? []} />}
           {activeTab === "Users" && isAdmin && (
             <UsersTab
               users={data.users}

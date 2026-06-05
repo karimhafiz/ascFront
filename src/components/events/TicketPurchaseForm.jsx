@@ -107,7 +107,7 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup,
           {event.isTournament
             ? "Team Registration"
             : isSubscription
-              ? "Subscribe"
+              ? "Enroll"
               : "Purchase Tickets"}
         </h2>
       )}
@@ -281,7 +281,7 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup,
                 ) : event.isTournament ? (
                   "Register & Pay for Team"
                 ) : isSubscription ? (
-                  `Subscribe £${event.ticketPrice.toFixed(2)}/${interval}`
+                  `Enroll £${event.ticketPrice.toFixed(2)}/${interval}`
                 ) : (
                   "Buy Tickets"
                 )}

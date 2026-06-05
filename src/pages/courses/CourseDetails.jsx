@@ -177,7 +177,7 @@ export default function CourseDetails() {
                     >
                       {course.price > 0
                         ? course.isSubscription
-                          ? `Subscribe — £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "mo"}`
+                          ? `Enroll — £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "mo"}`
                           : `Enroll — £${course.price}`
                         : "Enroll for Free"}
                     </Button>
@@ -275,7 +275,7 @@ export default function CourseDetails() {
           >
             {course.price > 0
               ? course.isSubscription
-                ? `Subscribe — £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "month"}`
+                ? `Enroll — £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "month"}`
                 : `Enroll — £${course.price}`
               : "Enroll for Free"}
           </button>
@@ -295,7 +295,7 @@ export default function CourseDetails() {
           >
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-base-content">
-                {course.isSubscription ? "Subscribe" : "Enroll"}
+                {course.isSubscription ? "Enroll" : "Enroll"}
               </h2>
               <button
                 onClick={() => setShowEnrollModal(false)}
@@ -496,7 +496,7 @@ export default function CourseDetails() {
                     </span>
                   ) : course.price > 0 ? (
                     course.isSubscription ? (
-                      `Subscribe £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "mo"}`
+                      `Enroll £${course.price}/${INTERVAL_LABELS[course.billingInterval] || "mo"}`
                     ) : multiMode ? (
                       `Pay £${(course.price * participants.filter((p) => p.name.trim()).length).toFixed(2)}`
                     ) : (

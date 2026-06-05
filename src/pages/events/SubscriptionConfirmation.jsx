@@ -32,17 +32,17 @@ export default function SubscriptionConfirmation() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-base-content">
-            {isReactivated ? "Subscription Reactivated!" : "Subscription Confirmed!"}
+            {isReactivated ? "Enrollment Reactivated!" : "Enrollment Confirmed!"}
           </h1>
           <p className="text-base-content/70 mt-2">
             {isReactivated
-              ? "Your subscription is no longer cancelled. You're all set."
-              : "Payment received. Your subscription is now active."}
+              ? "Your enrollment is no longer cancelled. You're all set."
+              : "Payment received. Your enrollment is now active."}
           </p>
           {!isLoading && event?.isReoccurring && !isReactivated && (
             <p className="text-base-content/50 text-sm mt-1">
-              Your {INTERVAL_ADJ[event.subscriptionInterval] || "monthly"} subscription is now
-              active. Manage it anytime from your profile.
+              Your {INTERVAL_ADJ[event.subscriptionInterval] || "monthly"} enrollment is now active.
+              Manage it anytime from your profile.
             </p>
           )}
         </div>
@@ -87,11 +87,11 @@ export default function SubscriptionConfirmation() {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-base-content/50 mt-0.5">•</span> You can attend all upcoming
-              sessions while your subscription is active
+              sessions while your enrollment is active
             </li>
             <li className="flex items-start gap-2">
               <span className="text-base-content/50 mt-0.5">•</span> Manage or cancel your
-              subscription from your profile anytime
+              enrollment from your profile anytime
             </li>
           </ul>
         </div>

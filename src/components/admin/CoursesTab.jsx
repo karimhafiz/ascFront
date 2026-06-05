@@ -77,6 +77,9 @@ const EnrollmentRow = ({ e }) => (
     <td className="px-3 sm:px-4 py-3 text-base-content/50 hidden sm:table-cell">
       {formatDate(e.createdAt)}
     </td>
+    <td className="px-3 sm:px-4 py-3 font-mono text-[11px] text-base-content/40 hidden lg:table-cell">
+      {e.enrollmentCode ?? "\u2014"}
+    </td>
     <td className="px-3 sm:px-4 py-3 text-center">
       <PrintBtn enrollment={e} />
     </td>
@@ -346,6 +349,9 @@ export default function CoursesTab({ enrollments, courses }) {
                               <th className="px-3 sm:px-4 py-2 text-xs font-medium text-base-content/50 hidden sm:table-cell">
                                 Date
                               </th>
+                              <th className="px-3 sm:px-4 py-2 text-xs font-medium text-base-content/50 hidden lg:table-cell">
+                                Ref
+                              </th>
                               <th className="px-3 sm:px-4 py-2 text-xs font-medium text-base-content/50 text-center">
                                 Actions
                               </th>
@@ -399,6 +405,9 @@ export default function CoursesTab({ enrollments, courses }) {
                         sort={enrollSort}
                         onSort={setEnrollSort}
                       />
+                      <th className="px-3 sm:px-4 py-3 font-semibold text-base-content hidden lg:table-cell">
+                        Ref
+                      </th>
                       <th className="px-3 sm:px-4 py-3 font-semibold text-base-content text-center">
                         Actions
                       </th>
@@ -407,7 +416,7 @@ export default function CoursesTab({ enrollments, courses }) {
                   <tbody className="divide-y divide-base-100">
                     {enrollPg.paged.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-10 text-base-content/50">
+                        <td colSpan={7} className="text-center py-10 text-base-content/50">
                           No enrollments found
                         </td>
                       </tr>
@@ -433,6 +442,9 @@ export default function CoursesTab({ enrollments, courses }) {
                           </td>
                           <td className="px-3 sm:px-4 py-3 text-base-content/50">
                             {formatDate(e.createdAt)}
+                          </td>
+                          <td className="px-3 sm:px-4 py-3 font-mono text-[11px] text-base-content/40 hidden lg:table-cell">
+                            {e.enrollmentCode ?? "\u2014"}
                           </td>
                           <td className="px-3 sm:px-4 py-3 text-center">
                             <PrintBtn enrollment={e} />

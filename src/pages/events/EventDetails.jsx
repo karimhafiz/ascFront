@@ -132,7 +132,7 @@ export default function EventDetails() {
         onClick={() => setShowTicketModal(true)}
         className="whitespace-nowrap hidden md:inline-flex"
       >
-        {event.isTournament ? "Register Team" : isSubscription ? "Subscribe" : "Buy Tickets"}
+        {event.isTournament ? "Register Team" : isSubscription ? "Enroll" : "Buy Tickets"}
       </Button>
     );
   };
@@ -265,7 +265,7 @@ export default function EventDetails() {
             onClick={() => setShowTicketModal(true)}
             className="md:hidden fixed bottom-6 left-4 right-4 z-40 btn btn-primary shadow-xl text-base rounded-2xl py-3"
           >
-            {event.isTournament ? "Register Team" : isSubscription ? "Subscribe" : "Buy Tickets"}
+            {event.isTournament ? "Register Team" : isSubscription ? "Enroll" : "Buy Tickets"}
           </button>
         ))}
 
@@ -286,7 +286,7 @@ export default function EventDetails() {
                 {event.isTournament
                   ? "Team Registration"
                   : isSubscription
-                    ? "Subscribe"
+                    ? "Enroll"
                     : "Purchase Tickets"}
               </h2>
               <button

@@ -78,6 +78,9 @@ const TeamCard = ({ team, showEvent }) => (
         Manager: {team.manager?.name} &middot; {team.manager?.email}
         {team.manager?.phone && ` \u00b7 ${team.manager.phone}`}
       </p>
+      {team.teamCode && (
+        <p className="font-mono text-[11px] text-base-content/40 mt-0.5">{team.teamCode}</p>
+      )}
     </div>
     <div className="flex items-start gap-2">
       <span
