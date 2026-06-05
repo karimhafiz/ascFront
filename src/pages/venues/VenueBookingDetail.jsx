@@ -5,6 +5,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, GlassCard, PageContainer, Spinner } from "../../components/ui";
 import { fetchWithAuth, isAuthenticated } from "../../auth/auth";
 import { slugToId, formatDate } from "../../util/util";
+import moment from "moment";
+import VenueCalendar from "./VenueCalendar";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -237,21 +239,20 @@ export default function VenueBookingDetail() {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="glass-label" htmlFor="selectedDate">
-                    Preferred Date *
-                  </label>
-                  <input
-                    id="selectedDate"
-                    type="date"
-                    min={minDate}
-                    className="glass-input"
-                    value={selectedDate}
-                    onChange={(event) => {
-                      setSelectedDate(event.target.value);
+                  <label className="glass-label">Calendar</label>
+                  <VenueCalendar
+                    venueId={venueId}
+                    selectedDate={selectedDate}
+                    onSelectDate={(date) => {
+                      setSelectedDate(date);
                       setSelectedSlotId("");
                     }}
-                    required
                   />
+                  {selectedDate && (
+                    <p className="mt-2 text-sm font-semibold text-base-content">
+                      {moment(selectedDate).format("dddd, D MMMM YYYY")}
+                    </p>
+                  )}
                 </div>
 
                 {venue?.weeklySchedule?.length > 0 && (
