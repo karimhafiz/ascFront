@@ -22,20 +22,23 @@ const Login = () => {
   const isGoogleConflict = error?.authMethod === "google";
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-64px)] py-8">
+    <div
+      className="flex items-center justify-center py-4"
+      style={{ minHeight: "calc(100dvh - var(--navbar-height))" }}
+    >
       <div
-        className="relative w-full max-w-md p-8 md:p-12 rounded-2xl overflow-hidden backdrop-blur-xl border border-base-300/40 shadow-[0_8px_32px_rgba(0,0,0,0.08)]"
+        className="relative w-full max-w-md px-6 py-6 sm:p-8 md:p-12 rounded-2xl overflow-hidden backdrop-blur-xl border border-base-300/40 shadow-[0_8px_32px_rgba(0,0,0,0.08)]"
         style={{ background: "rgba(255, 255, 255, 0.35)" }}
       >
         {/* Decorative glass elements */}
         <div className="absolute -top-20 -left-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl"></div>
         <div className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full bg-secondary/10 blur-3xl"></div>
 
-        <h1 className="text-3xl font-bold text-center text-base-content mb-8 relative z-10">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-base-content mb-5 sm:mb-8 relative z-10">
           Login
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-7 relative z-10">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-7 relative z-10">
           <div className="form-control">
             <label className="label mb-1">
               <span className="glass-label text-lg">Email</span>
@@ -46,7 +49,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="glass-input py-3"
+                className="glass-input"
                 required
               />
             </div>
@@ -61,7 +64,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="glass-input py-3"
+                className="glass-input"
                 required
               />
             </div>
@@ -69,7 +72,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className={`btn w-full text-base font-medium py-3 mt-6 rounded-xl btn-primary border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all ${
+            className={`btn w-full text-base font-medium mt-2 rounded-xl btn-primary border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all ${
               loginMutation.isPending ? "opacity-70" : ""
             }`}
             disabled={loginMutation.isPending}
@@ -128,9 +131,9 @@ const Login = () => {
         )}
 
         <div className="relative z-10">
-          <p className="text-center text-base-content/70 mt-4">or</p>
+          <p className="text-center text-base-content/70 mt-3">or</p>
           <GoogleLogin />
-          <p className="text-center text-sm text-base-content/50 mt-6">
+          <p className="text-center text-sm text-base-content/50 mt-4">
             Don&apos;t have an account?{" "}
             <Link
               to="/signup"

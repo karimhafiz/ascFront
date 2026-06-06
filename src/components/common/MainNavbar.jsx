@@ -95,7 +95,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className={` w-full fixed left-0 right-0 top-0 z-50 h-18 transition-all duration-300 ${
+      className={`w-full fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
         scrolled
           ? "border-b border-white/60 bg-white/88 py-2 shadow-[0_18px_50px_-30px_rgba(16,38,58,0.5)] backdrop-blur-2xl"
           : "border-b border-transparent bg-white/60 py-3 backdrop-blur-xl lg:py-4"
@@ -103,10 +103,10 @@ export default function Navbar() {
     >
       <div className=" flex items-center justify-between lg:justify-center xl:gap-16 md:gap-8 px-4 lg:px-4 xl:px-6">
         <Link to="/" className="group flex shrink-0 items-center space-x-2 ">
-          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary via-primary to-primary/90 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105">
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-linear-to-br from-secondary via-primary to-primary/90 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105">
             ASC
           </div>
-          <span className="text-lg font-semibold tracking-[0.06em] text-base-content transition-colors duration-300 group-hover:text-primary lg:text-xl">
+          <span className="block lg:hidden 2xl:block text-lg font-semibold tracking-[0.06em] text-base-content transition-colors duration-300 group-hover:text-primary lg:text-xl">
             Ayendah Sazan
           </span>
         </Link>
@@ -255,7 +255,7 @@ export default function Navbar() {
                 <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 11-2 0V5H5v11a1 1 0 11-2 0V4z" />
                 <path d="M7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm0 4a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
               </svg>
-              Book Venue
+              Venues
               {indicator(isVenueActive)}
             </Link>
           </li>
@@ -311,10 +311,10 @@ export default function Navbar() {
                     : "hover:bg-base-200/80 hover:shadow-sm"
                 }`}
               >
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-primary text-xs font-bold text-white shadow-sm shadow-primary/20 xl:h-8 xl:w-8">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-secondary to-primary text-xs font-bold text-white shadow-sm shadow-primary/20 xl:h-8 xl:w-8">
                   {userEmail ? userEmail[0].toUpperCase() : "?"}
                 </div>
-                <span className="hidden xl:block max-w-45 truncate text-sm font-medium text-base-content">
+                <span className="block lg:hidden xl:block max-w-45 truncate text-sm font-medium text-base-content">
                   {userEmail}
                 </span>
                 <svg
@@ -355,7 +355,7 @@ export default function Navbar() {
                     My Profile
                   </Link>
 
-                  <div className="mx-3 h-px bg-gradient-to-r from-transparent via-base-300 to-transparent" />
+                  <div className="mx-3 h-px bg-linear-to-r from-transparent via-base-300 to-transparent" />
 
                   <button
                     onClick={(e) => {

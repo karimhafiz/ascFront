@@ -103,7 +103,7 @@ export default function VenueCalendar({ venueId, selectedDate, onSelectDate }) {
         />
       </div>
 
-      <div className="flex items-center gap-4 mt-2 px-1 text-xs text-base-content/50">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 px-1 text-xs text-base-content/50">
         <span className="flex items-center gap-1.5">
           <span
             className="w-3 h-3 rounded-sm inline-block"

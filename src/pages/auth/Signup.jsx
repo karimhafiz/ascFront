@@ -22,7 +22,10 @@ const Signup = () => {
   const error = signupMutation.error;
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-64px)] py-8">
+    <div
+      className="flex items-center justify-center py-4"
+      style={{ minHeight: "calc(100dvh - var(--navbar-height))" }}
+    >
       <div
         className="relative w-full max-w-md p-8 md:p-12 rounded-2xl overflow-hidden backdrop-blur-xl border border-base-300/40 shadow-[0_8px_32px_rgba(0,0,0,0.08)]"
         style={{ background: "rgba(255, 255, 255, 0.35)" }}

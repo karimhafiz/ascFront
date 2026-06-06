@@ -139,19 +139,19 @@ export default function VenueBookingDetail() {
         ) : (
           <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
             <div className="space-y-6">
-              <div className="hero-panel rounded-[2rem] p-8 sm:p-10">
-                <span className="section-kicker mb-5 border-white/10 bg-white/8 text-white">
+              <div className="hero-panel rounded-[2rem] p-6 sm:p-8 md:p-10">
+                <span className="section-kicker mb-4 border-white/10 bg-white/8 text-white">
                   Venue Hire
                 </span>
-                <h1 className="mb-4 text-4xl font-semibold tracking-[-0.04em] text-white md:text-5xl">
+                <h1 className="mb-3 text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl md:text-5xl">
                   {venue?.name}
                 </h1>
                 {venue?.description && (
-                  <p className="mb-6 text-base leading-8 text-neutral-content/82">
+                  <p className="mb-5 text-sm leading-7 text-neutral-content/82 sm:text-base sm:leading-8">
                     {venue.description}
                   </p>
                 )}
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 grid-cols-2">
                   <div className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.08em] text-neutral-content/60">
                       Capacity
@@ -171,7 +171,7 @@ export default function VenueBookingDetail() {
                 </div>
               </div>
 
-              <GlassCard className="rounded-[2rem] p-6 sm:p-8">
+              <GlassCard className="rounded-[2rem] p-5 sm:p-6 md:p-8">
                 <span className="section-kicker mb-4">Venue Details</span>
                 <div className="space-y-5">
                   {[venue.street, venue.city, venue.postCode].filter(Boolean).length > 0 && (
@@ -226,10 +226,10 @@ export default function VenueBookingDetail() {
               </GlassCard>
             </div>
 
-            <GlassCard className="rounded-[2rem] p-6 sm:p-8">
-              <div className="mb-6">
-                <span className="section-kicker mb-4">Booking</span>
-                <h2 className="mb-2 text-3xl font-semibold tracking-[-0.03em] text-base-content">
+            <GlassCard className="rounded-[2rem] p-5 sm:p-6 md:p-8">
+              <div className="mb-5">
+                <span className="section-kicker mb-3">Booking</span>
+                <h2 className="mb-2 text-2xl font-semibold tracking-[-0.03em] text-base-content sm:text-3xl">
                   Choose a slot and continue to checkout
                 </h2>
                 <p className="text-base leading-7 text-base-content/70">
@@ -270,8 +270,8 @@ export default function VenueBookingDetail() {
                       ]
                         .filter((day) => venue.weeklySchedule.some((s) => s.dayOfWeek === day))
                         .map((day) => (
-                          <div key={day} className="flex items-start gap-3 text-sm">
-                            <span className="w-24 shrink-0 font-semibold capitalize text-base-content">
+                          <div key={day} className="flex items-start gap-2 text-sm">
+                            <span className="w-20 shrink-0 font-semibold capitalize text-base-content">
                               {day}
                             </span>
                             <div className="flex flex-wrap gap-1.5">

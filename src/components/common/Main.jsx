@@ -18,10 +18,10 @@ export default function Main() {
   const hideFooter = NO_FOOTER.includes(pathname);
 
   return (
-    <div className="professional-shell min-h-[calc(100vh-72px)]">
+    <div className="professional-shell">
       <ScrollToTop />
       <Navbar />
-      <main className="relative min-h-screen">
+      <main className="relative">
         <Outlet />
       </main>
       {!hideFooter && <Footer />}
