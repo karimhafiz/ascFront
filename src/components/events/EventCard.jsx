@@ -99,7 +99,7 @@ export default function EventCard({ event }) {
                 {event.title}
               </h3>
 
-              <p className="mb-4 line-clamp-3 text-sm leading-6 text-base-content/70">
+              <p className="mb-4 line-clamp-3 whitespace-pre-wrap [tab-size:4] text-sm leading-6 text-base-content/70">
                 {event.shortDescription}
               </p>
 

@@ -103,11 +103,10 @@ const EventForm = ({ method, event = {} }) => {
             <label htmlFor="shortDescription" className={labelClass}>
               Short Description
             </label>
-            <input
+            <textarea
               id="shortDescription"
-              type="text"
               name="shortDescription"
-              className={fieldClass}
+              className={`${textareaClass} min-h-24`}
               required
               defaultValue={event.shortDescription || ""}
             />

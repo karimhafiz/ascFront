@@ -187,7 +187,7 @@ export default function EventDetails() {
           <div className="card-body">
             <h2 className="card-title text-xl text-base-content">About This Event</h2>
             <div className="prose max-w-none text-base-content/80 prose-headings:text-base-content prose-p:leading-7">
-              <p>{event.longDescription}</p>
+              <p className="whitespace-pre-wrap [tab-size:4]">{event.longDescription}</p>
             </div>
           </div>
         </GlassCard>
