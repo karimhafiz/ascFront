@@ -25,6 +25,7 @@ jest.mock("../../../src/auth/auth", () => ({
   parseJwt: jest.fn(),
   getAuthToken: jest.fn(),
   clearAuth: jest.fn(),
+  subscribeToAuth: jest.fn(() => () => {}),
 }));
 
 const { isAuthenticated, isAdmin, parseJwt, getAuthToken } = require("../../../src/auth/auth");

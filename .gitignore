@@ -36,3 +36,5 @@ env.production
 *.sw?
 
 CLAUDE.md
+.vercel
+.env*
