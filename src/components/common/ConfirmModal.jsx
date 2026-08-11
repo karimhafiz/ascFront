@@ -9,6 +9,7 @@ import { Button } from "../ui";
  *   title     {string}   — bold heading
  *   message   {string}   — body text
  *   confirmLabel {string} — confirm button label (default "Confirm")
+ *   variant   {"default"|"danger"} — "danger" tints the icon and confirm button for destructive actions
  *   onConfirm {fn}       — called when the user clicks confirm
  *   onCancel  {fn}       — called when the user clicks cancel or the backdrop
  */
@@ -17,10 +18,13 @@ export default function ConfirmModal({
   title = "Are you sure?",
   message,
   confirmLabel = "Confirm",
+  variant = "default",
   onConfirm,
   onCancel,
 }) {
   if (!isOpen) return null;
+
+  const isDanger = variant === "danger";
 
   return (
     <div
@@ -33,9 +37,13 @@ export default function ConfirmModal({
       >
         {/* Icon */}
         <div className="flex justify-center mb-4">
-          <div className="w-12 h-12 rounded-full bg-base-200 flex items-center justify-center shadow-inner">
+          <div
+            className={`w-12 h-12 rounded-full flex items-center justify-center shadow-inner ${
+              isDanger ? "bg-red-50" : "bg-base-200"
+            }`}
+          >
             <svg
-              className="w-6 h-6 text-primary"
+              className={`w-6 h-6 ${isDanger ? "text-red-500" : "text-primary"}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -61,7 +69,11 @@ export default function ConfirmModal({
           <Button variant="secondary" className="flex-1 rounded-full" onClick={onCancel}>
             Cancel
           </Button>
-          <Button variant="primary" className="flex-1 rounded-full" onClick={onConfirm}>
+          <Button
+            variant={isDanger ? "danger" : "primary"}
+            className="flex-1 rounded-full"
+            onClick={onConfirm}
+          >
             {confirmLabel}
           </Button>
         </div>

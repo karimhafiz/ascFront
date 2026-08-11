@@ -2,6 +2,7 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import { isAdmin, isModerator, isAuthenticated } from "../../auth/auth";
 import { Button } from "../ui";
+import FloatingBar from "./FloatingBar";
 
 const ICONS = {
   event: (
@@ -57,7 +58,7 @@ export default function ManageHeader({
   if (!isAuthenticated() || (!isAdmin() && !isModerator())) return null;
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 pt-4 sm:pt-6">
+    <FloatingBar className="container px-4 sm:px-6">
       <div className="bg-white/60 backdrop-blur-md rounded-2xl border border-white/40 px-4 sm:px-6 py-3 sm:py-4 shadow-sm">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2.5">
@@ -107,6 +108,6 @@ export default function ManageHeader({
           </div>
         </div>
       </div>
-    </div>
+    </FloatingBar>
   );
 }

@@ -501,8 +501,8 @@ textarea.glass-input {
 }
 
 @media (max-width: 768px) {
-  body {
-    padding-top: 68px;
+  :root {
+    --navbar-height: 68px;
   }
 
   .page-section {

@@ -194,7 +194,7 @@ export default function UsersTab({ users, currentUserId, onRoleChange, onBanTogg
       <div className="hidden sm:block rounded-2xl border border-base-300 shadow-sm overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-gradient-to-r from-base-200 to-base-200 text-left">
+            <tr className="bg-linear-to-r from-base-200 to-base-200 text-left">
               <th className="px-4 py-3 font-semibold text-base-content">Name</th>
               <th className="px-4 py-3 font-semibold text-base-content hidden md:table-cell">
                 Email

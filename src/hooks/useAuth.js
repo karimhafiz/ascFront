@@ -25,8 +25,10 @@ export function useLogin() {
     onSuccess: (data) => {
       setAuth(data.accessToken, data.user);
       const role = data.user?.role;
-      if (role === "admin" || role === "moderator") {
+      if (role === "admin") {
         navigate("/admin");
+      } else if (role === "moderator") {
+        navigate("/profile");
       } else {
         navigate("/");
       }

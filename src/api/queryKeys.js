@@ -25,5 +25,9 @@ export const queryKeys = {
   },
   pageContent: {
     home: ["pageContent", "home"],
+    about: ["pageContent", "about"],
+  },
+  pageContentRequests: {
+    all: ["pageContentRequests"],
   },
 };

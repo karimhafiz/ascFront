@@ -314,7 +314,7 @@ export default function Navbar() {
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-secondary to-primary text-xs font-bold text-white shadow-sm shadow-primary/20 xl:h-8 xl:w-8">
                   {userEmail ? userEmail[0].toUpperCase() : "?"}
                 </div>
-                <span className="block lg:hidden xl:block max-w-45 truncate text-sm font-medium text-base-content">
+                <span className="block lg:hidden 2xl:block max-w-45 truncate text-sm font-medium text-base-content">
                   {userEmail}
                 </span>
                 <svg

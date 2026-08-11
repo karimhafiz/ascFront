@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ConfirmModal from "../../components/common/ConfirmModal";
+import ImageWithFallback from "../../components/common/ImageWithFallback";
+import PageEditBar from "../../components/common/PageEditBar";
 import { Button } from "../../components/ui";
 import { fetchWithAuth, isAdmin, isModerator } from "../../auth/auth";
 import { compressImage } from "../../util/compressImage";
@@ -91,13 +93,13 @@ function ActivityCard({
         editing ? "ring-2 ring-primary/20" : ""
       }`}
     >
-      <div className="relative aspect-[16/10] min-h-[220px] overflow-hidden">
-        <img
+      <div className="relative aspect-16/10 min-h-55 overflow-hidden">
+        <ImageWithFallback
           src={imgSrc}
           alt={card.title}
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-neutral/60 via-neutral/10 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-neutral/60 via-neutral/10 to-transparent" />
         <div className="absolute bottom-4 left-4 right-4">
           <span className="section-kicker border-white/15 bg-white/10 text-white shadow-none">
             Programme {index + 1}
@@ -152,21 +154,25 @@ function ActivityCard({
   );
 }
 
-export default function About() {
-  const canEdit = isAdmin() || isModerator();
+export default function About({ previewContent = null }) {
+  const canEdit = !previewContent && (isAdmin() || isModerator());
+  const canEditDirectly = isAdmin();
 
-  const [pageContent, setPageContent] = useState(DEFAULTS);
+  const initialContent = previewContent ? mergeWithDefaults(previewContent) : DEFAULTS;
+  const [pageContent, setPageContent] = useState(initialContent);
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(DEFAULTS);
+  const [draft, setDraft] = useState(initialContent);
   const [cardImageFiles, setCardImageFiles] = useState({});
   const [cardImagePreviews, setCardImagePreviews] = useState({});
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(null);
   const [pendingReset, setPendingReset] = useState(null);
   const cardImageRefs = useRef([]);
 
   useEffect(() => {
+    if (previewContent) return;
     fetch(`${import.meta.env.VITE_DEV_URI}pageContent/about`)
       .then((response) => response.json())
       .then((data) => {
@@ -177,6 +183,7 @@ export default function About() {
         }
       })
       .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleEdit = () => {
@@ -184,6 +191,7 @@ export default function About() {
     setCardImageFiles({});
     setCardImagePreviews({});
     setSaveError(null);
+    setSubmitSuccess(null);
     setEditing(true);
   };
 
@@ -251,6 +259,7 @@ export default function About() {
 
   const handleSave = async () => {
     setSaveError(null);
+    setSubmitSuccess(null);
 
     const errors = [];
     if (!draft.aboutHeroTitle?.trim()) errors.push("Hero title cannot be empty.");
@@ -289,8 +298,11 @@ export default function About() {
         formData.append(`activityImage_${cardId}`, file);
       });
 
-      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}pageContent/about`, {
-        method: "PUT",
+      const url = canEditDirectly
+        ? `${import.meta.env.VITE_DEV_URI}pageContent/about`
+        : `${import.meta.env.VITE_DEV_URI}pageContentRequests/about`;
+      const res = await fetchWithAuth(url, {
+        method: canEditDirectly ? "PUT" : "POST",
         body: formData,
       });
       if (!res.ok) {
@@ -298,13 +310,22 @@ export default function About() {
         throw new Error(body?.message || `Server error (${res.status})`);
       }
 
-      const { pageContent: saved } = await res.json();
-      setPageContent(mergeWithDefaults(saved));
+      if (canEditDirectly) {
+        const { pageContent: saved } = await res.json();
+        setPageContent(mergeWithDefaults(saved));
+      } else {
+        setSubmitSuccess("Your change request has been submitted for admin approval.");
+      }
       setEditing(false);
       setCardImageFiles({});
       setCardImagePreviews({});
     } catch (err) {
-      setSaveError(err.message || "Failed to save changes. Please try again.");
+      setSaveError(
+        err.message ||
+          (canEditDirectly
+            ? "Failed to save changes. Please try again."
+            : "Failed to submit request. Please try again.")
+      );
     } finally {
       setSaving(false);
     }
@@ -327,7 +348,7 @@ export default function About() {
       />
 
       {canEdit && (
-        <div className="sticky top-20 z-40 mx-auto mb-6 mt-6 flex w-[min(1200px,calc(100%-2rem))] flex-wrap justify-end gap-2 rounded-3xl border border-white/60 bg-white/75 px-4 py-3 shadow-[var(--shadow-soft)] backdrop-blur-xl">
+        <PageEditBar>
           {!editing ? (
             <Button variant="primary" onClick={handleEdit}>
               Edit Page
@@ -337,26 +358,34 @@ export default function About() {
               <Button variant="secondary" onClick={handleCancel}>
                 Cancel
               </Button>
-              <button
-                onClick={() => resetSection("all")}
-                disabled={resetting}
-                className="btn border border-warning/25 bg-warning/10 text-warning-content hover:bg-warning/15"
-              >
-                {resetting ? "Resetting..." : "Reset All to Defaults"}
-              </button>
+              {canEditDirectly && (
+                <button
+                  onClick={() => resetSection("all")}
+                  disabled={resetting}
+                  className="btn border border-warning/25 bg-warning/10 text-warning-content hover:bg-warning/15"
+                >
+                  {resetting ? "Resetting..." : "Reset All to Defaults"}
+                </button>
+              )}
               <Button variant="primary" onClick={handleSave} disabled={saving}>
-                {saving ? "Saving..." : "Save Changes"}
+                {saving
+                  ? canEditDirectly
+                    ? "Saving..."
+                    : "Submitting..."
+                  : canEditDirectly
+                    ? "Save Changes"
+                    : "Submit for Approval"}
               </Button>
             </>
           )}
-        </div>
+        </PageEditBar>
       )}
 
       {saveError && (
         <div className="fixed right-3 top-28 z-50 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-red-200 bg-red-50/95 px-4 py-3 text-sm text-red-600 shadow-lg backdrop-blur-sm animate-scale-in sm:right-6 sm:top-36 sm:max-w-sm">
           <div className="flex items-start gap-2">
             <svg
-              className="mt-0.5 h-4 w-4 flex-shrink-0"
+              className="mt-0.5 h-4 w-4 shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -374,7 +403,44 @@ export default function About() {
             </div>
             <button
               onClick={() => setSaveError(null)}
-              className="ml-auto flex-shrink-0 text-red-400 hover:text-red-600"
+              className="ml-auto shrink-0 text-red-400 hover:text-red-600"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {submitSuccess && (
+        <div className="fixed right-3 top-28 z-50 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-green-200 bg-green-50/95 px-4 py-3 text-sm text-green-700 shadow-lg backdrop-blur-sm animate-scale-in sm:right-6 sm:top-36 sm:max-w-sm">
+          <div className="flex items-start gap-2">
+            <svg
+              className="mt-0.5 h-4 w-4 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            <div>
+              <p className="mb-0.5 font-medium">Request submitted</p>
+              <p className="text-xs leading-relaxed">{submitSuccess}</p>
+            </div>
+            <button
+              onClick={() => setSubmitSuccess(null)}
+              className="ml-auto shrink-0 text-green-400 hover:text-green-600"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -391,7 +457,7 @@ export default function About() {
 
       <section className="page-section pt-4 md:pt-6">
         <div
-          className={`hero-panel rounded-[2rem] px-6 py-8 md:px-10 md:py-10 ${
+          className={`hero-panel rounded-4xl px-6 py-8 md:px-10 md:py-10 ${
             editing ? "ring-2 ring-secondary/35" : ""
           }`}
         >
@@ -412,13 +478,15 @@ export default function About() {
                   value={draft.aboutHeroDescription}
                   onChange={(e) => setDraft({ ...draft, aboutHeroDescription: e.target.value })}
                 />
-                <Button
-                  variant="secondary"
-                  onClick={() => resetSection("hero")}
-                  disabled={resetting}
-                >
-                  Reset Hero
-                </Button>
+                {canEditDirectly && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => resetSection("hero")}
+                    disabled={resetting}
+                  >
+                    Reset Hero
+                  </Button>
+                )}
               </div>
             ) : (
               <>
@@ -437,7 +505,7 @@ export default function About() {
       <section className="page-section py-6 md:py-8">
         <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
           <div
-            className={`glass-card rounded-[2rem] p-7 sm:p-8 ${editing ? "ring-2 ring-primary/20" : ""}`}
+            className={`glass-card rounded-4xl p-7 sm:p-8 ${editing ? "ring-2 ring-primary/20" : ""}`}
           >
             <span className="section-kicker mb-4">Our Mission</span>
             {editing ? (
@@ -453,13 +521,15 @@ export default function About() {
                   value={draft.missionText}
                   onChange={(e) => setDraft({ ...draft, missionText: e.target.value })}
                 />
-                <Button
-                  variant="secondary"
-                  onClick={() => resetSection("mission")}
-                  disabled={resetting}
-                >
-                  Reset Mission
-                </Button>
+                {canEditDirectly && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => resetSection("mission")}
+                    disabled={resetting}
+                  >
+                    Reset Mission
+                  </Button>
+                )}
               </div>
             ) : (
               <>
@@ -474,7 +544,7 @@ export default function About() {
           </div>
 
           <div
-            className={`hero-panel rounded-[2rem] p-7 sm:p-8 ${editing ? "ring-2 ring-secondary/30" : ""}`}
+            className={`hero-panel rounded-4xl p-7 sm:p-8 ${editing ? "ring-2 ring-secondary/30" : ""}`}
           >
             <span className="section-kicker mb-4 border-white/10 bg-white/8 text-white">
               Get Involved
@@ -493,13 +563,15 @@ export default function About() {
                   onChange={(e) => setDraft({ ...draft, getInvolvedText: e.target.value })}
                 />
                 <div className="flex flex-wrap gap-3">
-                  <Button
-                    variant="secondary"
-                    onClick={() => resetSection("getInvolved")}
-                    disabled={resetting}
-                  >
-                    Reset Section
-                  </Button>
+                  {canEditDirectly && (
+                    <Button
+                      variant="secondary"
+                      onClick={() => resetSection("getInvolved")}
+                      disabled={resetting}
+                    >
+                      Reset Section
+                    </Button>
+                  )}
                   <Button variant="primary" disabled>
                     Contact Us
                   </Button>
@@ -529,7 +601,7 @@ export default function About() {
           copy="After understanding our purpose, this section gives a quick picture of the programmes and spaces we create for the community."
         />
 
-        {editing && (
+        {editing && canEditDirectly && (
           <div className="mb-6 flex justify-end">
             <Button variant="secondary" onClick={() => resetSection("cards")} disabled={resetting}>
               Reset Programme Cards
