@@ -1,16 +1,23 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { fetchWithAuth } from "../../auth/auth";
+import {
+  useEventSubscriptionCancelMutation,
+  useEventSubscriptionReactivateMutation,
+} from "../../hooks/useEventSubscriptionMutation";
 import { optimizeCloudinaryUrl, toSlug } from "../../util/util";
 import ConfirmModal from "../common/ConfirmModal";
 import { formatCurrency, INTERVAL_ADJ } from "./profileHelpers";
 
 export default function EventSubscriptionRow({ subscription, onAction }) {
-  const [cancelling, setCancelling] = useState(false);
   const [cancelDone, setCancelDone] = useState(subscription.subscriptionStatus === "cancelled");
-  const [reactivating, setReactivating] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const [toast, setToast] = useState(null);
+
+  // Hooks must run unconditionally on every render, so these are declared
+  // before the `!event` early return below.
+  const cancelMutation = useEventSubscriptionCancelMutation(subscription._id);
+  const reactivateMutation = useEventSubscriptionReactivateMutation(subscription._id);
+
   const event = subscription.eventId;
   if (!event) return null;
 
@@ -30,49 +37,31 @@ export default function EventSubscriptionRow({ subscription, onAction }) {
         : "Are you sure you want to cancel? You'll keep access until the end of your current billing period.",
       confirmText: "Yes, cancel",
       variant: "danger",
-      onConfirm: async () => {
+      onConfirm: () => {
         setConfirm(null);
-        setCancelling(true);
-        try {
-          const res = await fetchWithAuth(
-            `${import.meta.env.VITE_DEV_URI}events/subscriptions/${subscription._id}/cancel`,
-            { method: "POST" }
-          );
-          const data = await res.json();
-          if (res.ok) {
+        cancelMutation.mutate(undefined, {
+          onSuccess: () => {
             setCancelDone(true);
             onAction();
-          } else showToast(data.error || "Failed to cancel");
-        } catch {
-          showToast("Something went wrong");
-        }
-        setCancelling(false);
+          },
+          onError: (err) => showToast(err.message || "Failed to cancel"),
+        });
       },
     });
   };
 
-  const handleReactivate = async () => {
-    setReactivating(true);
-    try {
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}events/subscriptions/${subscription._id}/reactivate`,
-        { method: "POST" }
-      );
-      const data = await res.json();
-      if (res.ok) {
+  const handleReactivate = () => {
+    reactivateMutation.mutate(undefined, {
+      onSuccess: (data) => {
         if (data.url) {
           window.location.href = data.url;
           return;
         }
         setCancelDone(false);
         onAction();
-      } else {
-        showToast(data.error || "Failed to reactivate");
-      }
-    } catch {
-      showToast("Something went wrong");
-    }
-    setReactivating(false);
+      },
+      onError: (err) => showToast(err.message || "Failed to reactivate"),
+    });
   };
 
   return (
@@ -173,18 +162,18 @@ export default function EventSubscriptionRow({ subscription, onAction }) {
         {cancelDone ? (
           <button
             onClick={handleReactivate}
-            disabled={reactivating}
+            disabled={reactivateMutation.isPending}
             className="text-xs text-green-600 hover:text-green-800 font-medium hover:underline transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
-            {reactivating ? "Reactivating..." : "Reactivate"}
+            {reactivateMutation.isPending ? "Reactivating..." : "Reactivate"}
           </button>
         ) : (
           <button
             onClick={handleCancel}
-            disabled={cancelling}
+            disabled={cancelMutation.isPending}
             className="text-xs text-red-500 hover:text-red-700 font-medium hover:underline transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
-            {cancelling ? "Cancelling..." : "Cancel subscription"}
+            {cancelMutation.isPending ? "Cancelling..." : "Cancel subscription"}
           </button>
         )}
       </div>

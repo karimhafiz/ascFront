@@ -1,44 +1,38 @@
 import { useState } from "react";
-import { fetchWithAuth } from "../../auth/auth";
 import { validatePhone } from "../../util/util";
+import { useTeamEditMutation } from "../../hooks/useTeamMutation";
 import { Button, Spinner } from "../ui";
 
 export default function TeamEditForm({ team, onClose, onSaved }) {
   const [name, setName] = useState(team.name);
   const [managerName, setManagerName] = useState(team.manager?.name || "");
   const [managerPhone, setManagerPhone] = useState(team.manager?.phone || "");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
+  const saveMutation = useTeamEditMutation(team._id);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!validatePhone(managerPhone)) {
       setError("Please enter a valid UK phone number (e.g. 07123456789 or +447123456789).");
       return;
     }
-    setLoading(true);
     setError("");
-    try {
-      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}teams/${team._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          manager: { name: managerName, email: team.manager.email, phone: managerPhone.trim() },
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update team");
-      onSaved(data.team);
-    } catch (err) {
-      setError(err.message || "An error occurred while updating the team");
-    }
-    setLoading(false);
+    saveMutation.mutate(
+      {
+        name,
+        manager: { name: managerName, email: team.manager.email, phone: managerPhone.trim() },
+      },
+      {
+        onSuccess: (data) => onSaved(data.team),
+        onError: (err) => setError(err.message || "An error occurred while updating the team"),
+      }
+    );
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-gradient-to-br from-white/80 to-base-200/80 rounded-2xl shadow-xl border border-white/50 backdrop-blur-md p-5 sm:p-8 relative w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-linear-to-br from-white/80 to-base-200/80 rounded-2xl shadow-xl border border-white/50 backdrop-blur-md p-5 sm:p-8 relative w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
         <Button
           variant="circle"
           size="sm"
@@ -51,7 +45,7 @@ export default function TeamEditForm({ team, onClose, onSaved }) {
 
         <div className="text-center mb-4">
           <h2 className="text-2xl font-bold text-base-content">Edit Team</h2>
-          <div className="h-1 w-24 bg-gradient-to-r from-primary to-primary/70 rounded-full mx-auto mt-2"></div>
+          <div className="h-1 w-24 bg-linear-to-r from-primary to-primary/70 rounded-full mx-auto mt-2"></div>
         </div>
 
         {error && (
@@ -116,8 +110,13 @@ export default function TeamEditForm({ team, onClose, onSaved }) {
             />
           </div>
 
-          <Button variant="primary" className="w-full py-3" type="submit" disabled={loading}>
-            {loading ? (
+          <Button
+            variant="primary"
+            className="w-full py-3"
+            type="submit"
+            disabled={saveMutation.isPending}
+          >
+            {saveMutation.isPending ? (
               <div className="flex items-center justify-center gap-2">
                 <Spinner size="sm" />
                 <span>Saving...</span>

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { clearAuth, getAuthToken, isAdmin, isAuthenticated, parseJwt } from "../../auth/auth";
 import { useAuthState } from "../../auth/useAuthState";
+import { useLogoutMutation } from "../../hooks/useLogoutMutation";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -40,18 +41,16 @@ export default function Navbar() {
   const isVenueActive = location.pathname.startsWith("/venues");
   const venueLink = "/venues/booking";
 
-  const handleLogout = async (e) => {
+  const logoutMutation = useLogoutMutation();
+
+  const handleLogout = (e) => {
     e.preventDefault();
-    try {
-      await fetch(`${import.meta.env.VITE_DEV_URI}users/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch {
-      // Clear local auth state even if the network request fails.
-    }
-    clearAuth();
-    navigate("/");
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        clearAuth();
+        navigate("/");
+      },
+    });
   };
 
   useEffect(() => {

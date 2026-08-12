@@ -1,7 +1,13 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import UsersTab from "../../../src/components/admin/UsersTab";
 import "@testing-library/jest-dom";
+
+function renderWithClient(ui) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+}
 
 jest.mock("../../../src/auth/auth", () => ({
   getAuthToken: () => "mock-token",
@@ -48,7 +54,7 @@ describe("UsersTab", () => {
   });
 
   it("renders all users", () => {
-    render(
+    renderWithClient(
       <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
     );
     expect(screen.getAllByText("Admin User").length).toBeGreaterThanOrEqual(1);
@@ -57,14 +63,14 @@ describe("UsersTab", () => {
   });
 
   it("shows 'you' label for current user", () => {
-    render(
+    renderWithClient(
       <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
     );
     expect(screen.getAllByText("you").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders role dropdowns for other users", () => {
-    render(
+    renderWithClient(
       <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
     );
     const selects = screen.getAllByRole("combobox");
@@ -73,14 +79,14 @@ describe("UsersTab", () => {
   });
 
   it("shows 'No users found' when empty", () => {
-    render(
+    renderWithClient(
       <UsersTab users={[]} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
     );
     expect(screen.getAllByText("No users found").length).toBeGreaterThanOrEqual(1);
   });
 
   it("filters users by search", () => {
-    render(
+    renderWithClient(
       <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
     );
     fireEvent.change(screen.getByPlaceholderText(/search/i), {
@@ -92,7 +98,7 @@ describe("UsersTab", () => {
 
   it("opens confirm modal on role change and calls onRoleChange after confirm", async () => {
     const onRoleChange = jest.fn();
-    render(
+    renderWithClient(
       <UsersTab
         users={users}
         currentUserId="u1"
@@ -118,7 +124,7 @@ describe("UsersTab", () => {
   });
 
   it("shows role badges", () => {
-    render(
+    renderWithClient(
       <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
     );
     expect(screen.getAllByText("admin").length).toBeGreaterThanOrEqual(1);
@@ -127,7 +133,7 @@ describe("UsersTab", () => {
   });
 
   it("shows ban buttons for non-current users", () => {
-    render(
+    renderWithClient(
       <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
     );
     const banButtons = screen.getAllByText("Ban");
@@ -135,7 +141,7 @@ describe("UsersTab", () => {
   });
 
   it("shows Active status for non-banned users", () => {
-    render(
+    renderWithClient(
       <UsersTab users={users} currentUserId="u1" onRoleChange={jest.fn()} onBanToggle={jest.fn()} />
     );
     expect(screen.getAllByText("Active").length).toBeGreaterThanOrEqual(1);

@@ -7,6 +7,7 @@ import { fetchWithAuth, isAuthenticated } from "../../auth/auth";
 import { slugToId, formatDate } from "../../util/util";
 import moment from "moment";
 import VenueCalendar from "./VenueCalendar";
+import { queryKeys } from "../../api/queryKeys";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -33,7 +34,7 @@ export default function VenueBookingDetail() {
     isLoading: venueLoading,
     error: venueError,
   } = useQuery({
-    queryKey: ["venue", venueId],
+    queryKey: queryKeys.venues.detail(venueId),
     queryFn: async () => {
       const response = await fetch(`${API}venues/${venueId}`);
       const data = await response.json().catch(() => null);
@@ -49,7 +50,7 @@ export default function VenueBookingDetail() {
     isLoading: slotsLoading,
     error: slotsError,
   } = useQuery({
-    queryKey: ["venue-slots", venueId, selectedDate],
+    queryKey: queryKeys.venues.slots(venueId, selectedDate),
     queryFn: async () => {
       const response = await fetch(
         `${API}venues/${venueId}/slots?date=${encodeURIComponent(selectedDate)}`

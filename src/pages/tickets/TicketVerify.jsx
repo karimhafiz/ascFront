@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchWithAuth, isAdmin, isModerator } from "../../auth/auth";
 import { Button, PageContainer, Spinner, GlassCard } from "../../components/ui";
+import { queryKeys } from "../../api/queryKeys";
 
 const TICKET_CODE_RE = /^TKT-[A-Z2-9]{6}$/;
 
@@ -63,7 +64,7 @@ export default function TicketVerify() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["verify-ticket", ticketCode],
+    queryKey: queryKeys.tickets.verify(ticketCode),
     queryFn: () => fetchTicket(ticketCode),
     enabled: !invalidFormat && isStaff,
   });
@@ -73,7 +74,7 @@ export default function TicketVerify() {
     onSuccess: (data) => {
       setCheckedInTicket(data);
       setJustCheckedIn(!data.wasAlreadyCheckedIn);
-      queryClient.invalidateQueries({ queryKey: ["verify-ticket", ticketCode] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tickets.verify(ticketCode) });
     },
   });
 

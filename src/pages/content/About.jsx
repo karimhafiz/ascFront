@@ -1,10 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import ImageWithFallback from "../../components/common/ImageWithFallback";
 import PageEditBar from "../../components/common/PageEditBar";
 import { Button } from "../../components/ui";
-import { fetchWithAuth, isAdmin, isModerator } from "../../auth/auth";
+import { isAdmin, isModerator } from "../../auth/auth";
 import { compressImage } from "../../util/compressImage";
+import {
+  usePageContentSaveMutation,
+  usePageContentResetMutation,
+} from "../../hooks/usePageContentMutation";
+import { API } from "../../api/apiClient";
+import { queryKeys } from "../../api/queryKeys";
 
 const DEFAULT_CARDS = [
   {
@@ -159,32 +166,29 @@ export default function About({ previewContent = null }) {
   const canEditDirectly = isAdmin();
 
   const initialContent = previewContent ? mergeWithDefaults(previewContent) : DEFAULTS;
-  const [pageContent, setPageContent] = useState(initialContent);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(initialContent);
   const [cardImageFiles, setCardImageFiles] = useState({});
   const [cardImagePreviews, setCardImagePreviews] = useState({});
-  const [saving, setSaving] = useState(false);
-  const [resetting, setResetting] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(null);
   const [pendingReset, setPendingReset] = useState(null);
   const cardImageRefs = useRef([]);
 
-  useEffect(() => {
-    if (previewContent) return;
-    fetch(`${import.meta.env.VITE_DEV_URI}pageContent/about`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && Object.keys(data).length > 0) {
-          const merged = mergeWithDefaults(data);
-          setPageContent(merged);
-          setDraft(merged);
-        }
-      })
-      .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { data: rawPageContent } = useQuery({
+    queryKey: queryKeys.pageContent.about,
+    queryFn: async () => {
+      const r = await fetch(`${API}pageContent/about`);
+      return r.json();
+    },
+    enabled: !previewContent,
+  });
+
+  const pageContent = previewContent
+    ? mergeWithDefaults(previewContent)
+    : rawPageContent && Object.keys(rawPageContent).length > 0
+      ? mergeWithDefaults(rawPageContent)
+      : DEFAULTS;
 
   const handleEdit = () => {
     setDraft(JSON.parse(JSON.stringify(pageContent)));
@@ -204,43 +208,29 @@ export default function About({ previewContent = null }) {
 
   const resetSection = (section) => setPendingReset(section);
 
-  const doReset = async () => {
+  const resetMutation = usePageContentResetMutation("about");
+
+  const doReset = () => {
     const section = pendingReset;
     setPendingReset(null);
-    setResetting(true);
     setSaveError(null);
 
-    try {
-      const url =
-        section === "all"
-          ? `${import.meta.env.VITE_DEV_URI}pageContent/about`
-          : `${import.meta.env.VITE_DEV_URI}pageContent/about/${section}`;
-
-      const res = await fetchWithAuth(url, { method: "DELETE" });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(body?.message || `Server error (${res.status})`);
-      }
-
-      const data = await res.json();
-      if (section === "all") {
-        setPageContent(DEFAULTS);
-        setDraft(DEFAULTS);
-        setEditing(false);
-      } else {
-        const merged = mergeWithDefaults(data.pageContent || {});
-        setPageContent(merged);
-        setDraft(JSON.parse(JSON.stringify(merged)));
-        if (section === "cards") {
-          setCardImageFiles({});
-          setCardImagePreviews({});
+    resetMutation.mutate(section, {
+      onSuccess: (data) => {
+        if (section === "all") {
+          setDraft(DEFAULTS);
+          setEditing(false);
+        } else {
+          const merged = mergeWithDefaults(data.pageContent || {});
+          setDraft(JSON.parse(JSON.stringify(merged)));
+          if (section === "cards") {
+            setCardImageFiles({});
+            setCardImagePreviews({});
+          }
         }
-      }
-    } catch (err) {
-      setSaveError(err.message || "Failed to reset. Please try again.");
-    } finally {
-      setResetting(false);
-    }
+      },
+      onError: (err) => setSaveError(err.message || "Failed to reset. Please try again."),
+    });
   };
 
   const updateCard = (index, field, value) => {
@@ -257,7 +247,9 @@ export default function About({ previewContent = null }) {
     setCardImagePreviews((prev) => ({ ...prev, [cardId]: URL.createObjectURL(compressed) }));
   };
 
-  const handleSave = async () => {
+  const saveMutation = usePageContentSaveMutation("about", canEditDirectly);
+
+  const handleSave = () => {
     setSaveError(null);
     setSubmitSuccess(null);
 
@@ -279,56 +271,41 @@ export default function About({ previewContent = null }) {
       return;
     }
 
-    setSaving(true);
-    try {
-      const formData = new FormData();
-      formData.append(
-        "contentData",
-        JSON.stringify({
-          aboutHeroTitle: draft.aboutHeroTitle,
-          aboutHeroDescription: draft.aboutHeroDescription,
-          activityCards: draft.activityCards,
-          missionTitle: draft.missionTitle,
-          missionText: draft.missionText,
-          getInvolvedTitle: draft.getInvolvedTitle,
-          getInvolvedText: draft.getInvolvedText,
-        })
-      );
-      Object.entries(cardImageFiles).forEach(([cardId, file]) => {
-        formData.append(`activityImage_${cardId}`, file);
-      });
+    const formData = new FormData();
+    formData.append(
+      "contentData",
+      JSON.stringify({
+        aboutHeroTitle: draft.aboutHeroTitle,
+        aboutHeroDescription: draft.aboutHeroDescription,
+        activityCards: draft.activityCards,
+        missionTitle: draft.missionTitle,
+        missionText: draft.missionText,
+        getInvolvedTitle: draft.getInvolvedTitle,
+        getInvolvedText: draft.getInvolvedText,
+      })
+    );
+    Object.entries(cardImageFiles).forEach(([cardId, file]) => {
+      formData.append(`activityImage_${cardId}`, file);
+    });
 
-      const url = canEditDirectly
-        ? `${import.meta.env.VITE_DEV_URI}pageContent/about`
-        : `${import.meta.env.VITE_DEV_URI}pageContentRequests/about`;
-      const res = await fetchWithAuth(url, {
-        method: canEditDirectly ? "PUT" : "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(body?.message || `Server error (${res.status})`);
-      }
-
-      if (canEditDirectly) {
-        const { pageContent: saved } = await res.json();
-        setPageContent(mergeWithDefaults(saved));
-      } else {
-        setSubmitSuccess("Your change request has been submitted for admin approval.");
-      }
-      setEditing(false);
-      setCardImageFiles({});
-      setCardImagePreviews({});
-    } catch (err) {
-      setSaveError(
-        err.message ||
-          (canEditDirectly
-            ? "Failed to save changes. Please try again."
-            : "Failed to submit request. Please try again.")
-      );
-    } finally {
-      setSaving(false);
-    }
+    saveMutation.mutate(formData, {
+      onSuccess: () => {
+        if (!canEditDirectly) {
+          setSubmitSuccess("Your change request has been submitted for admin approval.");
+        }
+        setEditing(false);
+        setCardImageFiles({});
+        setCardImagePreviews({});
+      },
+      onError: (err) => {
+        setSaveError(
+          err.message ||
+            (canEditDirectly
+              ? "Failed to save changes. Please try again."
+              : "Failed to submit request. Please try again.")
+        );
+      },
+    });
   };
 
   const resetLabel =
@@ -361,14 +338,14 @@ export default function About({ previewContent = null }) {
               {canEditDirectly && (
                 <button
                   onClick={() => resetSection("all")}
-                  disabled={resetting}
+                  disabled={resetMutation.isPending}
                   className="btn border border-warning/25 bg-warning/10 text-warning-content hover:bg-warning/15"
                 >
-                  {resetting ? "Resetting..." : "Reset All to Defaults"}
+                  {resetMutation.isPending ? "Resetting..." : "Reset All to Defaults"}
                 </button>
               )}
-              <Button variant="primary" onClick={handleSave} disabled={saving}>
-                {saving
+              <Button variant="primary" onClick={handleSave} disabled={saveMutation.isPending}>
+                {saveMutation.isPending
                   ? canEditDirectly
                     ? "Saving..."
                     : "Submitting..."
@@ -482,7 +459,7 @@ export default function About({ previewContent = null }) {
                   <Button
                     variant="secondary"
                     onClick={() => resetSection("hero")}
-                    disabled={resetting}
+                    disabled={resetMutation.isPending}
                   >
                     Reset Hero
                   </Button>
@@ -525,7 +502,7 @@ export default function About({ previewContent = null }) {
                   <Button
                     variant="secondary"
                     onClick={() => resetSection("mission")}
-                    disabled={resetting}
+                    disabled={resetMutation.isPending}
                   >
                     Reset Mission
                   </Button>
@@ -567,7 +544,7 @@ export default function About({ previewContent = null }) {
                     <Button
                       variant="secondary"
                       onClick={() => resetSection("getInvolved")}
-                      disabled={resetting}
+                      disabled={resetMutation.isPending}
                     >
                       Reset Section
                     </Button>
@@ -603,7 +580,11 @@ export default function About({ previewContent = null }) {
 
         {editing && canEditDirectly && (
           <div className="mb-6 flex justify-end">
-            <Button variant="secondary" onClick={() => resetSection("cards")} disabled={resetting}>
+            <Button
+              variant="secondary"
+              onClick={() => resetSection("cards")}
+              disabled={resetMutation.isPending}
+            >
               Reset Programme Cards
             </Button>
           </div>

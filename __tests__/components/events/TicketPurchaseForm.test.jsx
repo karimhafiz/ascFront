@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import TicketPurchaseForm from "../../../src/components/events/TicketPurchaseForm";
 import "@testing-library/jest-dom";
 
@@ -32,15 +33,18 @@ const baseEvent = {
 
 function renderForm(eventOverrides = {}, props = {}) {
   const event = { ...baseEvent, ...eventOverrides };
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <MemoryRouter>
-      <TicketPurchaseForm
-        event={event}
-        eventId={event._id}
-        onTournamentSignup={jest.fn()}
-        {...props}
-      />
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <TicketPurchaseForm
+          event={event}
+          eventId={event._id}
+          onTournamentSignup={jest.fn()}
+          {...props}
+        />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 }
 

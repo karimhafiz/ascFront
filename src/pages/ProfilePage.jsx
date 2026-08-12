@@ -289,7 +289,11 @@ export default function ProfilePage() {
                     </h3>
                     <div className="space-y-4">
                       {enrollments.map((enrollment) => (
-                        <EnrollmentRow key={enrollment._id} enrollment={enrollment} />
+                        <EnrollmentRow
+                          key={enrollment._id}
+                          enrollment={enrollment}
+                          onAction={refreshProfile}
+                        />
                       ))}
                     </div>
                   </div>

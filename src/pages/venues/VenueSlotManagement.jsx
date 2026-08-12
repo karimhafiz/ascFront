@@ -7,6 +7,7 @@ import { fetchWithAuth } from "../../auth/auth";
 import { slugToId } from "../../util/util";
 import ScheduleEditor from "./venueSlots/ScheduleEditor";
 import SlotList from "./venueSlots/SlotList";
+import { queryKeys } from "../../api/queryKeys";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -20,7 +21,7 @@ export default function VenueSlotManagement() {
   const [savingSchedule, setSavingSchedule] = useState(false);
 
   const { data: venue, isLoading: venueLoading } = useQuery({
-    queryKey: ["venue", venueId],
+    queryKey: queryKeys.venues.detail(venueId),
     queryFn: async () => {
       const res = await fetch(`${API}venues/${venueId}`);
       const data = await res.json().catch(() => null);
@@ -47,7 +48,7 @@ export default function VenueSlotManagement() {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error || "Failed to save schedule.");
-      queryClient.invalidateQueries({ queryKey: ["venue", venueId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.venues.detail(venueId) });
     } finally {
       setSavingSchedule(false);
     }
@@ -61,7 +62,10 @@ export default function VenueSlotManagement() {
     });
     const data = await res.json().catch(() => null);
     if (!res.ok) throw new Error(data?.error || "Failed to generate slots.");
-    queryClient.invalidateQueries({ queryKey: ["venue-slots-all", venueId], exact: false });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.venues.slotsAll(venueId),
+      exact: false,
+    });
     return data.message;
   };
 

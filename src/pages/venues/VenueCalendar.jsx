@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/src/style.css";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../../api/queryKeys";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -22,7 +23,7 @@ export default function VenueCalendar({ venueId, selectedDate, onSelectDate }) {
   const monthTo = toLocalDateStr(new Date(month.getFullYear(), month.getMonth() + 1, 0));
 
   const { data: rangeData } = useQuery({
-    queryKey: ["venue-available-dates", venueId, monthFrom, monthTo],
+    queryKey: queryKeys.venues.availableDates(venueId, monthFrom, monthTo),
     enabled: !!venueId,
     queryFn: async () => {
       const res = await fetch(`${API}venues/${venueId}/slots?from=${monthFrom}&to=${monthTo}`);

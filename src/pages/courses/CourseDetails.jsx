@@ -9,6 +9,8 @@ import EnrolledPanel from "../../components/courses/EnrolledPanel";
 import CourseInfoGrid from "../../components/courses/CourseInfoGrid";
 import CourseDetailsBanner from "../../components/courses/CourseDetailsBanner";
 import { useCourse } from "../../hooks/useCourses";
+import { useCourseEnrollMutation } from "../../hooks/useCourseMutation";
+import { queryKeys } from "../../api/queryKeys";
 
 const INTERVAL_LABELS = { month: "month", year: "year" };
 
@@ -24,7 +26,6 @@ export default function CourseDetails() {
     return parseJwt(token)?.email || "";
   });
   const [phone, setPhone] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
   const [enrollError, setEnrollError] = useState("");
   const [multiMode, setMultiMode] = useState(false);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
@@ -51,7 +52,7 @@ export default function CourseDetails() {
   const { data: course, isLoading, error } = useCourse(courseId);
 
   const { data: enrollmentData } = useQuery({
-    queryKey: ["my-enrollment", courseId],
+    queryKey: queryKeys.courses.enrollment(courseId),
     queryFn: async () => {
       const res = await fetchWithAuth(
         `${import.meta.env.VITE_DEV_URI}courses/${courseId}/my-enrollment`
@@ -64,7 +65,9 @@ export default function CourseDetails() {
 
   const myEnrollment = enrollmentData?.enrollment;
 
-  const handleEnroll = async () => {
+  const enrollMutation = useCourseEnrollMutation(courseId);
+
+  const handleEnroll = () => {
     setEnrollError("");
     if (!email) {
       setEnrollError("Please enter your email.");
@@ -78,37 +81,27 @@ export default function CourseDetails() {
       setEnrollError("Please enter a valid UK phone number (e.g. 07123456789 or +447123456789).");
       return;
     }
-    try {
-      setIsProcessing(true);
-      const enrollParticipants = participants
-        .filter((p) => p.name.trim())
-        .map((p) => ({ ...p, email: p.email || email }));
-      if (!enrollParticipants.length) {
-        setEnrollError("Please enter at least one participant's name.");
-        setIsProcessing(false);
-        return;
-      }
-
-      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}courses/${courseId}/enroll`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          phone: phone.trim(),
-          participants: enrollParticipants,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Enrollment failed");
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        navigate(`/course-confirmation?courseId=${courseId}&free=true`);
-      }
-    } catch (err) {
-      setEnrollError(err.message);
-      setIsProcessing(false);
+    const enrollParticipants = participants
+      .filter((p) => p.name.trim())
+      .map((p) => ({ ...p, email: p.email || email }));
+    if (!enrollParticipants.length) {
+      setEnrollError("Please enter at least one participant's name.");
+      return;
     }
+
+    enrollMutation.mutate(
+      { email, phone: phone.trim(), participants: enrollParticipants },
+      {
+        onSuccess: (data) => {
+          if (data.url) {
+            window.location.href = data.url;
+          } else {
+            navigate(`/course-confirmation?courseId=${courseId}&free=true`);
+          }
+        },
+        onError: (err) => setEnrollError(err.message),
+      }
+    );
   };
 
   if (isLoading)
@@ -146,7 +139,7 @@ export default function CourseDetails() {
           <img
             src={course.images[0]}
             alt={course.title}
-            className="max-h-[35vh] md:max-h-[50vh] w-full rounded-[2rem] object-cover shadow-[var(--shadow-strong)]"
+            className="max-h-[35vh] md:max-h-[50vh] w-full rounded-4xl object-cover shadow-(--shadow-strong)"
           />
         </div>
       ) : (
@@ -199,7 +192,7 @@ export default function CourseDetails() {
                     enrollment={myEnrollment}
                     onChanged={() =>
                       queryClient.invalidateQueries({
-                        queryKey: ["my-enrollment", courseId],
+                        queryKey: queryKeys.courses.enrollment(courseId),
                       })
                     }
                   />
@@ -487,9 +480,9 @@ export default function CourseDetails() {
                   variant="primary"
                   className="w-full"
                   onClick={handleEnroll}
-                  disabled={isProcessing}
+                  disabled={enrollMutation.isPending}
                 >
-                  {isProcessing ? (
+                  {enrollMutation.isPending ? (
                     <span className="flex items-center justify-center">
                       <Spinner size="sm" />
                       <span className="ml-3">Redirecting to payment...</span>

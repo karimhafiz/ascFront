@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { parseJwt, getAuthToken, fetchWithAuth, isAuthenticated } from "../../auth/auth";
+import { parseJwt, getAuthToken, isAuthenticated } from "../../auth/auth";
 import { Button, GlassCard, Spinner } from "../ui";
+import { useCheckoutMutation } from "../../hooks/useCheckoutMutation";
 
 const INTERVAL_LABELS = { week: "week", month: "month" };
 
@@ -18,11 +19,12 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup,
     const payload = parseJwt(token);
     return payload?.email || "";
   });
-  const [isProcessing, setIsProcessing] = useState(false);
   const [buyError, setBuyError] = useState("");
   const [awaitingConfirm, setAwaitingConfirm] = useState(false);
 
-  const handleBuyTickets = async () => {
+  const checkoutMutation = useCheckoutMutation(loggedIn);
+
+  const handleBuyTickets = () => {
     setBuyError("");
     setAwaitingConfirm(false);
 
@@ -55,45 +57,22 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup,
       return;
     }
 
-    try {
-      setIsProcessing(true);
-
-      const payload = {
+    checkoutMutation.mutate(
+      {
         eventId,
         email,
         quantity: isSubscription ? 1 : parseInt(quantity) || 1,
-      };
-
-      let response;
-      if (loggedIn) {
-        response = await fetchWithAuth(
-          `${import.meta.env.VITE_DEV_URI}payments/create-checkout-session`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          }
-        );
-      } else {
-        response = await fetch(`${import.meta.env.VITE_DEV_URI}payments/guest-checkout-session`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+      },
+      {
+        onSuccess: (data) => {
+          window.location.href = data.url;
+        },
+        onError: (err) => {
+          console.error("Checkout error:", err);
+          setBuyError(err.message || "Something went wrong. Please try again.");
+        },
       }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create checkout session");
-      }
-
-      window.location.href = data.url;
-    } catch (err) {
-      console.error("Checkout error:", err);
-      setBuyError(err.message || "Something went wrong. Please try again.");
-      setIsProcessing(false);
-    }
+    );
   };
 
   const interval = INTERVAL_LABELS[event.subscriptionInterval] || "month";
@@ -269,9 +248,11 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup,
                 variant="primary"
                 className="w-full"
                 onClick={handleBuyTickets}
-                disabled={isProcessing || (!isSubscription && event.ticketsAvailable === 0)}
+                disabled={
+                  checkoutMutation.isPending || (!isSubscription && event.ticketsAvailable === 0)
+                }
               >
-                {isProcessing ? (
+                {checkoutMutation.isPending ? (
                   <span className="flex items-center justify-center">
                     <Spinner size="sm" />
                     <span className="ml-3">Redirecting to payment...</span>

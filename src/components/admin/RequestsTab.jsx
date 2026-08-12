@@ -5,15 +5,16 @@ import { fetchWithAuth } from "../../auth/auth";
 import ConfirmModal from "../common/ConfirmModal";
 import { formatDate } from "./adminHelpers";
 import { REQUEST_STATUS_STYLES } from "../../util/pageContentRequestStatus";
+import { usePageContentRequestReviewMutation } from "../../hooks/usePageContentMutation";
 import { API } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
 
 const PAGE_LABELS = { home: "Home", about: "About" };
 
 export default function RequestsTab() {
-  const [reviewing, setReviewing] = useState(null);
   const [modal, setModal] = useState(null);
   const queryClient = useQueryClient();
+  const reviewMutation = usePageContentRequestReviewMutation();
 
   const {
     data: requests,
@@ -29,34 +30,12 @@ export default function RequestsTab() {
   });
 
   const error = queryError?.message;
+  const reviewingId = reviewMutation.isPending ? reviewMutation.variables?.id : null;
 
   const setRequestStatus = (id, patch) => {
     queryClient.setQueryData(queryKeys.pageContentRequests.all, (prev) =>
       prev ? prev.map((r) => (r._id === id ? { ...r, ...patch } : r)) : prev
     );
-  };
-
-  const executeReview = async (id, action) => {
-    setReviewing(id);
-    try {
-      const res = await fetchWithAuth(`${API}pageContentRequests/${id}/${action}`, {
-        method: "PATCH",
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setRequestStatus(id, {
-          status: data.request.status,
-          reviewedBy: data.request.reviewedBy,
-          reviewedAt: data.request.reviewedAt,
-        });
-      } else {
-        alert(data.error || data.message);
-      }
-    } catch {
-      alert(`Failed to ${action} request`);
-    } finally {
-      setReviewing(null);
-    }
   };
 
   const promptReview = (request, action) => {
@@ -69,7 +48,19 @@ export default function RequestsTab() {
       confirmLabel: isApprove ? "Approve" : "Decline",
       onConfirm: () => {
         setModal(null);
-        executeReview(request._id, action);
+        reviewMutation.mutate(
+          { id: request._id, action },
+          {
+            onSuccess: (data) => {
+              setRequestStatus(request._id, {
+                status: data.request.status,
+                reviewedBy: data.request.reviewedBy,
+                reviewedAt: data.request.reviewedAt,
+              });
+            },
+            onError: (err) => alert(err.message || `Failed to ${action} request`),
+          }
+        );
       },
     });
   };
@@ -99,7 +90,7 @@ export default function RequestsTab() {
             <RequestGroup
               title="Pending"
               requests={pending}
-              reviewing={reviewing}
+              reviewing={reviewingId}
               onApprove={(r) => promptReview(r, "approve")}
               onDecline={(r) => promptReview(r, "decline")}
             />

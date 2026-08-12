@@ -1,39 +1,44 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { isAuthenticated, fetchWithAuth } from "../../auth/auth";
 import TicketCard from "../../components/tickets/TicketCard";
 import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
+import { API } from "../../api/apiClient";
+import { queryKeys } from "../../api/queryKeys";
 
 export default function TicketPage() {
   const { ticketCode } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [tickets, setTickets] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   // Support multi-ticket printing via ?codes=TKT-A,TKT-B query param
   const codesParam = searchParams.get("codes");
   const codes = codesParam ? codesParam.split(",").filter(Boolean) : [ticketCode];
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate("/login");
-      return;
-    }
-    Promise.all(
-      codes.map((code) =>
-        fetchWithAuth(`${import.meta.env.VITE_DEV_URI}tickets/${code}`).then(async (res) => {
-          if (!res.ok) throw new Error(`Ticket ${code} not found`);
-          return res.json();
-        })
-      )
-    )
-      .then(setTickets)
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticketCode, codesParam, navigate]);
+    if (!isAuthenticated()) navigate("/login");
+  }, [navigate]);
+
+  const {
+    data: tickets = [],
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: queryKeys.tickets.byCodes(codes),
+    queryFn: () =>
+      Promise.all(
+        codes.map((code) =>
+          fetchWithAuth(`${API}tickets/${code}`).then(async (res) => {
+            if (!res.ok) throw new Error(`Ticket ${code} not found`);
+            return res.json();
+          })
+        )
+      ),
+    enabled: isAuthenticated(),
+  });
+
+  const error = queryError?.message;
 
   // Auto-print when opened with ?print=true (e.g. from admin dashboard)
   useEffect(() => {
@@ -43,7 +48,7 @@ export default function TicketPage() {
     }
   }, [tickets, searchParams]);
 
-  if (loading)
+  if (loading || !isAuthenticated())
     return (
       <PageContainer center>
         <div className="flex flex-col items-center gap-3">

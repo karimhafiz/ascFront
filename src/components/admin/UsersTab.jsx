@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { fetchWithAuth } from "../../auth/auth";
+import { useUserBanMutation, useUserRoleMutation } from "../../hooks/useUserAdminMutation";
 import SortableHeader from "../common/SortableHeader";
 import ConfirmModal from "../common/ConfirmModal";
 import { formatDate, roleBadgeClass, usePagination } from "./adminHelpers";
@@ -9,8 +9,6 @@ const ROLE_ORDER = { admin: 0, moderator: 1, user: 2 };
 const ROLE_LABELS = { admin: "Admin", moderator: "Moderator", user: "User" };
 
 export default function UsersTab({ users, currentUserId, onRoleChange, onBanToggle }) {
-  const [updating, setUpdating] = useState(null);
-  const [banning, setBanning] = useState(null);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState({ key: null, dir: "asc" });
   const [modal, setModal] = useState(null);
@@ -36,39 +34,8 @@ export default function UsersTab({ users, currentUserId, onRoleChange, onBanTogg
 
   const pg = usePagination(sorted, [search, sort.key, sort.dir]);
 
-  const executeRole = async (userId, newRole) => {
-    setUpdating(userId);
-    try {
-      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}admin/users/${userId}/role`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: newRole }),
-      });
-      const data = await res.json();
-      if (res.ok) onRoleChange(userId, newRole);
-      else alert(data.error || data.message);
-    } catch {
-      alert("Failed to update role");
-    } finally {
-      setUpdating(null);
-    }
-  };
-
-  const executeBan = async (userId) => {
-    setBanning(userId);
-    try {
-      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}admin/users/${userId}/ban`, {
-        method: "PATCH",
-      });
-      const data = await res.json();
-      if (res.ok) onBanToggle(userId, data.isBanned);
-      else alert(data.error || data.message);
-    } catch {
-      alert("Failed to update ban status");
-    } finally {
-      setBanning(null);
-    }
-  };
+  const roleMutation = useUserRoleMutation();
+  const banMutation = useUserBanMutation();
 
   const promptRoleChange = (user, newRole) => {
     if (newRole === user.role) return;
@@ -79,7 +46,13 @@ export default function UsersTab({ users, currentUserId, onRoleChange, onBanTogg
       confirmLabel: isPromotion ? "Promote" : "Demote",
       onConfirm: () => {
         setModal(null);
-        executeRole(user._id, newRole);
+        roleMutation.mutate(
+          { userId: user._id, newRole },
+          {
+            onSuccess: () => onRoleChange(user._id, newRole),
+            onError: (err) => alert(err.message || "Failed to update role"),
+          }
+        );
       },
     });
   };
@@ -94,7 +67,13 @@ export default function UsersTab({ users, currentUserId, onRoleChange, onBanTogg
       confirmLabel: willBan ? "Ban" : "Unban",
       onConfirm: () => {
         setModal(null);
-        executeBan(user._id);
+        banMutation.mutate(
+          { userId: user._id },
+          {
+            onSuccess: (data) => onBanToggle(user._id, data.isBanned),
+            onError: (err) => alert(err.message || "Failed to update ban status"),
+          }
+        );
       },
     });
   };
@@ -164,7 +143,7 @@ export default function UsersTab({ users, currentUserId, onRoleChange, onBanTogg
                 <div className="flex items-center gap-2 mt-3">
                   <select
                     value={u.role}
-                    disabled={updating === u._id}
+                    disabled={roleMutation.isPending && roleMutation.variables?.userId === u._id}
                     onChange={(e) => promptRoleChange(u, e.target.value)}
                     className="glass-input glass-select text-xs px-2 py-1.5 disabled:opacity-50 flex-1"
                   >
@@ -174,14 +153,18 @@ export default function UsersTab({ users, currentUserId, onRoleChange, onBanTogg
                   </select>
                   <button
                     onClick={() => promptBan(u)}
-                    disabled={banning === u._id}
+                    disabled={banMutation.isPending && banMutation.variables?.userId === u._id}
                     className={`text-xs font-medium px-4 py-1.5 rounded-lg border transition-colors cursor-pointer disabled:opacity-50 ${
                       u.isBanned
                         ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
                         : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
                     }`}
                   >
-                    {banning === u._id ? "\u2026" : u.isBanned ? "Unban" : "Ban"}
+                    {banMutation.isPending && banMutation.variables?.userId === u._id
+                      ? "\u2026"
+                      : u.isBanned
+                        ? "Unban"
+                        : "Ban"}
                   </button>
                 </div>
               )}
@@ -298,7 +281,9 @@ export default function UsersTab({ users, currentUserId, onRoleChange, onBanTogg
                       <div className="flex items-center justify-center gap-2">
                         <select
                           value={u.role}
-                          disabled={updating === u._id}
+                          disabled={
+                            roleMutation.isPending && roleMutation.variables?.userId === u._id
+                          }
                           onChange={(e) => promptRoleChange(u, e.target.value)}
                           className="glass-input glass-select text-xs px-2 py-1 disabled:opacity-50"
                         >
@@ -308,14 +293,20 @@ export default function UsersTab({ users, currentUserId, onRoleChange, onBanTogg
                         </select>
                         <button
                           onClick={() => promptBan(u)}
-                          disabled={banning === u._id}
+                          disabled={
+                            banMutation.isPending && banMutation.variables?.userId === u._id
+                          }
                           className={`text-xs font-medium px-3 py-1 rounded-lg border transition-colors cursor-pointer disabled:opacity-50 ${
                             u.isBanned
                               ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
                               : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
                           }`}
                         >
-                          {banning === u._id ? "\u2026" : u.isBanned ? "Unban" : "Ban"}
+                          {banMutation.isPending && banMutation.variables?.userId === u._id
+                            ? "\u2026"
+                            : u.isBanned
+                              ? "Unban"
+                              : "Ban"}
                         </button>
                       </div>
                     )}

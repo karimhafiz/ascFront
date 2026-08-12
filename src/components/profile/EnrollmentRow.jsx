@@ -1,27 +1,37 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { fetchWithAuth } from "../../auth/auth";
+import {
+  useEnrollmentCancelMutation,
+  useEnrollmentEditParticipantMutation,
+  useEnrollmentReactivateMutation,
+  useEnrollmentRemoveParticipantMutation,
+  useEnrollmentUpdatePhoneMutation,
+} from "../../hooks/useEnrollmentMutation";
 import { optimizeCloudinaryUrl, toSlug, validatePhone } from "../../util/util";
 import ConfirmModal from "../common/ConfirmModal";
 import { formatCurrency, INTERVAL_ADJ, CATEGORY_COLORS } from "./profileHelpers";
 
-export default function EnrollmentRow({ enrollment }) {
+export default function EnrollmentRow({ enrollment, onAction }) {
   const [expanded, setExpanded] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
   const [cancelDone, setCancelDone] = useState(enrollment.subscriptionStatus === "cancelled");
-  const [reactivating, setReactivating] = useState(false);
   const [participants, setParticipants] = useState(enrollment.participants || []);
-  const [removingIdx, setRemovingIdx] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", age: "" });
-  const [savingEdit, setSavingEdit] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const [toast, setToast] = useState(null);
   const [editingPhone, setEditingPhone] = useState(false);
   const [phoneValue, setPhoneValue] = useState(enrollment.buyerPhone || "");
-  const [savingPhone, setSavingPhone] = useState(false);
   const [phoneError, setPhoneError] = useState("");
   const [currentPhone, setCurrentPhone] = useState(enrollment.buyerPhone || "");
+
+  // Hooks must run unconditionally on every render, so these are declared
+  // before the `!course` early return below.
+  const savePhoneMutation = useEnrollmentUpdatePhoneMutation(enrollment._id);
+  const cancelMutation = useEnrollmentCancelMutation(enrollment._id);
+  const reactivateMutation = useEnrollmentReactivateMutation(enrollment._id);
+  const removeParticipantMutation = useEnrollmentRemoveParticipantMutation(enrollment._id);
+  const editParticipantMutation = useEnrollmentEditParticipantMutation(enrollment._id);
+
   const course = enrollment.courseId;
   if (!course) return null;
   const gradient = CATEGORY_COLORS[course.category] || CATEGORY_COLORS.Other;
@@ -34,7 +44,7 @@ export default function EnrollmentRow({ enrollment }) {
     setTimeout(() => setToast(null), 4000);
   };
 
-  const handleSavePhone = async () => {
+  const handleSavePhone = () => {
     setPhoneError("");
     if (!phoneValue.trim()) {
       setPhoneError("Phone number is required.");
@@ -44,26 +54,16 @@ export default function EnrollmentRow({ enrollment }) {
       setPhoneError("Please enter a valid UK phone number.");
       return;
     }
-    setSavingPhone(true);
-    try {
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ buyerPhone: phoneValue.trim() }),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update phone");
-      setCurrentPhone(phoneValue.trim());
-      setEditingPhone(false);
-      showToast("Phone number updated", "success");
-    } catch (err) {
-      setPhoneError(err.message);
-    } finally {
-      setSavingPhone(false);
-    }
+    const phone = phoneValue.trim();
+    savePhoneMutation.mutate(phone, {
+      onSuccess: () => {
+        setCurrentPhone(phone);
+        setEditingPhone(false);
+        showToast("Phone number updated", "success");
+        onAction?.();
+      },
+      onError: (err) => setPhoneError(err.message),
+    });
   };
 
   const handleCancel = () => {
@@ -74,46 +74,31 @@ export default function EnrollmentRow({ enrollment }) {
         : "Are you sure you want to cancel? You'll keep access until the end of your current billing period.",
       confirmText: "Yes, cancel",
       variant: "danger",
-      onConfirm: async () => {
+      onConfirm: () => {
         setConfirm(null);
-        setCancelling(true);
-        try {
-          const res = await fetchWithAuth(
-            `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/cancel`,
-            { method: "POST" }
-          );
-          const data = await res.json();
-          if (res.ok) setCancelDone(true);
-          else showToast(data.error || "Failed to cancel");
-        } catch {
-          showToast("Something went wrong");
-        }
-        setCancelling(false);
+        cancelMutation.mutate(undefined, {
+          onSuccess: () => {
+            setCancelDone(true);
+            onAction?.();
+          },
+          onError: (err) => showToast(err.message || "Failed to cancel"),
+        });
       },
     });
   };
 
-  const handleReactivate = async () => {
-    setReactivating(true);
-    try {
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/reactivate`,
-        { method: "POST" }
-      );
-      const data = await res.json();
-      if (res.ok) {
+  const handleReactivate = () => {
+    reactivateMutation.mutate(undefined, {
+      onSuccess: (data) => {
         if (data.url) {
           window.location.href = data.url;
           return;
         }
         setCancelDone(false);
-      } else {
-        showToast(data.error || "Failed to reactivate");
-      }
-    } catch {
-      showToast("Something went wrong");
-    }
-    setReactivating(false);
+        onAction?.();
+      },
+      onError: (err) => showToast(err.message || "Failed to reactivate"),
+    });
   };
 
   const handleRemoveParticipant = (index) => {
@@ -123,28 +108,18 @@ export default function EnrollmentRow({ enrollment }) {
       message: `Remove ${name} from this course? This cannot be undone.`,
       confirmText: "Remove",
       variant: "danger",
-      onConfirm: async () => {
+      onConfirm: () => {
         setConfirm(null);
-        setRemovingIdx(index);
-        try {
-          const res = await fetchWithAuth(
-            `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/remove-participant`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ participantId: participants[index]._id }),
-            }
-          );
-          const data = await res.json();
-          if (res.ok) {
-            setParticipants(data.participants);
-          } else {
-            showToast(data.error || "Failed to remove participant");
+        removeParticipantMutation.mutate(
+          { index, participantId: participants[index]._id },
+          {
+            onSuccess: (data) => {
+              setParticipants(data.participants);
+              onAction?.();
+            },
+            onError: (err) => showToast(err.message || "Failed to remove participant"),
           }
-        } catch {
-          showToast("Something went wrong");
-        }
-        setRemovingIdx(null);
+        );
       },
     });
   };
@@ -159,36 +134,27 @@ export default function EnrollmentRow({ enrollment }) {
     setEditForm({ name: "", age: "" });
   };
 
-  const handleSaveEdit = async (participantId) => {
+  const handleSaveEdit = (participantId) => {
     if (!editForm.name.trim()) {
       showToast("Name cannot be empty");
       return;
     }
-    setSavingEdit(true);
-    try {
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/participants/${participantId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: editForm.name.trim(),
-            age: editForm.age ? Number(editForm.age) : undefined,
-          }),
-        }
-      );
-      const data = await res.json();
-      if (res.ok) {
-        setParticipants(data.participants);
-        setEditingId(null);
-        showToast("Participant updated", "success");
-      } else {
-        showToast(data.error || "Failed to update participant");
+    editParticipantMutation.mutate(
+      {
+        participantId,
+        name: editForm.name.trim(),
+        age: editForm.age ? Number(editForm.age) : undefined,
+      },
+      {
+        onSuccess: (data) => {
+          setParticipants(data.participants);
+          setEditingId(null);
+          showToast("Participant updated", "success");
+          onAction?.();
+        },
+        onError: (err) => showToast(err.message || "Failed to update participant"),
       }
-    } catch {
-      showToast("Something went wrong");
-    }
-    setSavingEdit(false);
+    );
   };
 
   return (
@@ -310,18 +276,18 @@ export default function EnrollmentRow({ enrollment }) {
           {cancelDone ? (
             <button
               onClick={handleReactivate}
-              disabled={reactivating}
+              disabled={reactivateMutation.isPending}
               className="text-xs text-green-600 hover:text-green-800 font-medium hover:underline transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
-              {reactivating ? "Reactivating..." : "Reactivate"}
+              {reactivateMutation.isPending ? "Reactivating..." : "Reactivate"}
             </button>
           ) : (
             <button
               onClick={handleCancel}
-              disabled={cancelling}
+              disabled={cancelMutation.isPending}
               className="text-xs text-red-500 hover:text-red-700 font-medium hover:underline transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
-              {cancelling ? "Cancelling..." : "Cancel enrollment"}
+              {cancelMutation.isPending ? "Cancelling..." : "Cancel enrollment"}
             </button>
           )}
         </div>
@@ -344,10 +310,10 @@ export default function EnrollmentRow({ enrollment }) {
             <div className="flex gap-2">
               <button
                 onClick={handleSavePhone}
-                disabled={savingPhone}
+                disabled={savePhoneMutation.isPending}
                 className="btn btn-xs btn-primary text-[10px]"
               >
-                {savingPhone ? "Saving..." : "Save"}
+                {savePhoneMutation.isPending ? "Saving..." : "Save"}
               </button>
               <button
                 onClick={() => {
@@ -441,17 +407,17 @@ export default function EnrollmentRow({ enrollment }) {
                 <div className="flex gap-1.5 justify-end">
                   <button
                     onClick={cancelEdit}
-                    disabled={savingEdit}
+                    disabled={editParticipantMutation.isPending}
                     className="btn btn-xs btn-ghost text-[10px]"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => handleSaveEdit(p._id)}
-                    disabled={savingEdit}
+                    disabled={editParticipantMutation.isPending}
                     className="btn btn-xs btn-primary text-[10px]"
                   >
-                    {savingEdit ? "Saving..." : "Save"}
+                    {editParticipantMutation.isPending ? "Saving..." : "Save"}
                   </button>
                 </div>
               </div>
@@ -498,11 +464,12 @@ export default function EnrollmentRow({ enrollment }) {
                 {participants.length > 1 && !cancelDone && (
                   <button
                     onClick={() => handleRemoveParticipant(i)}
-                    disabled={removingIdx !== null}
+                    disabled={removeParticipantMutation.isPending}
                     title={`Remove ${p.name}`}
                     className="opacity-0 group-hover/participant:opacity-100 transition-opacity text-red-400 hover:text-red-600 disabled:opacity-30 shrink-0 cursor-pointer disabled:cursor-not-allowed"
                   >
-                    {removingIdx === i ? (
+                    {removeParticipantMutation.isPending &&
+                    removeParticipantMutation.variables?.index === i ? (
                       <div className="w-4 h-4 rounded-full border-2 border-red-300 border-t-red-500 animate-spin" />
                     ) : (
                       <svg

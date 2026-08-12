@@ -1,17 +1,21 @@
 import React, { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import ImageWithFallback from "../../components/common/ImageWithFallback";
 import PageEditBar from "../../components/common/PageEditBar";
 import CourseCard from "../../components/courses/CourseCard";
 import EventCard from "../../components/events/EventCard";
 import Button from "../../components/ui/Button";
-import { fetchWithAuth, isAdmin, isModerator } from "../../auth/auth";
+import { isAdmin, isModerator } from "../../auth/auth";
 import { compressImage } from "../../util/compressImage";
 import { useEvents } from "../../hooks/useEvents";
 import { useCourses } from "../../hooks/useCourses";
+import {
+  usePageContentSaveMutation,
+  usePageContentResetMutation,
+} from "../../hooks/usePageContentMutation";
 import { API } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
 
@@ -42,13 +46,10 @@ function SectionHeader({ kicker, title, action }) {
 export default function Home({ previewContent = null }) {
   const { data: events } = useEvents();
   const { data: courses } = useCourses();
-  const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(DEFAULTS);
   const [heroImagePreview, setHeroImagePreview] = useState(null);
   const [heroImageFile, setHeroImageFile] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [resetting, setResetting] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -88,30 +89,24 @@ export default function Home({ previewContent = null }) {
     setSaveError(null);
   };
 
-  const doReset = async () => {
+  const resetMutation = usePageContentResetMutation("home");
+
+  const doReset = () => {
     setConfirmOpen(false);
-    setResetting(true);
     setSaveError(null);
-    try {
-      const res = await fetchWithAuth(`${API}pageContent/home`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(body?.message || `Server error (${res.status})`);
-      }
-      queryClient.setQueryData(queryKeys.pageContent.home, {});
-      setHeroImagePreview(null);
-      setHeroImageFile(null);
-      setEditing(false);
-    } catch (err) {
-      setSaveError(err.message || "Failed to reset. Please try again.");
-    } finally {
-      setResetting(false);
-    }
+    resetMutation.mutate("all", {
+      onSuccess: () => {
+        setHeroImagePreview(null);
+        setHeroImageFile(null);
+        setEditing(false);
+      },
+      onError: (err) => setSaveError(err.message || "Failed to reset. Please try again."),
+    });
   };
 
-  const handleSave = async () => {
+  const saveMutation = usePageContentSaveMutation("home", canEditDirectly);
+
+  const handleSave = () => {
     setSaveError(null);
     setSubmitSuccess(null);
 
@@ -124,49 +119,35 @@ export default function Home({ previewContent = null }) {
       return;
     }
 
-    setSaving(true);
-    try {
-      const formData = new FormData();
-      formData.append(
-        "contentData",
-        JSON.stringify({
-          heroTitle: draft.heroTitle,
-          heroDescription: draft.heroDescription,
-          heroBadgeText: draft.heroBadgeText,
-        })
-      );
-      if (heroImageFile) formData.append("heroImage", heroImageFile);
+    const formData = new FormData();
+    formData.append(
+      "contentData",
+      JSON.stringify({
+        heroTitle: draft.heroTitle,
+        heroDescription: draft.heroDescription,
+        heroBadgeText: draft.heroBadgeText,
+      })
+    );
+    if (heroImageFile) formData.append("heroImage", heroImageFile);
 
-      const url = canEditDirectly ? `${API}pageContent/home` : `${API}pageContentRequests/home`;
-      const res = await fetchWithAuth(url, {
-        method: canEditDirectly ? "PUT" : "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(body?.message || `Server error (${res.status})`);
-      }
-
-      if (canEditDirectly) {
-        const { pageContent: saved } = await res.json();
-        queryClient.setQueryData(queryKeys.pageContent.home, saved);
+    saveMutation.mutate(formData, {
+      onSuccess: () => {
+        if (!canEditDirectly) {
+          setSubmitSuccess("Your change request has been submitted for admin approval.");
+        }
         setEditing(false);
-      } else {
-        setSubmitSuccess("Your change request has been submitted for admin approval.");
-        setEditing(false);
-      }
-      setHeroImagePreview(null);
-      setHeroImageFile(null);
-    } catch (err) {
-      setSaveError(
-        err.message ||
-          (canEditDirectly
-            ? "Failed to save changes. Please try again."
-            : "Failed to submit request. Please try again.")
-      );
-    } finally {
-      setSaving(false);
-    }
+        setHeroImagePreview(null);
+        setHeroImageFile(null);
+      },
+      onError: (err) => {
+        setSaveError(
+          err.message ||
+            (canEditDirectly
+              ? "Failed to save changes. Please try again."
+              : "Failed to submit request. Please try again.")
+        );
+      },
+    });
   };
 
   const upcomingEvents = (events || [])
@@ -205,14 +186,14 @@ export default function Home({ previewContent = null }) {
               {canEditDirectly && (
                 <button
                   onClick={() => setConfirmOpen(true)}
-                  disabled={resetting}
+                  disabled={resetMutation.isPending}
                   className="btn border border-warning/25 bg-warning/10 text-warning-content hover:bg-warning/15"
                 >
-                  {resetting ? "Resetting..." : "Reset to Defaults"}
+                  {resetMutation.isPending ? "Resetting..." : "Reset to Defaults"}
                 </button>
               )}
-              <Button variant="primary" onClick={handleSave} disabled={saving}>
-                {saving
+              <Button variant="primary" onClick={handleSave} disabled={saveMutation.isPending}>
+                {saveMutation.isPending
                   ? canEditDirectly
                     ? "Saving..."
                     : "Submitting..."
