@@ -5,6 +5,23 @@ let _accessToken = null;
 let _expiration = null;
 let _user = null; // { id, name, email, role }
 
+// ── Proactive refresh, scheduled against the token's actual exp claim ──
+const REFRESH_BUFFER_MS = 60_000; // refresh 1 minute before actual expiry
+let _refreshTimer = null;
+
+function _scheduleRefresh() {
+  clearTimeout(_refreshTimer);
+  if (!_expiration) return;
+  const delay = Math.max(new Date(_expiration).getTime() - Date.now() - REFRESH_BUFFER_MS, 0);
+  _refreshTimer = setTimeout(async () => {
+    // This timer is only ever armed while a real token is held, so a failed
+    // refresh here means an active session just genuinely ended — worth telling
+    // the user, unlike a failed bootstrap refresh for a never-logged-in visitor.
+    const refreshed = await refreshAccessToken();
+    if (!refreshed) _notifySessionExpired();
+  }, delay);
+}
+
 // ── Subscribers — notified whenever auth state changes ──
 const _subscribers = new Set();
 
@@ -15,6 +32,19 @@ export function subscribeToAuth(fn) {
 
 function _notify() {
   _subscribers.forEach((fn) => fn());
+}
+
+// ── Subscribers — notified specifically when a refresh attempt fails,
+// i.e. the session has genuinely ended (not a manual logout) ──
+const _expiredSubscribers = new Set();
+
+export function subscribeToSessionExpired(fn) {
+  _expiredSubscribers.add(fn);
+  return () => _expiredSubscribers.delete(fn);
+}
+
+function _notifySessionExpired() {
+  _expiredSubscribers.forEach((fn) => fn());
 }
 
 export function getAuthToken() {
@@ -34,10 +64,13 @@ export function setAuth(accessToken, user) {
     _expiration = null;
   }
   _user = user || null;
+  _scheduleRefresh();
   _notify();
 }
 
 export function clearAuth() {
+  clearTimeout(_refreshTimer);
+  _refreshTimer = null;
   _accessToken = null;
   _expiration = null;
   _user = null;
@@ -127,6 +160,7 @@ export async function fetchWithAuth(url, options = {}) {
   if (!token || !isAuthenticated()) {
     const refreshed = await refreshAccessToken();
     if (!refreshed) {
+      _notifySessionExpired();
       throw new Error("Session expired. Please log in again.");
     }
     token = getAuthToken();
@@ -141,6 +175,7 @@ export async function fetchWithAuth(url, options = {}) {
   if (response.status === 401) {
     const refreshed = await refreshAccessToken();
     if (!refreshed) {
+      _notifySessionExpired();
       throw new Error("Session expired. Please log in again.");
     }
     token = getAuthToken();
