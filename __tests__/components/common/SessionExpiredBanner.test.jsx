@@ -30,26 +30,26 @@ describe("SessionExpiredBanner", () => {
 
   it("renders nothing until a session-expired event fires", () => {
     renderBanner();
-    expect(screen.queryByText(/session has expired/i)).not.toBeInTheDocument();
+    expect(screen.queryByText("Session expired")).not.toBeInTheDocument();
   });
 
   it("shows the notice when the session-expired event fires", () => {
     renderBanner();
     act(() => mockExpiredCallback());
-    expect(screen.getAllByText(/session has expired/i)[0]).toBeInTheDocument();
+    expect(screen.getByText("Session expired")).toBeInTheDocument();
   });
 
-  it("dismisses without navigating away", () => {
+  it("dismisses on click, without navigating away", () => {
     renderBanner();
     act(() => mockExpiredCallback());
-    fireEvent.click(screen.getAllByLabelText("Dismiss")[0]);
-    expect(screen.queryByText(/session has expired/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("Dismiss"));
+    expect(screen.queryByText("Session expired")).not.toBeInTheDocument();
   });
 
   it("links the login action to /login", () => {
     renderBanner();
     act(() => mockExpiredCallback());
-    const link = screen.getAllByRole("link", { name: /log in/i })[0];
+    const link = screen.getByRole("link", { name: /log in/i });
     expect(link).toHaveAttribute("href", "/login");
   });
 });
