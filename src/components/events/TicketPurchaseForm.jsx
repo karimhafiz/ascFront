@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { parseJwt, getAuthToken, isAuthenticated } from "../../auth/auth";
 import { Button, GlassCard, Spinner } from "../ui";
 import { useCheckoutMutation } from "../../hooks/useCheckoutMutation";
+import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
 
 const INTERVAL_LABELS = { week: "week", month: "month" };
 
@@ -69,7 +70,11 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup,
         },
         onError: (err) => {
           console.error("Checkout error:", err);
-          setBuyError(err.message || "Something went wrong. Please try again.");
+          setBuyError(
+            err.status === 502
+              ? STRIPE_DOWN_MESSAGE
+              : err.message || "Something went wrong. Please try again."
+          );
         },
       }
     );

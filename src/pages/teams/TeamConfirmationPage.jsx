@@ -6,6 +6,7 @@ import { toSlug } from "../../util/util";
 import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
 import { API } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
+import { fetchOrThrow } from "../../util/errorUtil";
 
 export default function TeamConfirmationPage() {
   const [searchParams] = useSearchParams();
@@ -18,7 +19,7 @@ export default function TeamConfirmationPage() {
   } = useQuery({
     queryKey: queryKeys.teams.detail(teamId),
     queryFn: async () => {
-      const res = await fetch(`${API}teams/${teamId}`);
+      const res = await fetchOrThrow(`${API}teams/${teamId}`);
       if (!res.ok) throw new Error("Failed to fetch team details");
       return res.json();
     },
@@ -30,7 +31,7 @@ export default function TeamConfirmationPage() {
   const { data: eventData } = useQuery({
     queryKey: queryKeys.events.detail(team?.event),
     queryFn: async () => {
-      const res = await fetch(`${API}events/${team.event}`);
+      const res = await fetchOrThrow(`${API}events/${team.event}`);
       if (!res.ok) return null;
       return res.json();
     },

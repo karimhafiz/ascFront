@@ -8,6 +8,7 @@ import { slugToId, formatDate } from "../../util/util";
 import moment from "moment";
 import VenueCalendar from "./VenueCalendar";
 import { queryKeys } from "../../api/queryKeys";
+import { fetchOrThrow, STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -36,7 +37,7 @@ export default function VenueBookingDetail() {
   } = useQuery({
     queryKey: queryKeys.venues.detail(venueId),
     queryFn: async () => {
-      const response = await fetch(`${API}venues/${venueId}`);
+      const response = await fetchOrThrow(`${API}venues/${venueId}`);
       const data = await response.json().catch(() => null);
       if (!response.ok) {
         throw new Error(data?.error || "Failed to load venue details.");
@@ -52,7 +53,7 @@ export default function VenueBookingDetail() {
   } = useQuery({
     queryKey: queryKeys.venues.slots(venueId, selectedDate),
     queryFn: async () => {
-      const response = await fetch(
+      const response = await fetchOrThrow(
         `${API}venues/${venueId}/slots?date=${encodeURIComponent(selectedDate)}`
       );
       const data = await response.json().catch(() => null);
@@ -105,7 +106,11 @@ export default function VenueBookingDetail() {
 
       throw new Error("Checkout URL was not returned by the server.");
     } catch (error) {
-      setErrorMessage(error.message || "Failed to start venue booking checkout.");
+      setErrorMessage(
+        error.status === 502
+          ? STRIPE_DOWN_MESSAGE
+          : error.message || "Failed to start venue booking checkout."
+      );
     } finally {
       setIsSubmitting(false);
     }

@@ -6,6 +6,7 @@ import {
   useEnrollmentReactivateMutation,
 } from "../../hooks/useEnrollmentMutation";
 import { Button } from "../ui";
+import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
 
 const INTERVAL_LABELS = { month: "month", year: "year" };
 const INTERVAL_ADJ = { month: "Monthly", year: "Yearly" };
@@ -63,7 +64,8 @@ export default function EnrolledPanel({ course, enrollment, onChanged }) {
           setNewParticipant({ name: "", age: "" });
           onChanged();
         },
-        onError: (err) => setAddParticipantError(err.message),
+        onError: (err) =>
+          setAddParticipantError(err.status === 502 ? STRIPE_DOWN_MESSAGE : err.message),
       })
       .catch(() => {});
   };
@@ -74,7 +76,8 @@ export default function EnrolledPanel({ course, enrollment, onChanged }) {
     setSubscriptionError("");
     cancelSubscriptionMutation.mutate(undefined, {
       onSuccess: () => onChanged(),
-      onError: (err) => setSubscriptionError(err.message),
+      onError: (err) =>
+        setSubscriptionError(err.status === 502 ? STRIPE_DOWN_MESSAGE : err.message),
     });
   };
 
@@ -90,7 +93,8 @@ export default function EnrolledPanel({ course, enrollment, onChanged }) {
         }
         onChanged();
       },
-      onError: (err) => setSubscriptionError(err.message),
+      onError: (err) =>
+        setSubscriptionError(err.status === 502 ? STRIPE_DOWN_MESSAGE : err.message),
     });
   };
 

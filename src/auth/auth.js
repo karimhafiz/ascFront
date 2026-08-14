@@ -1,3 +1,5 @@
+import { fetchOrThrow } from "../util/errorUtil";
+
 const API = import.meta.env.VITE_DEV_URI;
 
 // ── In-memory token store (not accessible via XSS unlike localStorage) ──
@@ -24,13 +26,19 @@ function _scheduleRefresh() {
 
 // ── Subscribers — notified whenever auth state changes ──
 const _subscribers = new Set();
+let _version = 0;
 
 export function subscribeToAuth(fn) {
   _subscribers.add(fn);
   return () => _subscribers.delete(fn);
 }
 
+export function getAuthVersion() {
+  return _version;
+}
+
 function _notify() {
+  _version++;
   _subscribers.forEach((fn) => fn());
 }
 
@@ -169,7 +177,7 @@ export async function fetchWithAuth(url, options = {}) {
   const headers = { ...(options.headers || {}) };
   headers.Authorization = `Bearer ${token}`;
 
-  const response = await fetch(url, { ...options, headers });
+  const response = await fetchOrThrow(url, { ...options, headers });
 
   // If 401, try one refresh then retry
   if (response.status === 401) {
@@ -180,7 +188,7 @@ export async function fetchWithAuth(url, options = {}) {
     }
     token = getAuthToken();
     headers.Authorization = `Bearer ${token}`;
-    return fetch(url, { ...options, headers });
+    return fetchOrThrow(url, { ...options, headers });
   }
 
   return response;

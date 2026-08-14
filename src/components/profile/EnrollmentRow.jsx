@@ -10,6 +10,7 @@ import {
 import { optimizeCloudinaryUrl, toSlug, validatePhone } from "../../util/util";
 import ConfirmModal from "../common/ConfirmModal";
 import { formatCurrency, INTERVAL_ADJ, CATEGORY_COLORS } from "./profileHelpers";
+import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
 
 export default function EnrollmentRow({ enrollment, onAction }) {
   const [expanded, setExpanded] = useState(false);
@@ -81,7 +82,8 @@ export default function EnrollmentRow({ enrollment, onAction }) {
             setCancelDone(true);
             onAction?.();
           },
-          onError: (err) => showToast(err.message || "Failed to cancel"),
+          onError: (err) =>
+            showToast(err.status === 502 ? STRIPE_DOWN_MESSAGE : err.message || "Failed to cancel"),
         });
       },
     });
@@ -97,7 +99,8 @@ export default function EnrollmentRow({ enrollment, onAction }) {
         setCancelDone(false);
         onAction?.();
       },
-      onError: (err) => showToast(err.message || "Failed to reactivate"),
+      onError: (err) =>
+        showToast(err.status === 502 ? STRIPE_DOWN_MESSAGE : err.message || "Failed to reactivate"),
     });
   };
 
@@ -117,7 +120,12 @@ export default function EnrollmentRow({ enrollment, onAction }) {
               setParticipants(data.participants);
               onAction?.();
             },
-            onError: (err) => showToast(err.message || "Failed to remove participant"),
+            onError: (err) =>
+              showToast(
+                err.status === 502
+                  ? STRIPE_DOWN_MESSAGE
+                  : err.message || "Failed to remove participant"
+              ),
           }
         );
       },

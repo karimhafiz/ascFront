@@ -6,6 +6,7 @@ import { GlassCard, PageContainer, Spinner } from "../../components/ui";
 import { toSlug } from "../../util/util";
 import { isAdmin, isModerator } from "../../auth/auth";
 import { queryKeys } from "../../api/queryKeys";
+import { fetchOrThrow } from "../../util/errorUtil";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -19,7 +20,7 @@ export default function VenueBooking() {
   } = useQuery({
     queryKey: queryKeys.venues.all,
     queryFn: async () => {
-      const response = await fetch(`${API}venues/`);
+      const response = await fetchOrThrow(`${API}venues/`);
       const data = await response.json().catch(() => null);
       if (!response.ok) {
         throw new Error(data?.error || "Failed to load venues.");

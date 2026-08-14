@@ -4,6 +4,7 @@ import {
   useEventSubscriptionReactivateMutation,
 } from "../../hooks/useEventSubscriptionMutation";
 import { Button } from "../ui";
+import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
 
 const INTERVAL_LABELS = { week: "week", month: "month" };
 const INTERVAL_ADJ = { week: "Weekly", month: "Monthly" };
@@ -38,7 +39,8 @@ export default function SubscribedPanel({ event, subscription, onChanged }) {
     setSubscriptionError("");
     cancelSubscriptionMutation.mutate(undefined, {
       onSuccess: () => onChanged(),
-      onError: (err) => setSubscriptionError(err.message),
+      onError: (err) =>
+        setSubscriptionError(err.status === 502 ? STRIPE_DOWN_MESSAGE : err.message),
     });
   };
 
@@ -54,7 +56,8 @@ export default function SubscribedPanel({ event, subscription, onChanged }) {
         }
         onChanged();
       },
-      onError: (err) => setSubscriptionError(err.message),
+      onError: (err) =>
+        setSubscriptionError(err.status === 502 ? STRIPE_DOWN_MESSAGE : err.message),
     });
   };
 

@@ -8,6 +8,7 @@ import { slugToId } from "../../util/util";
 import ScheduleEditor from "./venueSlots/ScheduleEditor";
 import SlotList from "./venueSlots/SlotList";
 import { queryKeys } from "../../api/queryKeys";
+import { fetchOrThrow } from "../../util/errorUtil";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -23,7 +24,7 @@ export default function VenueSlotManagement() {
   const { data: venue, isLoading: venueLoading } = useQuery({
     queryKey: queryKeys.venues.detail(venueId),
     queryFn: async () => {
-      const res = await fetch(`${API}venues/${venueId}`);
+      const res = await fetchOrThrow(`${API}venues/${venueId}`);
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error || "Failed to load venue.");
       return data;

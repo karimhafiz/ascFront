@@ -5,6 +5,7 @@ import { getAuthToken, isAuthenticated } from "../../auth/auth";
 import TicketCard from "../../components/tickets/TicketCard";
 import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
 import { queryKeys } from "../../api/queryKeys";
+import { fetchOrThrow } from "../../util/errorUtil";
 
 export default function OrderConfirmation() {
   const [searchParams] = useSearchParams();
@@ -20,7 +21,7 @@ export default function OrderConfirmation() {
     queryKey: queryKeys.tickets.detail(ticketId),
     queryFn: async () => {
       const token = getAuthToken();
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}tickets/${ticketId}`, {
+      const res = await fetchOrThrow(`${import.meta.env.VITE_DEV_URI}tickets/${ticketId}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error("Failed to fetch ticket details");
@@ -35,7 +36,7 @@ export default function OrderConfirmation() {
     queryKey: queryKeys.tickets.byPayment(ticket?.paymentId),
     queryFn: async () => {
       const token = getAuthToken();
-      const res = await fetch(
+      const res = await fetchOrThrow(
         `${import.meta.env.VITE_DEV_URI}tickets/by-payment/${ticket.paymentId}`,
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -54,7 +55,9 @@ export default function OrderConfirmation() {
   const { data: guestOrder, isLoading: guestLoading } = useQuery({
     queryKey: queryKeys.payments.guestOrder(sessionId),
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}payments/guest-order/${sessionId}`);
+      const res = await fetchOrThrow(
+        `${import.meta.env.VITE_DEV_URI}payments/guest-order/${sessionId}`
+      );
       if (!res.ok) throw new Error("Failed to fetch order");
       return res.json();
     },
@@ -65,7 +68,9 @@ export default function OrderConfirmation() {
   const { data: receipt } = useQuery({
     queryKey: queryKeys.payments.receipt(sessionId),
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}payments/session/${sessionId}`);
+      const res = await fetchOrThrow(
+        `${import.meta.env.VITE_DEV_URI}payments/session/${sessionId}`
+      );
       if (!res.ok) throw new Error("Failed to fetch receipt");
       return res.json();
     },

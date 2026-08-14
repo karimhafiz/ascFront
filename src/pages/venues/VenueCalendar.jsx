@@ -3,6 +3,7 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/src/style.css";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../../api/queryKeys";
+import { fetchOrThrow } from "../../util/errorUtil";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -26,7 +27,9 @@ export default function VenueCalendar({ venueId, selectedDate, onSelectDate }) {
     queryKey: queryKeys.venues.availableDates(venueId, monthFrom, monthTo),
     enabled: !!venueId,
     queryFn: async () => {
-      const res = await fetch(`${API}venues/${venueId}/slots?from=${monthFrom}&to=${monthTo}`);
+      const res = await fetchOrThrow(
+        `${API}venues/${venueId}/slots?from=${monthFrom}&to=${monthTo}`
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed to load availability.");
       return Array.isArray(data) ? { availableDates: [] } : data;

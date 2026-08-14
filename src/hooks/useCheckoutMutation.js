@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { API, fetchJSON } from "../api/apiClient";
+import { fetchOrThrow } from "../util/errorUtil";
 
 // loggedIn determines the endpoint: guest checkout has no token to attach,
 // so it deliberately can't go through fetchJSON/fetchWithAuth.
@@ -13,7 +14,7 @@ export function useCheckoutMutation(loggedIn) {
           body: JSON.stringify(payload),
         });
       }
-      const response = await fetch(`${API}payments/guest-checkout-session`, {
+      const response = await fetchOrThrow(`${API}payments/guest-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

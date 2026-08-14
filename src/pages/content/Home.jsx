@@ -18,6 +18,7 @@ import {
 } from "../../hooks/usePageContentMutation";
 import { API } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
+import { fetchOrThrow } from "../../util/errorUtil";
 
 const DEFAULTS = {
   heroTitle: "Welcome to Ayendah Sazan",
@@ -61,7 +62,7 @@ export default function Home({ previewContent = null }) {
   const { data: rawPageContent } = useQuery({
     queryKey: queryKeys.pageContent.home,
     queryFn: async () => {
-      const r = await fetch(`${API}pageContent/home`);
+      const r = await fetchOrThrow(`${API}pageContent/home`);
       return r.json();
     },
     enabled: !previewContent,

@@ -2,13 +2,14 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { API } from "../api/apiClient";
 import { setAuth, clearAuth } from "../auth/auth";
+import { fetchOrThrow } from "../util/errorUtil";
 
 export function useLogin() {
   const navigate = useNavigate();
 
   return useMutation({
     mutationFn: async ({ email, password }) => {
-      const res = await fetch(`${API}users/login`, {
+      const res = await fetchOrThrow(`${API}users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -41,7 +42,7 @@ export function useSignup() {
 
   return useMutation({
     mutationFn: async ({ name, email, password }) => {
-      const res = await fetch(`${API}users/register`, {
+      const res = await fetchOrThrow(`${API}users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
@@ -78,7 +79,7 @@ export function useLogout() {
 }
 
 export async function googleLogin(tokenId) {
-  const res = await fetch(`${API}users/google`, {
+  const res = await fetchOrThrow(`${API}users/google`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
