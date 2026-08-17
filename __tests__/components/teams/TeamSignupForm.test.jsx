@@ -5,12 +5,18 @@ import TeamSignupForm from "../../../src/components/teams/TeamSignupForm";
 import "@testing-library/jest-dom";
 
 jest.mock("../../../src/auth/auth", () => ({
-  fetchWithAuth: jest.fn(() =>
-    Promise.resolve({
+  fetchWithAuth: jest.fn((url) => {
+    if (url.includes("/register")) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ message: "Registered" }), // no url = free tournament
+      });
+    }
+    return Promise.resolve({
       ok: true,
       json: () => Promise.resolve({ teams: [] }),
-    })
-  ),
+    });
+  }),
 }));
 
 function renderWithQuery(ui) {
@@ -73,5 +79,44 @@ describe("TeamSignupForm", () => {
     expect(screen.getByPlaceholderText("Manager Name")).toBeRequired();
     expect(screen.getByPlaceholderText("Manager Email")).toBeRequired();
     expect(screen.getByPlaceholderText("Phone Number")).toBeRequired();
+  });
+
+  // Regression test: a free-tournament registration used to close the modal
+  // and hard-reload the page instead of calling the onSuccess invalidation
+  // callback the parent already wires up — silently dropping it.
+  it("should invalidate and call onSuccess/onClose on free registration instead of reloading", async () => {
+    const mockOnSuccess = jest.fn();
+    const reloadSpy = jest.fn();
+    Object.defineProperty(window, "location", {
+      value: { ...window.location, reload: reloadSpy },
+      writable: true,
+    });
+
+    await act(async () => {
+      renderWithQuery(
+        <TeamSignupForm eventId="e1" onClose={mockOnClose} onSuccess={mockOnSuccess} />
+      );
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Team Name"), {
+      target: { value: "The Test Team" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Manager Name"), {
+      target: { value: "Manager Name" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Manager Email"), {
+      target: { value: "manager@test.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Phone Number"), {
+      target: { value: "07123456789" },
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("Register Team"));
+    });
+
+    expect(mockOnClose).toHaveBeenCalled();
+    expect(mockOnSuccess).toHaveBeenCalled();
+    expect(reloadSpy).not.toHaveBeenCalled();
   });
 });

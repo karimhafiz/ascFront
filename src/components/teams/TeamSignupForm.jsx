@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchWithAuth } from "../../auth/auth";
 import { validatePhone } from "../../util/util";
 import { Button, Spinner } from "../ui";
@@ -7,7 +7,7 @@ import { API } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
 import { useTeamPayMutation } from "../../hooks/useTeamMutation";
 
-export default function TeamSignupForm({ eventId, managerId, onClose }) {
+export default function TeamSignupForm({ eventId, managerId, onClose, onSuccess }) {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -15,6 +15,16 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
   const [managerEmail, setManagerEmail] = useState(managerId || "");
   const [managerPhone, setManagerPhone] = useState("");
   const payMutation = useTeamPayMutation(eventId);
+  const queryClient = useQueryClient();
+
+  // Free-tournament registration has no Stripe redirect to land on, so this
+  // is the only place a completed signup gets reflected — invalidate rather
+  // than reload so the rest of the page doesn't lose its state.
+  const handleFreeRegistrationSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.teams.unpaid(eventId) });
+    onClose();
+    onSuccess?.();
+  };
 
   const { data: unpaidData, isLoading: loadingUnpaid } = useQuery({
     queryKey: queryKeys.teams.unpaid(eventId),
@@ -40,8 +50,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
         window.location.href = data.url;
       } else {
         // Free tournament — already registered
-        onClose();
-        window.location.reload();
+        handleFreeRegistrationSuccess();
       }
     } catch (err) {
       setError(err.message || "Failed to resume payment");
@@ -67,8 +76,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
         window.location.href = data.url;
       } else {
         // Free tournament — registered immediately
-        onClose();
-        window.location.reload();
+        handleFreeRegistrationSuccess();
       }
     } catch (err) {
       setError(err.message || "An error occurred during registration");
