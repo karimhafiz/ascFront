@@ -8,7 +8,8 @@ import { slugToId, formatDate } from "../../util/util";
 import moment from "moment";
 import VenueCalendar from "./VenueCalendar";
 import { queryKeys } from "../../api/queryKeys";
-import { fetchOrThrow, STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
+import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
+import { fetchPublicJSON } from "../../api/apiClient";
 import { useVenueBookingCheckoutMutation } from "../../hooks/useVenueMutation";
 
 const API = import.meta.env.VITE_DEV_URI;
@@ -38,14 +39,7 @@ export default function VenueBookingDetail() {
     error: venueError,
   } = useQuery({
     queryKey: queryKeys.venues.detail(venueId),
-    queryFn: async () => {
-      const response = await fetchOrThrow(`${API}venues/${venueId}`);
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        throw new Error(data?.error || "Failed to load venue details.");
-      }
-      return data;
-    },
+    queryFn: () => fetchPublicJSON(`${API}venues/${venueId}`),
   });
 
   const {
@@ -54,16 +48,8 @@ export default function VenueBookingDetail() {
     error: slotsError,
   } = useQuery({
     queryKey: queryKeys.venues.slots(venueId, selectedDate),
-    queryFn: async () => {
-      const response = await fetchOrThrow(
-        `${API}venues/${venueId}/slots?date=${encodeURIComponent(selectedDate)}`
-      );
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        throw new Error(data?.error || "Failed to load available slots.");
-      }
-      return data;
-    },
+    queryFn: () =>
+      fetchPublicJSON(`${API}venues/${venueId}/slots?date=${encodeURIComponent(selectedDate)}`),
     enabled: !!selectedDate,
   });
 

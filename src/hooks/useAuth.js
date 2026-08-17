@@ -1,8 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { API } from "../api/apiClient";
-import { setAuth, clearAuth } from "../auth/auth";
-import { fetchOrThrow } from "../util/errorUtil";
+import { setAuth, clearAuth, fetchOrThrow } from "../auth/auth";
 
 export function useLogin() {
   const navigate = useNavigate();

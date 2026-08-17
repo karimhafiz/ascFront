@@ -1,8 +1,10 @@
 import { googleLogin } from "../../src/hooks/useAuth";
 import { setAuth } from "../../src/auth/auth";
 
-// Mock auth module
+// Mock auth module — keep the real fetchOrThrow (it wraps the mocked global
+// fetch below), only override the auth-state pieces this test cares about.
 jest.mock("../../src/auth/auth", () => ({
+  ...jest.requireActual("../../src/auth/auth"),
   setAuth: jest.fn(),
   clearAuth: jest.fn(),
   getAuthToken: jest.fn(() => null),

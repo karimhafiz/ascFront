@@ -1,5 +1,4 @@
-import { fetchWithAuth } from "../auth/auth";
-import { fetchOrThrow } from "../util/errorUtil";
+import { fetchWithAuth, fetchOrThrow } from "../auth/auth";
 
 export const API = import.meta.env.VITE_DEV_URI;
 

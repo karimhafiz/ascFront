@@ -5,7 +5,7 @@ import { slugToId } from "../../util/util";
 import { useQuery } from "@tanstack/react-query";
 import { Button, GlassCard, PageContainer, Spinner } from "../../components/ui";
 import { queryKeys } from "../../api/queryKeys";
-import { fetchOrThrow } from "../../util/errorUtil";
+import { fetchPublicJSON } from "../../api/apiClient";
 import { useVenueMutation } from "../../hooks/useVenueMutation";
 
 const API = import.meta.env.VITE_DEV_URI;
@@ -40,12 +40,7 @@ export default function VenueFormPage() {
     error: loadError,
   } = useQuery({
     queryKey: queryKeys.venues.detail(venueId),
-    queryFn: async () => {
-      const response = await fetchOrThrow(`${API}venues/${venueId}`);
-      const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error || "Failed to load venue.");
-      return data;
-    },
+    queryFn: () => fetchPublicJSON(`${API}venues/${venueId}`),
     enabled: isEditing,
   });
 

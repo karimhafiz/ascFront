@@ -1,4 +1,4 @@
-import { fetchOrThrow } from "../util/errorUtil";
+import { ApiError, STRIPE_DOWN_MESSAGE } from "../util/errorUtil";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -158,6 +158,27 @@ export function isAdmin() {
 
 export function isModerator() {
   return isAuthenticated() && getUserRole() === "moderator";
+}
+
+// ── Auth-agnostic fetch wrapper: distinguishes "server unreachable" (fetch
+// itself throws), "DB down" (backend's connectDB middleware responds 503),
+// and "Stripe down" (a Stripe-calling route responds 502) from ordinary
+// non-ok responses, which callers still handle themselves. ──
+
+export async function fetchOrThrow(url, options) {
+  let response;
+  try {
+    response = await fetch(url, options);
+  } catch {
+    throw new ApiError("Unable to reach the server.", null);
+  }
+  if (response.status === 503) {
+    throw new ApiError("Database is unavailable.", 503);
+  }
+  if (response.status === 502) {
+    throw new ApiError(STRIPE_DOWN_MESSAGE, 502);
+  }
+  return response;
 }
 
 // ── Authenticated fetch with auto-refresh ──

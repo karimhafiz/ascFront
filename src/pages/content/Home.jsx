@@ -16,9 +16,8 @@ import {
   usePageContentSaveMutation,
   usePageContentResetMutation,
 } from "../../hooks/usePageContentMutation";
-import { API } from "../../api/apiClient";
+import { API, fetchPublicJSON } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
-import { fetchOrThrow } from "../../util/errorUtil";
 
 const DEFAULTS = {
   heroTitle: "Welcome to Ayendah Sazan",
@@ -61,18 +60,12 @@ export default function Home({ previewContent = null }) {
 
   const { data: rawPageContent } = useQuery({
     queryKey: queryKeys.pageContent.home,
-    queryFn: async () => {
-      const r = await fetchOrThrow(`${API}pageContent/home`);
-      return r.json();
-    },
+    queryFn: () => fetchPublicJSON(`${API}pageContent/home`),
     enabled: !previewContent,
   });
   const { data: publicStats = {} } = useQuery({
     queryKey: queryKeys.stats.public,
-    queryFn: async () => {
-      const r = await fetchOrThrow(`${API}stats/public`);
-      return r.json();
-    },
+    queryFn: () => fetchPublicJSON(`${API}stats/public`),
   });
 
   const pageContent = previewContent
