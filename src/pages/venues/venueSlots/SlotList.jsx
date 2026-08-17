@@ -1,15 +1,20 @@
 import { useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Button, GlassCard, Spinner } from "../../../components/ui";
 import { fetchWithAuth } from "../../../auth/auth";
 import { formatDate } from "../../../util/util";
 import TimeSelect from "./TimeSelect";
 import { queryKeys } from "../../../api/queryKeys";
+import {
+  useVenueSlotCreateMutation,
+  useVenueSlotDeleteMutation,
+} from "../../../hooks/useVenueMutation";
 
 const API = import.meta.env.VITE_DEV_URI;
 
 export default function SlotList({ venueId }) {
-  const queryClient = useQueryClient();
+  const createSlotMutation = useVenueSlotCreateMutation(venueId);
+  const deleteSlotMutation = useVenueSlotDeleteMutation(venueId);
   const [weekOffset, setWeekOffset] = useState(0);
   const [oneOffForm, setOneOffForm] = useState({ date: "", start: "", end: "", error: "" });
   const [addingOneOff, setAddingOneOff] = useState(false);
@@ -57,17 +62,7 @@ export default function SlotList({ venueId }) {
     try {
       const body = { date: oneOffForm.date, startTime: oneOffForm.start };
       if (oneOffForm.end) body.endTime = oneOffForm.end;
-      const res = await fetchWithAuth(`${API}venues/${venueId}/slots`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to create slot.");
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.venues.slotsAll(venueId),
-        exact: false,
-      });
+      await createSlotMutation.mutateAsync(body);
       setOneOffForm({ date: "", start: "", end: "", error: "" });
     } catch (err) {
       setOneOffForm((prev) => ({ ...prev, error: err.message }));
@@ -79,15 +74,7 @@ export default function SlotList({ venueId }) {
   const handleDeleteSlot = async (slotId) => {
     setDeletingSlotId(slotId);
     try {
-      const res = await fetchWithAuth(`${API}venues/${venueId}/slot/${slotId}`, {
-        method: "DELETE",
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to delete slot.");
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.venues.slotsAll(venueId),
-        exact: false,
-      });
+      await deleteSlotMutation.mutateAsync(slotId);
     } catch (err) {
       alert(err.message);
     } finally {

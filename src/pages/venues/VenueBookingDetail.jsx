@@ -3,12 +3,13 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, GlassCard, PageContainer, Spinner } from "../../components/ui";
-import { fetchWithAuth, isAuthenticated } from "../../auth/auth";
+import { isAuthenticated } from "../../auth/auth";
 import { slugToId, formatDate } from "../../util/util";
 import moment from "moment";
 import VenueCalendar from "./VenueCalendar";
 import { queryKeys } from "../../api/queryKeys";
 import { fetchOrThrow, STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
+import { useVenueBookingCheckoutMutation } from "../../hooks/useVenueMutation";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -29,6 +30,7 @@ export default function VenueBookingDetail() {
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const checkoutMutation = useVenueBookingCheckoutMutation();
 
   const {
     data: venue,
@@ -82,22 +84,13 @@ export default function VenueBookingDetail() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetchWithAuth(`${API}venues/booking/checkout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          venueId,
-          slotId: selectedSlotId,
-          numberOfAttendees: Number(formData.numberOfAttendees),
-          eventName: formData.eventName,
-          eventDescription: formData.eventDescription,
-        }),
+      const data = await checkoutMutation.mutateAsync({
+        venueId,
+        slotId: selectedSlotId,
+        numberOfAttendees: Number(formData.numberOfAttendees),
+        eventName: formData.eventName,
+        eventDescription: formData.eventDescription,
       });
-
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        throw new Error(data?.error || data?.message || "Failed to create checkout session.");
-      }
 
       if (data?.url) {
         window.location.href = data.url;

@@ -5,6 +5,7 @@ import { validatePhone } from "../../util/util";
 import { Button, Spinner } from "../ui";
 import { API } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
+import { useTeamPayMutation } from "../../hooks/useTeamMutation";
 
 export default function TeamSignupForm({ eventId, managerId, onClose }) {
   const [name, setName] = useState("");
@@ -13,6 +14,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
   const [managerName, setManagerName] = useState("");
   const [managerEmail, setManagerEmail] = useState(managerId || "");
   const [managerPhone, setManagerPhone] = useState("");
+  const payMutation = useTeamPayMutation(eventId);
 
   const { data: unpaidData, isLoading: loadingUnpaid } = useQuery({
     queryKey: queryKeys.teams.unpaid(eventId),
@@ -30,19 +32,10 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
     setError("");
     try {
       // Re-register triggers Stripe checkout for existing unpaid team
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: team.name,
-            manager: team.manager,
-          }),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Payment initialization failed");
+      const data = await payMutation.mutateAsync({
+        name: team.name,
+        manager: team.manager,
+      });
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -65,19 +58,10 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name,
-            manager: { name: managerName, email: managerEmail, phone: managerPhone.trim() },
-          }),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to register team");
+      const data = await payMutation.mutateAsync({
+        name,
+        manager: { name: managerName, email: managerEmail, phone: managerPhone.trim() },
+      });
 
       if (data.url) {
         window.location.href = data.url;
