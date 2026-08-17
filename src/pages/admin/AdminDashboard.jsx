@@ -6,18 +6,29 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
   Title,
   Tooltip,
   Legend,
 } from "chart.js";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 import { getAuthToken, getUserRole as getAuthRole, fetchWithAuth } from "../../auth/auth";
 import { PageContainer, Spinner } from "../../components/ui";
 import { roleBadgeClass } from "../../components/admin/adminHelpers";
 import TicketsTab from "../../components/admin/TicketsTab";
-import RevenueTab from "../../components/admin/RevenueTab";
+import AnalyticsTab from "../../components/admin/AnalyticsTab";
 import TeamsTab from "../../components/admin/TeamsTab";
 import CoursesTab from "../../components/admin/CoursesTab";
 import UsersTab from "../../components/admin/UsersTab";
@@ -26,7 +37,7 @@ import RequestsTab from "../../components/admin/RequestsTab";
 import { API } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
 
-const TABS = ["Tickets", "Revenue", "Teams", "Courses", "Venues", "Requests", "Users"];
+const TABS = ["Tickets", "Analytics", "Teams", "Courses", "Venues", "Requests", "Users"];
 
 export default function AdminDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -111,7 +122,9 @@ export default function AdminDashboard() {
     );
   };
 
-  const visibleTabs = isAdmin ? TABS : TABS.filter((t) => t !== "Users" && t !== "Requests");
+  const visibleTabs = isAdmin
+    ? TABS
+    : TABS.filter((t) => t !== "Users" && t !== "Requests" && t !== "Analytics");
 
   if (loading) {
     return (
@@ -235,7 +248,7 @@ export default function AdminDashboard() {
         {/* Tab content */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl sm:rounded-3xl border border-base-300 shadow-sm p-3 sm:p-6 mt-2">
           {activeTab === "Tickets" && <TicketsTab tickets={data.tickets} />}
-          {activeTab === "Revenue" && <RevenueTab events={data.events} />}
+          {activeTab === "Analytics" && isAdmin && <AnalyticsTab events={data.events} />}
           {activeTab === "Teams" && <TeamsTab teams={data.teams} />}
           {activeTab === "Courses" && (
             <CoursesTab enrollments={data.enrollments ?? []} courses={data.courses ?? []} />
