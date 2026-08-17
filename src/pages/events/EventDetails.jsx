@@ -12,6 +12,7 @@ import TicketPurchaseForm from "../../components/events/TicketPurchaseForm";
 import SubscribedPanel from "../../components/events/SubscribedPanel";
 import MyTeamsSection from "../../components/events/MyTeamsSection";
 import { useEvent } from "../../hooks/useEvents";
+import { queryKeys } from "../../api/queryKeys";
 
 export default function EventDetails() {
   const { eventSlug } = useParams();
@@ -37,7 +38,7 @@ export default function EventDetails() {
   const isTournament = event && event.isTournament;
 
   const { data: registeredTeams = [] } = useQuery({
-    queryKey: ["event-teams", eventId],
+    queryKey: queryKeys.events.teams(eventId),
     queryFn: async () => {
       const res = await fetch(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/teams`);
       if (!res.ok) throw new Error("Failed to fetch teams");
@@ -50,7 +51,7 @@ export default function EventDetails() {
     event?.isReoccurring && event?.stripePriceId && event?.ticketPrice > 0;
 
   const { data: mySubscriptionData } = useQuery({
-    queryKey: ["my-event-subscription", eventId],
+    queryKey: queryKeys.events.subscription(eventId),
     queryFn: async () => {
       const res = await fetchWithAuth(
         `${import.meta.env.VITE_DEV_URI}events/${eventId}/my-subscription`
@@ -152,7 +153,7 @@ export default function EventDetails() {
           <img
             src={event.images[0]}
             alt={event.title}
-            className="max-h-[35vh] md:max-h-[50vh] w-full rounded-[2rem] object-cover shadow-[var(--shadow-strong)]"
+            className="max-h-[35vh] md:max-h-[50vh] w-full rounded-4xl object-cover shadow-(--shadow-strong)"
           />
         </div>
       ) : (
@@ -173,7 +174,7 @@ export default function EventDetails() {
                     subscription={mySubscription}
                     onChanged={() =>
                       queryClient.invalidateQueries({
-                        queryKey: ["my-event-subscription", eventId],
+                        queryKey: queryKeys.events.subscription(eventId),
                       })
                     }
                   />
@@ -321,7 +322,7 @@ export default function EventDetails() {
           onSuccess={() => {
             setShowTeamSignup(false);
             queryClient.invalidateQueries({
-              queryKey: ["event-teams", eventId],
+              queryKey: queryKeys.events.teams(eventId),
             });
           }}
           onClose={() => setShowTeamSignup(false)}

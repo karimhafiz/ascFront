@@ -5,6 +5,7 @@ import { slugToId } from "../../util/util";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, GlassCard, PageContainer, Spinner } from "../../components/ui";
 import { fetchWithAuth } from "../../auth/auth";
+import { queryKeys } from "../../api/queryKeys";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -37,7 +38,7 @@ export default function VenueFormPage() {
     isLoading,
     error: loadError,
   } = useQuery({
-    queryKey: ["venue", venueId],
+    queryKey: queryKeys.venues.detail(venueId),
     queryFn: async () => {
       const response = await fetch(`${API}venues/${venueId}`);
       const data = await response.json().catch(() => null);
@@ -105,8 +106,10 @@ export default function VenueFormPage() {
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.error || "Failed to save venue.");
 
-      queryClient.invalidateQueries({ queryKey: ["venues"] });
-      if (isEditing) queryClient.invalidateQueries({ queryKey: ["venue", venueId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.venues.all });
+      if (isEditing) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.venues.detail(venueId) });
+      }
 
       navigate("/venues/booking");
     } catch (err) {

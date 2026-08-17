@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Navbar from "../../../src/components/common/MainNavbar";
 import "@testing-library/jest-dom";
 
@@ -31,10 +32,13 @@ jest.mock("../../../src/auth/auth", () => ({
 const { isAuthenticated, isAdmin, parseJwt, getAuthToken } = require("../../../src/auth/auth");
 
 function renderNavbar() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <MemoryRouter>
-      <Navbar />
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <Navbar />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 }
 

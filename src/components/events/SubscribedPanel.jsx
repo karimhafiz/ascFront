@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { fetchWithAuth } from "../../auth/auth";
+import {
+  useEventSubscriptionCancelMutation,
+  useEventSubscriptionReactivateMutation,
+} from "../../hooks/useEventSubscriptionMutation";
 import { Button } from "../ui";
 
 const INTERVAL_LABELS = { week: "week", month: "month" };
@@ -24,51 +27,35 @@ function formatDate(d) {
 }
 
 export default function SubscribedPanel({ event, subscription, onChanged }) {
-  const [cancellingSubscription, setCancellingSubscription] = useState(false);
-  const [reactivatingSubscription, setReactivatingSubscription] = useState(false);
   const [subscriptionError, setSubscriptionError] = useState("");
 
   const isCancelled = subscription.subscriptionStatus === "cancelled";
   const interval = INTERVAL_LABELS[event.subscriptionInterval] || "month";
 
-  const handleCancelSubscription = async () => {
+  const cancelSubscriptionMutation = useEventSubscriptionCancelMutation(subscription._id);
+
+  const handleCancelSubscription = () => {
     setSubscriptionError("");
-    setCancellingSubscription(true);
-    try {
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}events/subscriptions/${subscription._id}/cancel`,
-        { method: "POST" }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to cancel subscription");
-      onChanged();
-    } catch (err) {
-      setSubscriptionError(err.message);
-    } finally {
-      setCancellingSubscription(false);
-    }
+    cancelSubscriptionMutation.mutate(undefined, {
+      onSuccess: () => onChanged(),
+      onError: (err) => setSubscriptionError(err.message),
+    });
   };
 
-  const handleReactivateSubscription = async () => {
+  const reactivateSubscriptionMutation = useEventSubscriptionReactivateMutation(subscription._id);
+
+  const handleReactivateSubscription = () => {
     setSubscriptionError("");
-    setReactivatingSubscription(true);
-    try {
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}events/subscriptions/${subscription._id}/reactivate`,
-        { method: "POST" }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to reactivate subscription");
-      if (data.url) {
-        window.location.href = data.url;
-        return;
-      }
-      onChanged();
-    } catch (err) {
-      setSubscriptionError(err.message);
-    } finally {
-      setReactivatingSubscription(false);
-    }
+    reactivateSubscriptionMutation.mutate(undefined, {
+      onSuccess: (data) => {
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+        onChanged();
+      },
+      onError: (err) => setSubscriptionError(err.message),
+    });
   };
 
   return (
@@ -133,19 +120,21 @@ export default function SubscribedPanel({ event, subscription, onChanged }) {
               <Button
                 variant="primary"
                 onClick={handleReactivateSubscription}
-                disabled={reactivatingSubscription}
+                disabled={reactivateSubscriptionMutation.isPending}
                 className="text-sm w-full"
               >
-                {reactivatingSubscription ? "Reactivating..." : "Reactivate Enrollment"}
+                {reactivateSubscriptionMutation.isPending
+                  ? "Reactivating..."
+                  : "Reactivate Enrollment"}
               </Button>
             ) : (
               <Button
                 variant="danger"
                 onClick={handleCancelSubscription}
-                disabled={cancellingSubscription}
+                disabled={cancelSubscriptionMutation.isPending}
                 className="text-sm w-full"
               >
-                {cancellingSubscription ? "Cancelling..." : "Cancel Enrollment"}
+                {cancelSubscriptionMutation.isPending ? "Cancelling..." : "Cancel Enrollment"}
               </Button>
             )}
             {subscriptionError && (

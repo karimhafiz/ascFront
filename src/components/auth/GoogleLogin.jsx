@@ -12,7 +12,7 @@ const GoogleLogin = () => {
       if (!response?.credential) return;
       try {
         const { role } = await googleLogin(response.credential);
-        navigate(role === "admin" ? "/admin" : "/");
+        navigate(role === "admin" ? "/admin" : role === "moderator" ? "/profile" : "/");
         //eslint-disable-next-line no-unused-vars
       } catch (err) {
         // error already logged

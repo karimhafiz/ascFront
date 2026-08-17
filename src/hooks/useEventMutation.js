@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { API } from "../api/apiClient";
+import { API, fetchJSON } from "../api/apiClient";
 import { queryKeys } from "../api/queryKeys";
 import { fetchWithAuth } from "../auth/auth";
 import { compressImage } from "../util/compressImage";
@@ -65,6 +65,17 @@ export function useEventMutation(method, eventSlug) {
         queryClient.invalidateQueries({ queryKey: queryKeys.events.detail(eventId) });
       }
       navigate("/events");
+    },
+  });
+}
+
+export function useEventDeleteMutation(eventId) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => fetchJSON(`${API}events/${eventId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.events.all });
     },
   });
 }

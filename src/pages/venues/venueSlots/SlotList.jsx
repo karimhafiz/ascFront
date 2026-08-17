@@ -4,6 +4,7 @@ import { Button, GlassCard, Spinner } from "../../../components/ui";
 import { fetchWithAuth } from "../../../auth/auth";
 import { formatDate } from "../../../util/util";
 import TimeSelect from "./TimeSelect";
+import { queryKeys } from "../../../api/queryKeys";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -35,7 +36,7 @@ export default function SlotList({ venueId }) {
   }, [weekOffset]);
 
   const { data: allSlots = [], isLoading: slotsLoading } = useQuery({
-    queryKey: ["venue-slots-all", venueId, weekFromStr, weekToStr],
+    queryKey: queryKeys.venues.slotsAll(venueId, weekFromStr, weekToStr),
     queryFn: async () => {
       const res = await fetchWithAuth(
         `${API}venues/${venueId}/slots/all?from=${weekFromStr}&to=${weekToStr}`
@@ -63,7 +64,10 @@ export default function SlotList({ venueId }) {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error || "Failed to create slot.");
-      queryClient.invalidateQueries({ queryKey: ["venue-slots-all", venueId], exact: false });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.venues.slotsAll(venueId),
+        exact: false,
+      });
       setOneOffForm({ date: "", start: "", end: "", error: "" });
     } catch (err) {
       setOneOffForm((prev) => ({ ...prev, error: err.message }));
@@ -80,7 +84,10 @@ export default function SlotList({ venueId }) {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error || "Failed to delete slot.");
-      queryClient.invalidateQueries({ queryKey: ["venue-slots-all", venueId], exact: false });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.venues.slotsAll(venueId),
+        exact: false,
+      });
     } catch (err) {
       alert(err.message);
     } finally {

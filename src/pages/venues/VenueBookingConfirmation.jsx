@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FaBuilding, FaCalendarAlt, FaClock, FaMapMarkerAlt } from "react-icons/fa";
 import { Button, GlassCard, PageContainer, Spinner } from "../../components/ui";
 import { fetchWithAuth } from "../../auth/auth";
+import { queryKeys } from "../../api/queryKeys";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -17,7 +18,7 @@ export default function VenueBookingConfirmation() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["venue-booking", bookingId],
+    queryKey: queryKeys.venues.booking(bookingId),
     queryFn: async () => {
       const res = await fetchWithAuth(`${API}venues/booking/${bookingId}`);
       const data = await res.json().catch(() => null);

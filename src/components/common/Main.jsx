@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./MainNavbar";
 import Footer from "./Footer";
+import SessionExpiredBanner from "./SessionExpiredBanner";
 
 const NO_FOOTER = ["/login", "/signup"];
 
@@ -20,6 +21,7 @@ export default function Main() {
   return (
     <div className="professional-shell">
       <ScrollToTop />
+      <SessionExpiredBanner />
       <Navbar />
       <main className="relative">
         <Outlet />

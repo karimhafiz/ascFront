@@ -28,6 +28,7 @@ const Signup = lazy(() => import("./pages/auth/Signup"));
 const CancelPage = lazy(() => import("./pages/payments/CancelPage"));
 const TeamConfirmationPage = lazy(() => import("./pages/teams/TeamConfirmationPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const RequestPreview = lazy(() => import("./pages/admin/RequestPreview"));
 const SportsPage = lazy(() => import("./pages/content/Sports"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const TicketPage = lazy(() => import("./pages/tickets/TicketPage"));
@@ -124,6 +125,10 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         errorElement: <ErrorPage />,
         children: [{ index: true, element: w(AdminDashboard) }],
+      },
+      {
+        element: <ModeratorRoute />,
+        children: [{ path: "requests/:id/preview", element: w(RequestPreview) }],
       },
       { path: "login", element: w(Login) },
       { path: "signup", element: w(Signup) },

@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ConfirmModal from "../common/ConfirmModal";
 import { Badge, GlassCard } from "../ui";
-import { fetchWithAuth, isAdmin, isModerator } from "../../auth/auth";
+import { isAdmin, isModerator } from "../../auth/auth";
 import { formatDateRange, optimizeCloudinaryUrl, toSlug } from "../../util/util";
+import { useEventDeleteMutation } from "../../hooks/useEventMutation";
 
 const TYPE_COLORS = {
   ASC: { bg: "from-primary to-neutral", badge: "primary" },
@@ -25,21 +26,14 @@ export default function EventCard({ event }) {
     navigate(`/events/${slug}/edit`, { state: { event } });
   };
 
-  const handleRemoveEvent = async () => {
+  const deleteMutation = useEventDeleteMutation(event._id);
+
+  const handleRemoveEvent = () => {
     setConfirmOpen(false);
     setDeleteError(null);
-    try {
-      const response = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}events/${event._id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to delete the event.");
-      }
-      window.location.reload();
-    } catch (error) {
-      setDeleteError(error.message || "Failed to delete the event.");
-    }
+    deleteMutation.mutate(undefined, {
+      onError: (error) => setDeleteError(error.message || "Failed to delete the event."),
+    });
   };
 
   return (
@@ -54,7 +48,7 @@ export default function EventCard({ event }) {
       />
 
       <div className="group h-full">
-        <GlassCard className="flex h-full flex-col overflow-hidden rounded-[1.75rem] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-strong)]">
+        <GlassCard className="flex h-full flex-col overflow-hidden rounded-[1.75rem] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-(--shadow-strong)">
           <Link to={`/events/${slug}`} className="block">
             {event.images && event.images.length > 0 ? (
               <div className="relative h-52 overflow-hidden">
@@ -65,11 +59,11 @@ export default function EventCard({ event }) {
                   width="400"
                   height="208"
                 />
-                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/35 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black/35 to-transparent" />
               </div>
             ) : (
               <div
-                className={`flex h-52 w-full items-center justify-center bg-gradient-to-br ${colors.bg}`}
+                className={`flex h-52 w-full items-center justify-center bg-linear-to-br ${colors.bg}`}
               >
                 <svg
                   className="h-14 w-14 text-white/60"
@@ -106,7 +100,7 @@ export default function EventCard({ event }) {
               <div className="space-y-2 text-sm text-base-content/72">
                 <div className="flex items-start gap-2">
                   <svg
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-primary"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -124,7 +118,7 @@ export default function EventCard({ event }) {
                 {event.city && (
                   <div className="flex items-start gap-2">
                     <svg
-                      className="mt-0.5 h-4 w-4 flex-shrink-0 text-secondary"
+                      className="mt-0.5 h-4 w-4 shrink-0 text-secondary"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -154,7 +148,7 @@ export default function EventCard({ event }) {
                     {event.ticketPrice != null && (
                       <div className="flex items-center gap-2">
                         <svg
-                          className="h-4 w-4 flex-shrink-0 text-accent"
+                          className="h-4 w-4 shrink-0 text-accent"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -174,7 +168,7 @@ export default function EventCard({ event }) {
                     {event.ticketsAvailable != null && (
                       <div className="flex items-center gap-2">
                         <svg
-                          className="h-4 w-4 flex-shrink-0 text-primary"
+                          className="h-4 w-4 shrink-0 text-primary"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"

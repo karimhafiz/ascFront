@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import EnrolledPanel from "../../../src/components/courses/EnrolledPanel";
 import "@testing-library/jest-dom";
 
@@ -30,10 +31,13 @@ function renderPanel(props = {}) {
     onChanged: jest.fn(),
     ...props,
   };
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <MemoryRouter>
-      <EnrolledPanel {...defaultProps} />
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <EnrolledPanel {...defaultProps} />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 }
 

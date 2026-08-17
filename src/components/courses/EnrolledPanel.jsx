@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { fetchWithAuth } from "../../auth/auth";
+import {
+  useEnrollmentAddParticipantMutation,
+  useEnrollmentCancelMutation,
+  useEnrollmentReactivateMutation,
+} from "../../hooks/useEnrollmentMutation";
 import { Button } from "../ui";
 
 const INTERVAL_LABELS = { month: "month", year: "year" };
@@ -30,11 +34,8 @@ function formatDate(d) {
 
 export default function EnrolledPanel({ course, enrollment, onChanged }) {
   const [newParticipant, setNewParticipant] = useState({ name: "", age: "" });
-  const [addingParticipant, setAddingParticipant] = useState(false);
   const [addParticipantError, setAddParticipantError] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
-  const [cancellingSubscription, setCancellingSubscription] = useState(false);
-  const [reactivatingSubscription, setReactivatingSubscription] = useState(false);
   const [subscriptionError, setSubscriptionError] = useState("");
 
   const isCancelled = enrollment.subscriptionStatus === "cancelled";
@@ -48,71 +49,49 @@ export default function EnrolledPanel({ course, enrollment, onChanged }) {
     return () => document.removeEventListener("keydown", handleEsc);
   }, [showAddModal]);
 
+  const addParticipantMutation = useEnrollmentAddParticipantMutation(enrollment._id);
+
   const handleAddParticipant = async () => {
     setAddParticipantError("");
     if (!newParticipant.name.trim()) {
       setAddParticipantError("Name is required.");
       return;
     }
-    try {
-      setAddingParticipant(true);
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/add-participant`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newParticipant),
+    await addParticipantMutation
+      .mutateAsync(newParticipant, {
+        onSuccess: () => {
+          setNewParticipant({ name: "", age: "" });
+          onChanged();
+        },
+        onError: (err) => setAddParticipantError(err.message),
+      })
+      .catch(() => {});
+  };
+
+  const cancelSubscriptionMutation = useEnrollmentCancelMutation(enrollment._id);
+
+  const handleCancelSubscription = () => {
+    setSubscriptionError("");
+    cancelSubscriptionMutation.mutate(undefined, {
+      onSuccess: () => onChanged(),
+      onError: (err) => setSubscriptionError(err.message),
+    });
+  };
+
+  const reactivateSubscriptionMutation = useEnrollmentReactivateMutation(enrollment._id);
+
+  const handleReactivateSubscription = () => {
+    setSubscriptionError("");
+    reactivateSubscriptionMutation.mutate(undefined, {
+      onSuccess: (data) => {
+        if (data.url) {
+          window.location.href = data.url;
+          return;
         }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to add participant");
-      setNewParticipant({ name: "", age: "" });
-      onChanged();
-    } catch (err) {
-      setAddParticipantError(err.message);
-    } finally {
-      setAddingParticipant(false);
-    }
-  };
-
-  const handleCancelSubscription = async () => {
-    setSubscriptionError("");
-    setCancellingSubscription(true);
-    try {
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/cancel`,
-        { method: "POST" }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to cancel subscription");
-      onChanged();
-    } catch (err) {
-      setSubscriptionError(err.message);
-    } finally {
-      setCancellingSubscription(false);
-    }
-  };
-
-  const handleReactivateSubscription = async () => {
-    setSubscriptionError("");
-    setReactivatingSubscription(true);
-    try {
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}courses/enrollments/${enrollment._id}/reactivate`,
-        { method: "POST" }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to reactivate subscription");
-      if (data.url) {
-        window.location.href = data.url;
-        return;
-      }
-      onChanged();
-    } catch (err) {
-      setSubscriptionError(err.message);
-    } finally {
-      setReactivatingSubscription(false);
-    }
+        onChanged();
+      },
+      onError: (err) => setSubscriptionError(err.message),
+    });
   };
 
   return (
@@ -201,7 +180,7 @@ export default function EnrolledPanel({ course, enrollment, onChanged }) {
               key={i}
               className="flex items-center gap-2 bg-base-200/50 rounded-lg px-3 py-1.5 text-sm"
             >
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              <div className="w-6 h-6 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold shrink-0">
                 {p.name.charAt(0).toUpperCase()}
               </div>
               <span className="font-medium text-base-content">{p.name}</span>
@@ -230,19 +209,21 @@ export default function EnrolledPanel({ course, enrollment, onChanged }) {
               <Button
                 variant="primary"
                 onClick={handleReactivateSubscription}
-                disabled={reactivatingSubscription}
+                disabled={reactivateSubscriptionMutation.isPending}
                 className="text-sm"
               >
-                {reactivatingSubscription ? "Reactivating..." : "Reactivate Subscription"}
+                {reactivateSubscriptionMutation.isPending
+                  ? "Reactivating..."
+                  : "Reactivate Subscription"}
               </Button>
             ) : (
               <Button
                 variant="danger"
                 onClick={handleCancelSubscription}
-                disabled={cancellingSubscription}
+                disabled={cancelSubscriptionMutation.isPending}
                 className="text-sm"
               >
-                {cancellingSubscription ? "Cancelling..." : "Cancel Subscription"}
+                {cancelSubscriptionMutation.isPending ? "Cancelling..." : "Cancel Subscription"}
               </Button>
             )}
             {subscriptionError && (
@@ -315,10 +296,10 @@ export default function EnrolledPanel({ course, enrollment, onChanged }) {
                   await handleAddParticipant();
                   if (nameBefore) setShowAddModal(false);
                 }}
-                disabled={addingParticipant}
+                disabled={addParticipantMutation.isPending}
                 className="w-full text-sm"
               >
-                {addingParticipant ? "Adding..." : "+ Add Participant"}
+                {addParticipantMutation.isPending ? "Adding..." : "+ Add Participant"}
               </Button>
               {course.isSubscription && (
                 <p className="text-xs text-base-content/50 text-center">

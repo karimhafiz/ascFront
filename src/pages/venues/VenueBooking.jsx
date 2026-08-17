@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { GlassCard, PageContainer, Spinner } from "../../components/ui";
 import { toSlug } from "../../util/util";
 import { isAdmin, isModerator } from "../../auth/auth";
+import { queryKeys } from "../../api/queryKeys";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -16,7 +17,7 @@ export default function VenueBooking() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["venues"],
+    queryKey: queryKeys.venues.all,
     queryFn: async () => {
       const response = await fetch(`${API}venues/`);
       const data = await response.json().catch(() => null);
@@ -38,7 +39,7 @@ export default function VenueBooking() {
       </Helmet>
 
       <section className="page-section pt-6 md:pt-8">
-        <div className="hero-panel mb-8 rounded-[2rem] p-8 sm:p-10">
+        <div className="hero-panel mb-8 rounded-4xl p-8 sm:p-10">
           <span className="section-kicker mb-5 border-white/10 bg-white/8 text-white">
             Venue Hire
           </span>
@@ -56,17 +57,17 @@ export default function VenueBooking() {
             <Spinner />
           </div>
         ) : error ? (
-          <GlassCard className="rounded-[2rem] p-8 text-center">
+          <GlassCard className="rounded-4xl p-8 text-center">
             <p className="text-base-content/70">{error.message}</p>
           </GlassCard>
         ) : venues.length === 0 ? (
-          <GlassCard className="rounded-[2rem] p-8 text-center">
+          <GlassCard className="rounded-4xl p-8 text-center">
             <p className="text-base-content/70">No venues are currently available for booking.</p>
           </GlassCard>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {venues.map((venue) => (
-              <GlassCard key={venue._id} className="rounded-[2rem] p-6 flex flex-col gap-4">
+              <GlassCard key={venue._id} className="rounded-4xl p-6 flex flex-col gap-4">
                 <div>
                   <h2 className="text-xl font-semibold text-base-content">{venue.name}</h2>
                   {venue.description && (

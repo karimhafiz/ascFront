@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CourseCard from "../../../src/components/courses/CourseCard";
 import "@testing-library/jest-dom";
 
@@ -28,10 +29,13 @@ const mockCourse = {
 };
 
 function renderCard(course = mockCourse) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <MemoryRouter>
-      <CourseCard course={course} />
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <CourseCard course={course} />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 }
 

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAuthToken, isAuthenticated } from "../../auth/auth";
 import TicketCard from "../../components/tickets/TicketCard";
 import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
+import { queryKeys } from "../../api/queryKeys";
 
 export default function OrderConfirmation() {
   const [searchParams] = useSearchParams();
@@ -16,7 +17,7 @@ export default function OrderConfirmation() {
     error: ticketError,
     isLoading: ticketLoading,
   } = useQuery({
-    queryKey: ["ticket", ticketId],
+    queryKey: queryKeys.tickets.detail(ticketId),
     queryFn: async () => {
       const token = getAuthToken();
       const res = await fetch(`${import.meta.env.VITE_DEV_URI}tickets/${ticketId}`, {
@@ -31,7 +32,7 @@ export default function OrderConfirmation() {
 
   // Fetch sibling tickets to get total count for this payment
   const { data: groupTickets } = useQuery({
-    queryKey: ["tickets-by-payment", ticket?.paymentId],
+    queryKey: queryKeys.tickets.byPayment(ticket?.paymentId),
     queryFn: async () => {
       const token = getAuthToken();
       const res = await fetch(
@@ -51,7 +52,7 @@ export default function OrderConfirmation() {
 
   // Guest order — fetch tickets via session ID (no auth needed)
   const { data: guestOrder, isLoading: guestLoading } = useQuery({
-    queryKey: ["guest-order", sessionId],
+    queryKey: queryKeys.payments.guestOrder(sessionId),
     queryFn: async () => {
       const res = await fetch(`${import.meta.env.VITE_DEV_URI}payments/guest-order/${sessionId}`);
       if (!res.ok) throw new Error("Failed to fetch order");
@@ -62,7 +63,7 @@ export default function OrderConfirmation() {
 
   // Fallback receipt if no ticket_id
   const { data: receipt } = useQuery({
-    queryKey: ["receipt", sessionId],
+    queryKey: queryKeys.payments.receipt(sessionId),
     queryFn: async () => {
       const res = await fetch(`${import.meta.env.VITE_DEV_URI}payments/session/${sessionId}`);
       if (!res.ok) throw new Error("Failed to fetch receipt");

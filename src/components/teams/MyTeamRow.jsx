@@ -1,52 +1,43 @@
 import { useState } from "react";
-import { fetchWithAuth, getAuthToken, parseJwt } from "../../auth/auth";
+import { getAuthToken, parseJwt } from "../../auth/auth";
+import { useTeamPayMutation } from "../../hooks/useTeamMutation";
 import { Spinner } from "../ui";
 import TeamEditForm from "./TeamEditForm";
 import { Link } from "react-router-dom";
 
 export default function MyTeamRow({ team, onTeamUpdated, readOnly = false }) {
   const [editing, setEditing] = useState(false);
-  const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState("");
 
   const token = getAuthToken();
   const userEmail = token ? parseJwt(token)?.email : null;
   const isMyTeam = userEmail && team.manager?.email?.toLowerCase() === userEmail.toLowerCase();
 
-  const handlePay = async () => {
-    setPaying(true);
+  const eventId = team.event?._id || team.event;
+  const payMutation = useTeamPayMutation(eventId);
+
+  const handlePay = () => {
     setPayError("");
-    try {
-      const eventId = team.event?._id || team.event;
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: team.name,
-            manager: team.manager,
-          }),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Payment failed");
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        onTeamUpdated();
+    payMutation.mutate(
+      { name: team.name, manager: team.manager },
+      {
+        onSuccess: (data) => {
+          if (data.url) {
+            window.location.href = data.url;
+          } else {
+            onTeamUpdated();
+          }
+        },
+        onError: (err) => setPayError(err.message || "Failed to start payment"),
       }
-    } catch (err) {
-      setPayError(err.message || "Failed to start payment");
-      setPaying(false);
-    }
+    );
   };
 
   return (
     <>
       <div className="bg-white rounded-2xl border border-base-300 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
         <div className="flex items-center px-5 py-4 gap-4">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center shrink-0">
             <svg
               className="w-5 h-5 text-primary"
               fill="none"
@@ -91,15 +82,15 @@ export default function MyTeamRow({ team, onTeamUpdated, readOnly = false }) {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             {!readOnly && !team.paid && (
               <button
                 onClick={handlePay}
-                disabled={paying}
-                className="btn btn-sm bg-gradient-to-r from-amber-400 to-orange-500 border-none text-white transition-all duration-300 rounded-lg text-xs"
+                disabled={payMutation.isPending}
+                className="btn btn-sm bg-linear-to-r from-amber-400 to-orange-500 border-none text-white transition-all duration-300 rounded-lg text-xs"
                 title="Complete payment"
               >
-                {paying ? <Spinner size="sm" /> : "Pay Now"}
+                {payMutation.isPending ? <Spinner size="sm" /> : "Pay Now"}
               </button>
             )}
             {!readOnly && (

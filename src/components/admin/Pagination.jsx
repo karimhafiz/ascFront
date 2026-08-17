@@ -38,7 +38,7 @@ export default function Pagination({ page, totalPages, setPage, total, label }) 
           <button
             key={n}
             onClick={() => setPage(n)}
-            className={`min-w-[28px] px-1.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+            className={`min-w-7 px-1.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
               n === page
                 ? "bg-primary text-white shadow-sm"
                 : "text-base-content/50 hover:text-base-content hover:bg-base-200"

@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import EventCard from "../../../src/components/events/EventCard";
 import "@testing-library/jest-dom";
 
@@ -29,10 +30,13 @@ const baseEvent = {
 };
 
 function renderCard(overrides = {}) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <MemoryRouter>
-      <EventCard event={{ ...baseEvent, ...overrides }} />
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <EventCard event={{ ...baseEvent, ...overrides }} />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 }
 

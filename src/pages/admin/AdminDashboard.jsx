@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Chart as ChartJS,
@@ -22,14 +22,40 @@ import TeamsTab from "../../components/admin/TeamsTab";
 import CoursesTab from "../../components/admin/CoursesTab";
 import UsersTab from "../../components/admin/UsersTab";
 import VenuesTab from "../../components/admin/VenuesTab";
+import RequestsTab from "../../components/admin/RequestsTab";
 import { API } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
 
-const TABS = ["Tickets", "Revenue", "Teams", "Courses", "Venues", "Users"];
+const TABS = ["Tickets", "Revenue", "Teams", "Courses", "Venues", "Requests", "Users"];
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("Tickets");
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const tabParam = searchParams.get("tab");
+  const activeTab = TABS.includes(tabParam) ? tabParam : "Tickets";
+
+  const setActiveTab = (tab) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("tab", tab);
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (tabParam !== activeTab) {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set("tab", activeTab);
+          return next;
+        },
+        { replace: true }
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabParam]);
 
   const role = getAuthRole();
   const isAdmin = role === "admin";
@@ -85,7 +111,7 @@ export default function AdminDashboard() {
     );
   };
 
-  const visibleTabs = isAdmin ? TABS : TABS.filter((t) => t !== "Users");
+  const visibleTabs = isAdmin ? TABS : TABS.filter((t) => t !== "Users" && t !== "Requests");
 
   if (loading) {
     return (
@@ -109,10 +135,10 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-base-200 via-white to-base-200 pt-10 px-4 pb-10">
+    <div className="min-h-screen bg-linear-to-tr from-base-200 via-white to-base-200 pt-10 px-4 pb-10">
       <div className="max-w-5xl mx-auto">
         {/* Sticky header + tabs */}
-        <div className="sticky top-0 z-20 pb-6 -mx-4 px-4 [mask-image:linear-gradient(black_85%,transparent)] backdrop-blur-xl">
+        <div className="sticky top-0 z-20 pb-6 -mx-4 px-4 mask-[linear-gradient(black_85%,transparent)] backdrop-blur-xl">
           <div className="max-w-5xl mx-auto space-y-4 pt-1">
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
@@ -145,7 +171,7 @@ export default function AdminDashboard() {
                   className={
                     "basis-[30%] sm:basis-auto sm:flex-1 py-2 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer text-center " +
                     (activeTab === tab
-                      ? "bg-gradient-to-r from-primary to-primary/70 text-white shadow-sm"
+                      ? "bg-linear-to-r from-primary to-primary/70 text-white shadow-sm"
                       : "text-base-content/50 hover:text-base-content hover:bg-base-100")
                   }
                 >
@@ -215,6 +241,7 @@ export default function AdminDashboard() {
             <CoursesTab enrollments={data.enrollments ?? []} courses={data.courses ?? []} />
           )}
           {activeTab === "Venues" && <VenuesTab venueBookings={data.venueBookings ?? []} />}
+          {activeTab === "Requests" && isAdmin && <RequestsTab />}
           {activeTab === "Users" && isAdmin && (
             <UsersTab
               users={data.users}

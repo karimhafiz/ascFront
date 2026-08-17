@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { isAdmin, isModerator, fetchWithAuth } from "../../auth/auth";
+import { isAdmin, isModerator } from "../../auth/auth";
 import { optimizeCloudinaryUrl, toSlug } from "../../util/util";
 import { Badge, GlassCard } from "../ui";
+import { useCourseDeleteMutation } from "../../hooks/useCourseMutation";
 
 const CATEGORY_COLORS = {
   Language: { bg: "from-primary to-secondary", badge: "primary" },
@@ -17,21 +18,13 @@ export default function CourseCard({ course }) {
   const spotsLeft = course.maxEnrollment ? course.maxEnrollment - course.currentEnrollment : null;
   const isFull = spotsLeft !== null && spotsLeft <= 0;
   const canManage = isAdmin() || isModerator();
-  const [deleting, setDeleting] = useState(false);
 
-  const handleDelete = async (e) => {
+  const deleteMutation = useCourseDeleteMutation(course._id);
+
+  const handleDelete = (e) => {
     e.preventDefault();
     if (!window.confirm(`Delete "${course.title}"? This cannot be undone.`)) return;
-    setDeleting(true);
-    try {
-      const res = await fetchWithAuth(`${import.meta.env.VITE_DEV_URI}courses/${course._id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) window.location.reload();
-    } catch (err) {
-      console.error(err);
-    }
-    setDeleting(false);
+    deleteMutation.mutate(undefined, { onError: (err) => console.error(err) });
   };
 
   return (
@@ -50,7 +43,7 @@ export default function CourseCard({ course }) {
               />
             ) : (
               <div
-                className={`w-full h-44 bg-gradient-to-br ${colors.bg} flex items-center justify-center`}
+                className={`w-full h-44 bg-linear-to-br ${colors.bg} flex items-center justify-center`}
               >
                 <svg
                   className="w-14 h-14 text-white/60"
@@ -88,7 +81,7 @@ export default function CourseCard({ course }) {
               {course.instructor && (
                 <div className="flex items-center gap-1.5">
                   <svg
-                    className="w-3.5 h-3.5 flex-shrink-0"
+                    className="w-3.5 h-3.5 shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -106,7 +99,7 @@ export default function CourseCard({ course }) {
               {course.schedule && (
                 <div className="flex items-center gap-1.5">
                   <svg
-                    className="w-3.5 h-3.5 flex-shrink-0"
+                    className="w-3.5 h-3.5 shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -124,7 +117,7 @@ export default function CourseCard({ course }) {
               {course.city && (
                 <div className="flex items-center gap-1.5">
                   <svg
-                    className="w-3.5 h-3.5 flex-shrink-0"
+                    className="w-3.5 h-3.5 shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -185,7 +178,7 @@ export default function CourseCard({ course }) {
             </Link>
             <button
               onClick={handleDelete}
-              disabled={deleting}
+              disabled={deleteMutation.isPending}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 text-xs font-semibold transition-all disabled:opacity-50"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -196,7 +189,7 @@ export default function CourseCard({ course }) {
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                 />
               </svg>
-              {deleting ? "Deleting..." : "Delete"}
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </button>
           </div>
         )}

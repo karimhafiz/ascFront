@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { API } from "../api/apiClient";
+import { API, fetchJSON } from "../api/apiClient";
 import { queryKeys } from "../api/queryKeys";
 import { fetchWithAuth } from "../auth/auth";
 import { compressImage } from "../util/compressImage";
@@ -58,5 +58,27 @@ export function useCourseMutation(method, courseSlug) {
       }
       navigate("/courses");
     },
+  });
+}
+
+export function useCourseDeleteMutation(courseId) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => fetchJSON(`${API}courses/${courseId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.courses.all });
+    },
+  });
+}
+
+export function useCourseEnrollMutation(courseId) {
+  return useMutation({
+    mutationFn: ({ email, phone, participants }) =>
+      fetchJSON(`${API}courses/${courseId}/enroll`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, phone, participants }),
+      }),
   });
 }
