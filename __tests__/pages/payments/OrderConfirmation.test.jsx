@@ -8,6 +8,7 @@ import "@testing-library/jest-dom";
 let mockAuth = { loggedIn: false, token: null };
 
 jest.mock("../../../src/auth/auth", () => ({
+  ...jest.requireActual("../../../src/auth/auth"),
   isAuthenticated: () => mockAuth.loggedIn,
   getAuthToken: () => mockAuth.token,
 }));

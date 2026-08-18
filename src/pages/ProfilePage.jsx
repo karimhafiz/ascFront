@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { isAuthenticated, fetchWithAuth } from "../auth/auth";
 import { Button, Spinner } from "../components/ui";
@@ -12,11 +12,36 @@ import MyContentRequestsPanel from "../components/profile/MyContentRequestsPanel
 import { API } from "../api/apiClient";
 import { queryKeys } from "../api/queryKeys";
 
-const TABS = ["Tickets", "Teams", "Enrollments", "Venues"];
+const TABS = ["Tickets", "Teams", "Enrollments", "Venues", "Requests"];
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState("Tickets");
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const tabParam = searchParams.get("tab");
+  const activeTab = TABS.includes(tabParam) ? tabParam : "Tickets";
+
+  const setActiveTab = (tab) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("tab", tab);
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (tabParam !== activeTab) {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set("tab", activeTab);
+          return next;
+        },
+        { replace: true }
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabParam]);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -80,7 +105,7 @@ export default function ProfilePage() {
     );
 
   const { user, teams, enrollments = [], eventSubscriptions = [], venueBookings = [] } = data;
-  const visibleTabs = user.role === "moderator" ? [...TABS, "Requests"] : TABS;
+  const visibleTabs = user.role === "moderator" ? TABS : TABS.filter((t) => t !== "Requests");
   const initials = user.name
     ? user.name
         .split(" ")
@@ -331,7 +356,7 @@ export default function ProfilePage() {
               </div>
             ))}
 
-          {activeTab === "Requests" && <MyContentRequestsPanel />}
+          {activeTab === "Requests" && user.role === "moderator" && <MyContentRequestsPanel />}
         </div>
       </div>
     </div>

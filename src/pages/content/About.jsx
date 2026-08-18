@@ -10,7 +10,7 @@ import {
   usePageContentSaveMutation,
   usePageContentResetMutation,
 } from "../../hooks/usePageContentMutation";
-import { API } from "../../api/apiClient";
+import { API, fetchPublicJSON } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
 
 const DEFAULT_CARDS = [
@@ -177,10 +177,7 @@ export default function About({ previewContent = null }) {
 
   const { data: rawPageContent } = useQuery({
     queryKey: queryKeys.pageContent.about,
-    queryFn: async () => {
-      const r = await fetch(`${API}pageContent/about`);
-      return r.json();
-    },
+    queryFn: () => fetchPublicJSON(`${API}pageContent/about`),
     enabled: !previewContent,
   });
 

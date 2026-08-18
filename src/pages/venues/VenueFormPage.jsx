@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, useParams } from "react-router-dom";
 import { slugToId } from "../../util/util";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Button, GlassCard, PageContainer, Spinner } from "../../components/ui";
-import { fetchWithAuth } from "../../auth/auth";
 import { queryKeys } from "../../api/queryKeys";
+import { fetchPublicJSON } from "../../api/apiClient";
+import { useVenueMutation } from "../../hooks/useVenueMutation";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -28,7 +29,7 @@ export default function VenueFormPage() {
   const venueId = venueSlug ? slugToId(venueSlug) : null;
   const isEditing = !!venueId;
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const saveMutation = useVenueMutation(isEditing ? "PUT" : "POST", venueSlug);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -39,12 +40,7 @@ export default function VenueFormPage() {
     error: loadError,
   } = useQuery({
     queryKey: queryKeys.venues.detail(venueId),
-    queryFn: async () => {
-      const response = await fetch(`${API}venues/${venueId}`);
-      const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error || "Failed to load venue.");
-      return data;
-    },
+    queryFn: () => fetchPublicJSON(`${API}venues/${venueId}`),
     enabled: isEditing,
   });
 
@@ -94,24 +90,7 @@ export default function VenueFormPage() {
     };
 
     try {
-      const url = isEditing ? `${API}venues/${venueId}` : `${API}venues`;
-      const method = isEditing ? "PUT" : "POST";
-
-      const response = await fetchWithAuth(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error || "Failed to save venue.");
-
-      queryClient.invalidateQueries({ queryKey: queryKeys.venues.all });
-      if (isEditing) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.venues.detail(venueId) });
-      }
-
-      navigate("/venues/booking");
+      await saveMutation.mutateAsync(body);
     } catch (err) {
       setErrorMessage(err.message || "Something went wrong.");
     } finally {

@@ -7,6 +7,7 @@ import {
 import { optimizeCloudinaryUrl, toSlug } from "../../util/util";
 import ConfirmModal from "../common/ConfirmModal";
 import { formatCurrency, INTERVAL_ADJ } from "./profileHelpers";
+import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
 
 export default function EventSubscriptionRow({ subscription, onAction }) {
   const [cancelDone, setCancelDone] = useState(subscription.subscriptionStatus === "cancelled");
@@ -44,7 +45,8 @@ export default function EventSubscriptionRow({ subscription, onAction }) {
             setCancelDone(true);
             onAction();
           },
-          onError: (err) => showToast(err.message || "Failed to cancel"),
+          onError: (err) =>
+            showToast(err.status === 502 ? STRIPE_DOWN_MESSAGE : err.message || "Failed to cancel"),
         });
       },
     });
@@ -60,7 +62,8 @@ export default function EventSubscriptionRow({ subscription, onAction }) {
         setCancelDone(false);
         onAction();
       },
-      onError: (err) => showToast(err.message || "Failed to reactivate"),
+      onError: (err) =>
+        showToast(err.status === 502 ? STRIPE_DOWN_MESSAGE : err.message || "Failed to reactivate"),
     });
   };
 

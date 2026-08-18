@@ -1,18 +1,30 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchWithAuth } from "../../auth/auth";
 import { validatePhone } from "../../util/util";
 import { Button, Spinner } from "../ui";
 import { API } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
+import { useTeamPayMutation } from "../../hooks/useTeamMutation";
 
-export default function TeamSignupForm({ eventId, managerId, onClose }) {
+export default function TeamSignupForm({ eventId, managerId, onClose, onSuccess }) {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [managerName, setManagerName] = useState("");
   const [managerEmail, setManagerEmail] = useState(managerId || "");
   const [managerPhone, setManagerPhone] = useState("");
+  const payMutation = useTeamPayMutation(eventId);
+  const queryClient = useQueryClient();
+
+  // Free-tournament registration has no Stripe redirect to land on, so this
+  // is the only place a completed signup gets reflected — invalidate rather
+  // than reload so the rest of the page doesn't lose its state.
+  const handleFreeRegistrationSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.teams.unpaid(eventId) });
+    onClose();
+    onSuccess?.();
+  };
 
   const { data: unpaidData, isLoading: loadingUnpaid } = useQuery({
     queryKey: queryKeys.teams.unpaid(eventId),
@@ -30,25 +42,15 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
     setError("");
     try {
       // Re-register triggers Stripe checkout for existing unpaid team
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: team.name,
-            manager: team.manager,
-          }),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Payment initialization failed");
+      const data = await payMutation.mutateAsync({
+        name: team.name,
+        manager: team.manager,
+      });
       if (data.url) {
         window.location.href = data.url;
       } else {
         // Free tournament — already registered
-        onClose();
-        window.location.reload();
+        handleFreeRegistrationSuccess();
       }
     } catch (err) {
       setError(err.message || "Failed to resume payment");
@@ -65,26 +67,16 @@ export default function TeamSignupForm({ eventId, managerId, onClose }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetchWithAuth(
-        `${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name,
-            manager: { name: managerName, email: managerEmail, phone: managerPhone.trim() },
-          }),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to register team");
+      const data = await payMutation.mutateAsync({
+        name,
+        manager: { name: managerName, email: managerEmail, phone: managerPhone.trim() },
+      });
 
       if (data.url) {
         window.location.href = data.url;
       } else {
         // Free tournament — registered immediately
-        onClose();
-        window.location.reload();
+        handleFreeRegistrationSuccess();
       }
     } catch (err) {
       setError(err.message || "An error occurred during registration");

@@ -5,6 +5,7 @@ import { getAuthToken, isAuthenticated } from "../../auth/auth";
 import TicketCard from "../../components/tickets/TicketCard";
 import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
 import { queryKeys } from "../../api/queryKeys";
+import { fetchPublicJSON } from "../../api/apiClient";
 
 export default function OrderConfirmation() {
   const [searchParams] = useSearchParams();
@@ -18,13 +19,11 @@ export default function OrderConfirmation() {
     isLoading: ticketLoading,
   } = useQuery({
     queryKey: queryKeys.tickets.detail(ticketId),
-    queryFn: async () => {
+    queryFn: () => {
       const token = getAuthToken();
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}tickets/${ticketId}`, {
+      return fetchPublicJSON(`${import.meta.env.VITE_DEV_URI}tickets/${ticketId}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      if (!res.ok) throw new Error("Failed to fetch ticket details");
-      return res.json();
     },
     enabled: !!ticketId && loggedIn,
     retry: 1,
@@ -33,16 +32,14 @@ export default function OrderConfirmation() {
   // Fetch sibling tickets to get total count for this payment
   const { data: groupTickets } = useQuery({
     queryKey: queryKeys.tickets.byPayment(ticket?.paymentId),
-    queryFn: async () => {
+    // Falls back to just the one known ticket if the group fetch fails —
+    // still better than showing nothing.
+    queryFn: () => {
       const token = getAuthToken();
-      const res = await fetch(
+      return fetchPublicJSON(
         `${import.meta.env.VITE_DEV_URI}tickets/by-payment/${ticket.paymentId}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      );
-      if (!res.ok) return [ticket];
-      return res.json();
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+      ).catch(() => [ticket]);
     },
     enabled: !!ticket?.paymentId && loggedIn,
     retry: 0,
@@ -53,22 +50,15 @@ export default function OrderConfirmation() {
   // Guest order — fetch tickets via session ID (no auth needed)
   const { data: guestOrder, isLoading: guestLoading } = useQuery({
     queryKey: queryKeys.payments.guestOrder(sessionId),
-    queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}payments/guest-order/${sessionId}`);
-      if (!res.ok) throw new Error("Failed to fetch order");
-      return res.json();
-    },
+    queryFn: () =>
+      fetchPublicJSON(`${import.meta.env.VITE_DEV_URI}payments/guest-order/${sessionId}`),
     enabled: !!sessionId && !loggedIn,
   });
 
   // Fallback receipt if no ticket_id
   const { data: receipt } = useQuery({
     queryKey: queryKeys.payments.receipt(sessionId),
-    queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}payments/session/${sessionId}`);
-      if (!res.ok) throw new Error("Failed to fetch receipt");
-      return res.json();
-    },
+    queryFn: () => fetchPublicJSON(`${import.meta.env.VITE_DEV_URI}payments/session/${sessionId}`),
     enabled: !!sessionId && !ticketId && loggedIn,
     retry: 1,
   });

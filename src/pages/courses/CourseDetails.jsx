@@ -11,6 +11,7 @@ import CourseDetailsBanner from "../../components/courses/CourseDetailsBanner";
 import { useCourse } from "../../hooks/useCourses";
 import { useCourseEnrollMutation } from "../../hooks/useCourseMutation";
 import { queryKeys } from "../../api/queryKeys";
+import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
 
 const INTERVAL_LABELS = { month: "month", year: "year" };
 
@@ -99,7 +100,7 @@ export default function CourseDetails() {
             navigate(`/course-confirmation?courseId=${courseId}&free=true`);
           }
         },
-        onError: (err) => setEnrollError(err.message),
+        onError: (err) => setEnrollError(err.status === 502 ? STRIPE_DOWN_MESSAGE : err.message),
       }
     );
   };

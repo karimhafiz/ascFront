@@ -1,33 +1,33 @@
 import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { PageContainer, Spinner } from "../../components/ui";
-import { fetchWithAuth } from "../../auth/auth";
 import { slugToId } from "../../util/util";
 import ScheduleEditor from "./venueSlots/ScheduleEditor";
 import SlotList from "./venueSlots/SlotList";
 import { queryKeys } from "../../api/queryKeys";
+import { fetchPublicJSON } from "../../api/apiClient";
+import {
+  useVenueScheduleMutation,
+  useVenueGenerateSlotsMutation,
+} from "../../hooks/useVenueMutation";
 
 const API = import.meta.env.VITE_DEV_URI;
 
 export default function VenueSlotManagement() {
   const { venueSlug } = useParams();
   const venueId = slugToId(venueSlug);
-  const queryClient = useQueryClient();
   const scheduleSeeded = useRef(false);
+  const scheduleMutation = useVenueScheduleMutation(venueId);
+  const generateMutation = useVenueGenerateSlotsMutation(venueId);
 
   const [schedule, setSchedule] = useState([]);
   const [savingSchedule, setSavingSchedule] = useState(false);
 
   const { data: venue, isLoading: venueLoading } = useQuery({
     queryKey: queryKeys.venues.detail(venueId),
-    queryFn: async () => {
-      const res = await fetch(`${API}venues/${venueId}`);
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to load venue.");
-      return data;
-    },
+    queryFn: () => fetchPublicJSON(`${API}venues/${venueId}`),
   });
 
   // Seed working copy once — guarded so refetches don't clobber unsaved edits
@@ -41,31 +41,14 @@ export default function VenueSlotManagement() {
   const handleSaveSchedule = async (updatedSchedule) => {
     setSavingSchedule(true);
     try {
-      const res = await fetchWithAuth(`${API}venues/${venueId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ weeklySchedule: updatedSchedule }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to save schedule.");
-      queryClient.invalidateQueries({ queryKey: queryKeys.venues.detail(venueId) });
+      await scheduleMutation.mutateAsync(updatedSchedule);
     } finally {
       setSavingSchedule(false);
     }
   };
 
   const handleGenerate = async (from, to) => {
-    const res = await fetchWithAuth(`${API}venues/${venueId}/slots/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fromDate: from, toDate: to }),
-    });
-    const data = await res.json().catch(() => null);
-    if (!res.ok) throw new Error(data?.error || "Failed to generate slots.");
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.venues.slotsAll(venueId),
-      exact: false,
-    });
+    const data = await generateMutation.mutateAsync({ fromDate: from, toDate: to });
     return data.message;
   };
 

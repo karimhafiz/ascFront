@@ -16,7 +16,7 @@ import {
   usePageContentSaveMutation,
   usePageContentResetMutation,
 } from "../../hooks/usePageContentMutation";
-import { API } from "../../api/apiClient";
+import { API, fetchPublicJSON } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
 
 const DEFAULTS = {
@@ -60,11 +60,12 @@ export default function Home({ previewContent = null }) {
 
   const { data: rawPageContent } = useQuery({
     queryKey: queryKeys.pageContent.home,
-    queryFn: async () => {
-      const r = await fetch(`${API}pageContent/home`);
-      return r.json();
-    },
+    queryFn: () => fetchPublicJSON(`${API}pageContent/home`),
     enabled: !previewContent,
+  });
+  const { data: publicStats = {} } = useQuery({
+    queryKey: queryKeys.stats.public,
+    queryFn: () => fetchPublicJSON(`${API}stats/public`),
   });
 
   const pageContent = previewContent
@@ -384,9 +385,9 @@ export default function Home({ previewContent = null }) {
           <section className="page-section py-4 md:py-8">
             <div className="grid gap-4 rounded-4xl bg-neutral px-6 py-8 text-white shadow-(--shadow-strong) sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { value: "500+", label: "Community members engaged" },
-                { value: "50+", label: "Events delivered" },
-                { value: "20+", label: "Courses offered" },
+                { value: publicStats.activeUsers, label: "Community users engaged" },
+                { value: publicStats.currentEvents, label: "Events delivered" },
+                { value: publicStats.currentCourses, label: "Courses offered" },
                 { value: "Leeds", label: "Serving the local community" },
               ].map(({ value, label }) => (
                 <div

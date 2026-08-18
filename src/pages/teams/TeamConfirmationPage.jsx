@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FaUsers, FaTrophy, FaCalendarAlt, FaMapMarkerAlt } from "react-icons/fa";
 import { toSlug } from "../../util/util";
 import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
-import { API } from "../../api/apiClient";
+import { API, fetchPublicJSON } from "../../api/apiClient";
 import { queryKeys } from "../../api/queryKeys";
 
 export default function TeamConfirmationPage() {
@@ -17,11 +17,7 @@ export default function TeamConfirmationPage() {
     error: teamError,
   } = useQuery({
     queryKey: queryKeys.teams.detail(teamId),
-    queryFn: async () => {
-      const res = await fetch(`${API}teams/${teamId}`);
-      if (!res.ok) throw new Error("Failed to fetch team details");
-      return res.json();
-    },
+    queryFn: () => fetchPublicJSON(`${API}teams/${teamId}`),
     enabled: !!teamId,
   });
 
@@ -29,11 +25,9 @@ export default function TeamConfirmationPage() {
 
   const { data: eventData } = useQuery({
     queryKey: queryKeys.events.detail(team?.event),
-    queryFn: async () => {
-      const res = await fetch(`${API}events/${team.event}`);
-      if (!res.ok) return null;
-      return res.json();
-    },
+    // Swallow failures here — an event that's since been removed shouldn't
+    // block rendering the rest of the confirmation page.
+    queryFn: () => fetchPublicJSON(`${API}events/${team.event}`).catch(() => null),
     enabled: !!team?.event,
   });
 

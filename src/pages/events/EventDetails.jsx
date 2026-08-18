@@ -13,6 +13,7 @@ import SubscribedPanel from "../../components/events/SubscribedPanel";
 import MyTeamsSection from "../../components/events/MyTeamsSection";
 import { useEvent } from "../../hooks/useEvents";
 import { queryKeys } from "../../api/queryKeys";
+import { fetchPublicJSON } from "../../api/apiClient";
 
 export default function EventDetails() {
   const { eventSlug } = useParams();
@@ -39,11 +40,7 @@ export default function EventDetails() {
 
   const { data: registeredTeams = [] } = useQuery({
     queryKey: queryKeys.events.teams(eventId),
-    queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/teams`);
-      if (!res.ok) throw new Error("Failed to fetch teams");
-      return res.json();
-    },
+    queryFn: () => fetchPublicJSON(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/teams`),
     enabled: !!isTournament,
   });
 

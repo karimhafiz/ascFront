@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { getAuthToken, parseJwt } from "../../auth/auth";
 import { useTeamPayMutation } from "../../hooks/useTeamMutation";
+import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
 import { Spinner } from "../ui";
 import TeamEditForm from "./TeamEditForm";
 import { Link } from "react-router-dom";
@@ -28,7 +29,10 @@ export default function MyTeamRow({ team, onTeamUpdated, readOnly = false }) {
             onTeamUpdated();
           }
         },
-        onError: (err) => setPayError(err.message || "Failed to start payment"),
+        onError: (err) =>
+          setPayError(
+            err.status === 502 ? STRIPE_DOWN_MESSAGE : err.message || "Failed to start payment"
+          ),
       }
     );
   };

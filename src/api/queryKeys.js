@@ -46,4 +46,8 @@ export const queryKeys = {
   pageContentRequests: {
     all: ["pageContentRequests"],
   },
+  stats: {
+    public: ["stats", "public"],
+    admin: ["stats", "admin"],
+  },
 };
