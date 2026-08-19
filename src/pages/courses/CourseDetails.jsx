@@ -69,7 +69,7 @@ export default function CourseDetails() {
       if (!res.ok) return { enrollment: null };
       return res.json();
     },
-    enabled: loggedIn && !!courseId,
+    enabled: Boolean(loggedIn && courseId),
   });
 
   const myEnrollment = enrollmentData?.enrollment;

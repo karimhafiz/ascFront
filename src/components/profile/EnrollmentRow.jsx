@@ -37,7 +37,7 @@ export default function EnrollmentRow({ enrollment, onAction }) {
   if (!course) return null;
   const gradient = CATEGORY_COLORS[course.category] || CATEGORY_COLORS.Other;
   const hasParticipants = participants.length > 0;
-  const isSubscription = !!enrollment.subscriptionId;
+  const isSubscription = enrollment.subscriptionId;
   const periodEnd = enrollment.currentPeriodEnd ? new Date(enrollment.currentPeriodEnd) : null;
 
   const showToast = (message, type = "error") => {
@@ -504,7 +504,7 @@ export default function EnrollmentRow({ enrollment, onAction }) {
 
       {/* Confirm modal */}
       <ConfirmModal
-        isOpen={!!confirm}
+        isOpen={confirm}
         title={confirm?.title}
         message={confirm?.message}
         confirmLabel={confirm?.confirmText}

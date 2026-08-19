@@ -41,7 +41,7 @@ export default function EventDetails() {
   const { data: registeredTeams = [] } = useQuery({
     queryKey: queryKeys.events.teams(eventId),
     queryFn: () => fetchPublicJSON(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/teams`),
-    enabled: !!isTournament,
+    enabled: Boolean(isTournament),
   });
 
   const isRecurringSubscription =
@@ -56,7 +56,7 @@ export default function EventDetails() {
       if (!res.ok) return { subscription: null };
       return res.json();
     },
-    enabled: !!isRecurringSubscription && isAuthenticated(),
+    enabled: Boolean(isRecurringSubscription && isAuthenticated()),
   });
 
   const mySubscription = mySubscriptionData?.subscription;

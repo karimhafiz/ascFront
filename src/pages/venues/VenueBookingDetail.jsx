@@ -51,7 +51,7 @@ export default function VenueBookingDetail() {
     queryKey: queryKeys.venues.slots(venueId, selectedDate),
     queryFn: () =>
       fetchPublicJSON(`${API}venues/${venueId}/slots?date=${encodeURIComponent(selectedDate)}`),
-    enabled: !!selectedDate,
+    enabled: Boolean(selectedDate),
   });
 
   const selectedSlot = slots.find((slot) => slot._id === selectedSlotId);

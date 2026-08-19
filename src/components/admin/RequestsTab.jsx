@@ -101,7 +101,7 @@ export default function RequestsTab() {
   return (
     <div>
       <ConfirmModal
-        isOpen={!!modal}
+        isOpen={modal}
         title={modal?.title}
         message={modal?.message}
         confirmLabel={modal?.confirmLabel}

@@ -13,6 +13,6 @@ export function useCourse(courseId) {
   return useQuery({
     queryKey: queryKeys.courses.detail(courseId),
     queryFn: () => fetchPublicJSON(`${API}courses/${courseId}`),
-    enabled: !!courseId,
+    enabled: Boolean(courseId),
   });
 }

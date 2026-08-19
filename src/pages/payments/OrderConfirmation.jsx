@@ -25,7 +25,7 @@ export default function OrderConfirmation() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
     },
-    enabled: !!ticketId && loggedIn,
+    enabled: Boolean(ticketId && loggedIn),
     retry: 1,
   });
 
@@ -41,7 +41,7 @@ export default function OrderConfirmation() {
         { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       ).catch(() => [ticket]);
     },
-    enabled: !!ticket?.paymentId && loggedIn,
+    enabled: Boolean(ticket?.paymentId && loggedIn),
     retry: 0,
   });
 
@@ -52,14 +52,14 @@ export default function OrderConfirmation() {
     queryKey: queryKeys.payments.guestOrder(sessionId),
     queryFn: () =>
       fetchPublicJSON(`${import.meta.env.VITE_DEV_URI}payments/guest-order/${sessionId}`),
-    enabled: !!sessionId && !loggedIn,
+    enabled: Boolean(sessionId) && !loggedIn,
   });
 
   // Fallback receipt if no ticket_id
   const { data: receipt } = useQuery({
     queryKey: queryKeys.payments.receipt(sessionId),
     queryFn: () => fetchPublicJSON(`${import.meta.env.VITE_DEV_URI}payments/session/${sessionId}`),
-    enabled: !!sessionId && !ticketId && loggedIn,
+    enabled: Boolean(sessionId) && !ticketId && Boolean(loggedIn),
     retry: 1,
   });
 

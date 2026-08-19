@@ -18,7 +18,7 @@ export default function TeamConfirmationPage() {
   } = useQuery({
     queryKey: queryKeys.teams.detail(teamId),
     queryFn: () => fetchPublicJSON(`${API}teams/${teamId}`),
-    enabled: !!teamId,
+    enabled: Boolean(teamId),
   });
 
   const team = teamData?.team;
@@ -28,7 +28,7 @@ export default function TeamConfirmationPage() {
     // Swallow failures here — an event that's since been removed shouldn't
     // block rendering the rest of the confirmation page.
     queryFn: () => fetchPublicJSON(`${API}events/${team.event}`).catch(() => null),
-    enabled: !!team?.event,
+    enabled: Boolean(team?.event),
   });
 
   const event = eventData?.event || eventData;
