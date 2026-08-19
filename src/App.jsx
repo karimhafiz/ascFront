@@ -34,6 +34,7 @@ const SportsPage = lazy(() => import("./pages/content/Sports"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const TicketPage = lazy(() => import("./pages/tickets/TicketPage"));
 const TicketVerify = lazy(() => import("./pages/tickets/TicketVerify"));
+const TicketRecovery = lazy(() => import("./pages/tickets/TicketRecovery"));
 const CoursesPage = lazy(() => import("./pages/courses/Courses"));
 const CourseConfirmation = lazy(() => import("./pages/courses/CourseConfirmation"));
 const CourseDetails = lazy(() => import("./pages/courses/CourseDetails"));
@@ -81,6 +82,7 @@ const router = createBrowserRouter([
       { path: "profile", element: w(ProfilePage) },
       { path: "tickets/:ticketCode", element: w(TicketPage) },
       { path: "tickets/verify/:ticketCode", element: w(TicketVerify) },
+      { path: "tickets/recover", element: w(TicketRecovery) },
       {
         path: "courses",
         element: w(CourseRoot),
