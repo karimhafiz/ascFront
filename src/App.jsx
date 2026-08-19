@@ -25,6 +25,7 @@ const EventRoot = lazy(() => import("./pages/events/EventRoot"));
 const OrderConfirmation = lazy(() => import("./pages/payments/OrderConfirmation"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Signup = lazy(() => import("./pages/auth/Signup"));
+const VerifyEmail = lazy(() => import("./pages/auth/VerifyEmail"));
 const CancelPage = lazy(() => import("./pages/payments/CancelPage"));
 const TeamConfirmationPage = lazy(() => import("./pages/teams/TeamConfirmationPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -132,6 +133,7 @@ const router = createBrowserRouter([
       },
       { path: "login", element: w(Login) },
       { path: "signup", element: w(Signup) },
+      { path: "verify-email", element: w(VerifyEmail) },
     ],
   },
 ]);

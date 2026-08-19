@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { parseJwt, getAuthToken, isAuthenticated } from "../../auth/auth";
+import { parseJwt, getAuthToken, isAuthenticated, isVerified } from "../../auth/auth";
 import { Button, GlassCard, Spinner } from "../ui";
 import { useCheckoutMutation } from "../../hooks/useCheckoutMutation";
 import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
+import VerifyEmailNotice from "../common/VerifyEmailNotice";
 
 const INTERVAL_LABELS = { week: "week", month: "month" };
 
 export default function TicketPurchaseForm({ event, eventId, onTournamentSignup, isModal }) {
   const isSubscription = event.isReoccurring && event.stripePriceId && event.ticketPrice > 0;
   const loggedIn = isAuthenticated();
+  const verified = isVerified();
   const navigate = useNavigate();
   const requiresAuth = isSubscription || event.isTournament;
 
@@ -112,8 +114,19 @@ export default function TicketPurchaseForm({ event, eventId, onTournamentSignup,
           </div>
         )}
 
-        {/* Auth-required flows: show login CTA instead of form */}
-        {requiresAuth && !loggedIn ? (
+        {/* Logged in but unverified: block the purchase everywhere it's gated server-side */}
+        {loggedIn && !verified ? (
+          <VerifyEmailNotice
+            action={
+              event.isTournament
+                ? "register your team"
+                : isSubscription
+                  ? "subscribe"
+                  : "buy tickets"
+            }
+          />
+        ) : /* Auth-required flows: show login CTA instead of form */
+        requiresAuth && !loggedIn ? (
           <>
             <p className="text-sm text-base-content/70 text-center">
               {event.isTournament
