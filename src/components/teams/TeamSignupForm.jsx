@@ -32,7 +32,7 @@ export default function TeamSignupForm({ eventId, managerId, onClose, onSuccess 
       const r = await fetchWithAuth(`${API}teams/event/${eventId}/unpaid`);
       return r.json();
     },
-    enabled: !!managerEmail && !!eventId,
+    enabled: Boolean(managerEmail && eventId),
   });
 
   const unpaidTeams = unpaidData?.teams || [];

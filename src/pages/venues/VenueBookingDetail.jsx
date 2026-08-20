@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, GlassCard, PageContainer, Spinner } from "../../components/ui";
-import { isAuthenticated } from "../../auth/auth";
+import { isAuthenticated, isVerified } from "../../auth/auth";
 import { slugToId, formatDate } from "../../util/util";
 import moment from "moment";
 import VenueCalendar from "./VenueCalendar";
@@ -11,6 +11,7 @@ import { queryKeys } from "../../api/queryKeys";
 import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
 import { fetchPublicJSON } from "../../api/apiClient";
 import { useVenueBookingCheckoutMutation } from "../../hooks/useVenueMutation";
+import VerifyEmailNotice from "../../components/common/VerifyEmailNotice";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -50,7 +51,7 @@ export default function VenueBookingDetail() {
     queryKey: queryKeys.venues.slots(venueId, selectedDate),
     queryFn: () =>
       fetchPublicJSON(`${API}venues/${venueId}/slots?date=${encodeURIComponent(selectedDate)}`),
-    enabled: !!selectedDate,
+    enabled: Boolean(selectedDate),
   });
 
   const selectedSlot = slots.find((slot) => slot._id === selectedSlotId);
@@ -60,6 +61,11 @@ export default function VenueBookingDetail() {
 
     if (!isAuthenticated()) {
       navigate("/login");
+      return;
+    }
+
+    if (!isVerified()) {
+      setErrorMessage("Please verify your email before continuing.");
       return;
     }
 
@@ -405,11 +411,15 @@ export default function VenueBookingDetail() {
                   </div>
                 )}
 
-                <Button type="submit" className="w-full" disabled={isSubmitting || venueLoading}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting || venueLoading || (isAuthenticated() && !isVerified())}
+                >
                   {isSubmitting ? "Redirecting to Checkout..." : "Continue to Secure Checkout"}
                 </Button>
 
-                {!isAuthenticated() && (
+                {!isAuthenticated() ? (
                   <p className="text-sm leading-6 text-base-content/60">
                     You will need to{" "}
                     <Link to="/login" className="font-semibold text-primary hover:underline">
@@ -417,6 +427,8 @@ export default function VenueBookingDetail() {
                     </Link>{" "}
                     before starting checkout.
                   </p>
+                ) : (
+                  !isVerified() && <VerifyEmailNotice action="book a venue" />
                 )}
 
                 {errorMessage && (

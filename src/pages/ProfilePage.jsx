@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { isAuthenticated, fetchWithAuth } from "../auth/auth";
+import { isAuthenticated, isVerified, fetchWithAuth } from "../auth/auth";
 import { Button, Spinner } from "../components/ui";
 import MyTeamRow from "../components/teams/MyTeamRow";
 import OrderRow from "../components/profile/OrderRow";
@@ -9,6 +9,7 @@ import EnrollmentRow from "../components/profile/EnrollmentRow";
 import VenueBookingRow from "../components/profile/VenueBookingRow";
 import EventSubscriptionRow from "../components/profile/EventSubscriptionRow";
 import MyContentRequestsPanel from "../components/profile/MyContentRequestsPanel";
+import VerifyEmailNotice from "../components/common/VerifyEmailNotice";
 import { API } from "../api/apiClient";
 import { queryKeys } from "../api/queryKeys";
 
@@ -137,6 +138,26 @@ export default function ProfilePage() {
               >
                 {user.role}
               </span>
+              {isVerified() && (
+                <span
+                  className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200"
+                  title="Email verified"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-3.5 w-3.5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Verified
+                </span>
+              )}
             </div>
             <div className="flex gap-4 mt-1 text-sm text-base-content/50">
               <span>
@@ -163,6 +184,12 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {!isVerified() && (
+          <div className="mb-6">
+            <VerifyEmailNotice action="buy tickets, enroll in courses, or book a venue" />
+          </div>
+        )}
 
         {/* ── Tabs ── */}
         <div className="border-b border-base-300 mb-6">

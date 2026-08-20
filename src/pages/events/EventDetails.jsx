@@ -41,7 +41,7 @@ export default function EventDetails() {
   const { data: registeredTeams = [] } = useQuery({
     queryKey: queryKeys.events.teams(eventId),
     queryFn: () => fetchPublicJSON(`${import.meta.env.VITE_DEV_URI}teams/event/${eventId}/teams`),
-    enabled: !!isTournament,
+    enabled: Boolean(isTournament),
   });
 
   const isRecurringSubscription =
@@ -56,7 +56,7 @@ export default function EventDetails() {
       if (!res.ok) return { subscription: null };
       return res.json();
     },
-    enabled: !!isRecurringSubscription && isAuthenticated(),
+    enabled: Boolean(isRecurringSubscription && isAuthenticated()),
   });
 
   const mySubscription = mySubscriptionData?.subscription;
@@ -161,6 +161,16 @@ export default function EventDetails() {
         <div className={mySubscription ? "grid grid-cols-1 md:grid-cols-3 gap-6" : ""}>
           <div className={mySubscription ? "md:col-span-2" : ""}>
             <EventInfoGrid event={event} actionButton={getActionButton()} />
+            {!isFreeEvent && !event.isTournament && !isSubscription && !loggedIn && (
+              <p className="text-center md:text-right text-sm mt-2">
+                <Link
+                  to={`/tickets/recover?event=${encodeURIComponent(event.title)}`}
+                  className="text-primary hover:underline"
+                >
+                  Already bought a ticket? Recover it here
+                </Link>
+              </p>
+            )}
           </div>
           {mySubscription && (
             <div className="md:col-span-1">

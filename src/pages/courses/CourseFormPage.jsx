@@ -7,7 +7,7 @@ import { useCourse } from "../../hooks/useCourses";
 export default function CourseFormPage() {
   const { courseSlug } = useParams();
   const courseId = courseSlug ? slugToId(courseSlug) : null;
-  const isEditing = !!courseId;
+  const isEditing = courseId;
 
   const { data: course, isLoading, error } = useCourse(courseId);
 

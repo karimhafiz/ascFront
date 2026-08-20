@@ -197,7 +197,7 @@ export default function EventSubscriptionRow({ subscription, onAction }) {
 
       {/* Confirm modal */}
       <ConfirmModal
-        isOpen={!!confirm}
+        isOpen={confirm}
         title={confirm?.title}
         message={confirm?.message}
         confirmLabel={confirm?.confirmText}

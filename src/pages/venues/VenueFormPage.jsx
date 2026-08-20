@@ -27,7 +27,7 @@ const INITIAL_FORM = {
 export default function VenueFormPage() {
   const { venueSlug } = useParams();
   const venueId = venueSlug ? slugToId(venueSlug) : null;
-  const isEditing = !!venueId;
+  const isEditing = venueId;
   const navigate = useNavigate();
   const saveMutation = useVenueMutation(isEditing ? "PUT" : "POST", venueSlug);
 
@@ -41,7 +41,7 @@ export default function VenueFormPage() {
   } = useQuery({
     queryKey: queryKeys.venues.detail(venueId),
     queryFn: () => fetchPublicJSON(`${API}venues/${venueId}`),
-    enabled: isEditing,
+    enabled: Boolean(isEditing),
   });
 
   const venueToForm = (v) => ({

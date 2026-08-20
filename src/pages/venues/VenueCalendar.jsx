@@ -25,7 +25,7 @@ export default function VenueCalendar({ venueId, selectedDate, onSelectDate }) {
 
   const { data: rangeData } = useQuery({
     queryKey: queryKeys.venues.availableDates(venueId, monthFrom, monthTo),
-    enabled: !!venueId,
+    enabled: Boolean(venueId),
     queryFn: async () => {
       const data = await fetchPublicJSON(
         `${API}venues/${venueId}/slots?from=${monthFrom}&to=${monthTo}`

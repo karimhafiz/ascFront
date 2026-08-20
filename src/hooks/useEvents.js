@@ -13,6 +13,6 @@ export function useEvent(eventId) {
   return useQuery({
     queryKey: queryKeys.events.detail(eventId),
     queryFn: () => fetchPublicJSON(`${API}events/${eventId}`),
-    enabled: !!eventId,
+    enabled: Boolean(eventId),
   });
 }

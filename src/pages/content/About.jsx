@@ -313,7 +313,7 @@ export default function About({ previewContent = null }) {
   return (
     <div className="pb-12">
       <ConfirmModal
-        isOpen={!!pendingReset}
+        isOpen={pendingReset}
         title="Reset to Defaults?"
         message={`Reset ${resetLabel} to default content? This will permanently clear any custom text and images for that section.`}
         confirmLabel="Reset"

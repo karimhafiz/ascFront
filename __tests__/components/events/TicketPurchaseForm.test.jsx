@@ -11,10 +11,11 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
 }));
 
-let mockAuth = { loggedIn: false, token: null, email: "" };
+let mockAuth = { loggedIn: false, token: null, email: "", verified: true };
 
 jest.mock("../../../src/auth/auth", () => ({
   isAuthenticated: () => mockAuth.loggedIn,
+  isVerified: () => mockAuth.verified,
   getAuthToken: () => mockAuth.token,
   parseJwt: (t) => (t ? { email: mockAuth.email } : null),
   fetchWithAuth: jest.fn(),
@@ -81,7 +82,12 @@ describe("TicketPurchaseForm", () => {
 
   describe("Authenticated user", () => {
     beforeEach(() => {
-      mockAuth = { loggedIn: true, token: "fake.jwt.token", email: "user@test.com" };
+      mockAuth = {
+        loggedIn: true,
+        token: "fake.jwt.token",
+        email: "user@test.com",
+        verified: true,
+      };
     });
 
     it("shows disabled email field with pre-filled value", () => {
@@ -89,6 +95,13 @@ describe("TicketPurchaseForm", () => {
       const emailInput = screen.getByPlaceholderText("Enter your email");
       expect(emailInput).toBeDisabled();
       expect(emailInput.value).toBe("user@test.com");
+    });
+
+    it("blocks the form behind a verify-email notice when the account isn't verified", () => {
+      mockAuth.verified = false;
+      renderForm();
+      expect(screen.getByText("Verify your email to buy tickets")).toBeInTheDocument();
+      expect(screen.queryByPlaceholderText("Enter your email")).not.toBeInTheDocument();
     });
 
     it("shows lock icon when logged in", () => {
@@ -139,7 +152,12 @@ describe("TicketPurchaseForm", () => {
     });
 
     it("shows full form for authenticated users", () => {
-      mockAuth = { loggedIn: true, token: "fake.jwt.token", email: "user@test.com" };
+      mockAuth = {
+        loggedIn: true,
+        token: "fake.jwt.token",
+        email: "user@test.com",
+        verified: true,
+      };
       renderForm(subscriptionEvent);
       expect(screen.queryByText("Log in to subscribe")).not.toBeInTheDocument();
       expect(screen.getByPlaceholderText("Enter your email")).toBeInTheDocument();
@@ -159,7 +177,12 @@ describe("TicketPurchaseForm", () => {
     });
 
     it("shows full form for authenticated users", () => {
-      mockAuth = { loggedIn: true, token: "fake.jwt.token", email: "user@test.com" };
+      mockAuth = {
+        loggedIn: true,
+        token: "fake.jwt.token",
+        email: "user@test.com",
+        verified: true,
+      };
       renderForm(tournamentEvent);
       expect(screen.queryByText("Log in to register your team")).not.toBeInTheDocument();
       expect(screen.getByPlaceholderText("Enter your email")).toBeInTheDocument();

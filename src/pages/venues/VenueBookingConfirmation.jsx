@@ -25,7 +25,7 @@ export default function VenueBookingConfirmation() {
       if (!res.ok) throw new Error(data?.error || "Failed to load booking details.");
       return data;
     },
-    enabled: !!bookingId,
+    enabled: Boolean(bookingId),
   });
 
   const venue = booking?.venue;

@@ -149,7 +149,7 @@ export function getUserRole() {
 }
 
 export function isAuthenticated() {
-  return !!_accessToken && !!_expiration && new Date(_expiration) > new Date();
+  return _accessToken && _expiration && new Date(_expiration) > new Date();
 }
 
 export function isAdmin() {
@@ -158,6 +158,15 @@ export function isAdmin() {
 
 export function isModerator() {
   return isAuthenticated() && getUserRole() === "moderator";
+}
+
+export function isVerified() {
+  if (!isAuthenticated()) return false;
+  if (_user) return _user.isVerified;
+  const token = getAuthToken();
+  if (!token) return false;
+  const data = parseJwt(token);
+  return data ? data.isVerified : false;
 }
 
 // ── Auth-agnostic fetch wrapper: distinguishes "server unreachable" (fetch

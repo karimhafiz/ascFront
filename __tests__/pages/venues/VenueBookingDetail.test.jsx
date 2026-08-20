@@ -18,8 +18,12 @@ jest.mock("react-router-dom", () => {
 });
 
 let mockLoggedIn = true;
+let mockVerified = true;
 jest.mock("../../../src/auth/auth", () => ({
   isAuthenticated: () => mockLoggedIn,
+  isVerified: () => mockVerified,
+  getAuthToken: () => "fake.jwt.token",
+  parseJwt: () => ({ email: "user@test.com" }),
 }));
 
 const mockFetchPublicJSON = jest.fn();
@@ -94,6 +98,7 @@ describe("VenueBookingDetail", () => {
     jest.clearAllMocks();
     mockParams = { venueSlug };
     mockLoggedIn = true;
+    mockVerified = true;
   });
 
   it("shows a spinner while the venue loads", () => {
@@ -151,6 +156,21 @@ describe("VenueBookingDetail", () => {
     expect(
       await screen.findByText("No available slots were found for this date.")
     ).toBeInTheDocument();
+  });
+
+  it("blocks submission behind a verify-email notice when authenticated but unverified", async () => {
+    mockVerified = false;
+    mockLoadedVenueAndSlots();
+    renderPage();
+    await screen.findByText("Community Hall");
+
+    expect(screen.getByText("Verify your email to book a venue")).toBeInTheDocument();
+    expect(screen.getByText("Continue to Secure Checkout").closest("button")).toBeDisabled();
+
+    await act(async () => {
+      submitBookingForm();
+    });
+    expect(mockCheckoutMutateAsync).not.toHaveBeenCalled();
   });
 
   it("redirects to login instead of submitting when not authenticated", async () => {

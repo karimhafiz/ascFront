@@ -2,9 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAuthToken, isAuthenticated, parseJwt, fetchWithAuth } from "../../auth/auth";
+import {
+  getAuthToken,
+  isAuthenticated,
+  isVerified,
+  parseJwt,
+  fetchWithAuth,
+} from "../../auth/auth";
 import { slugToId, validatePhone } from "../../util/util";
 import { PageContainer, Button, GlassCard, Spinner } from "../../components/ui";
+import VerifyEmailNotice from "../../components/common/VerifyEmailNotice";
 import EnrolledPanel from "../../components/courses/EnrolledPanel";
 import CourseInfoGrid from "../../components/courses/CourseInfoGrid";
 import CourseDetailsBanner from "../../components/courses/CourseDetailsBanner";
@@ -21,6 +28,7 @@ export default function CourseDetails() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const loggedIn = isAuthenticated();
+  const verified = isVerified();
   const [email, setEmail] = useState(() => {
     const token = getAuthToken();
     if (!token) return "";
@@ -61,7 +69,7 @@ export default function CourseDetails() {
       if (!res.ok) return { enrollment: null };
       return res.json();
     },
-    enabled: loggedIn && !!courseId,
+    enabled: Boolean(loggedIn && courseId),
   });
 
   const myEnrollment = enrollmentData?.enrollment;
@@ -314,7 +322,9 @@ export default function CourseDetails() {
               </div>
             )}
 
-            {!loggedIn ? (
+            {loggedIn && !verified ? (
+              <VerifyEmailNotice action="enroll" />
+            ) : !loggedIn ? (
               <div className="space-y-3">
                 <p className="text-sm text-base-content/70 text-center">
                   You need an account to enroll in courses.

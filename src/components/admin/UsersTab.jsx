@@ -81,7 +81,7 @@ export default function UsersTab({ users, currentUserId, onRoleChange, onBanTogg
   return (
     <div>
       <ConfirmModal
-        isOpen={!!modal}
+        isOpen={modal}
         title={modal?.title}
         message={modal?.message}
         confirmLabel={modal?.confirmLabel}

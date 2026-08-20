@@ -25,6 +25,7 @@ const EventRoot = lazy(() => import("./pages/events/EventRoot"));
 const OrderConfirmation = lazy(() => import("./pages/payments/OrderConfirmation"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Signup = lazy(() => import("./pages/auth/Signup"));
+const VerifyEmail = lazy(() => import("./pages/auth/VerifyEmail"));
 const CancelPage = lazy(() => import("./pages/payments/CancelPage"));
 const TeamConfirmationPage = lazy(() => import("./pages/teams/TeamConfirmationPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -33,6 +34,7 @@ const SportsPage = lazy(() => import("./pages/content/Sports"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const TicketPage = lazy(() => import("./pages/tickets/TicketPage"));
 const TicketVerify = lazy(() => import("./pages/tickets/TicketVerify"));
+const TicketRecovery = lazy(() => import("./pages/tickets/TicketRecovery"));
 const CoursesPage = lazy(() => import("./pages/courses/Courses"));
 const CourseConfirmation = lazy(() => import("./pages/courses/CourseConfirmation"));
 const CourseDetails = lazy(() => import("./pages/courses/CourseDetails"));
@@ -80,6 +82,7 @@ const router = createBrowserRouter([
       { path: "profile", element: w(ProfilePage) },
       { path: "tickets/:ticketCode", element: w(TicketPage) },
       { path: "tickets/verify/:ticketCode", element: w(TicketVerify) },
+      { path: "tickets/recover", element: w(TicketRecovery) },
       {
         path: "courses",
         element: w(CourseRoot),
@@ -132,6 +135,7 @@ const router = createBrowserRouter([
       },
       { path: "login", element: w(Login) },
       { path: "signup", element: w(Signup) },
+      { path: "verify-email", element: w(VerifyEmail) },
     ],
   },
 ]);

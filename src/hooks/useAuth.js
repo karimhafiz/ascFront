@@ -3,36 +3,40 @@ import { useNavigate } from "react-router-dom";
 import { API } from "../api/apiClient";
 import { setAuth, clearAuth, fetchOrThrow } from "../auth/auth";
 
+async function loginRequest({ email, password }) {
+  const res = await fetchOrThrow(`${API}users/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    const err = new Error(data.message || "An error occurred. Please try again later.");
+    err.authMethod = data.authMethod || null;
+    throw err;
+  }
+  return data;
+}
+
+function handleAuthSuccess(navigate, data) {
+  setAuth(data.accessToken, data.user);
+  const role = data.user?.role;
+  if (role === "admin") {
+    navigate("/admin");
+  } else if (role === "moderator") {
+    navigate("/profile");
+  } else {
+    navigate("/");
+  }
+}
+
 export function useLogin() {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: async ({ email, password }) => {
-      const res = await fetchOrThrow(`${API}users/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        const err = new Error(data.message || "An error occurred. Please try again later.");
-        err.authMethod = data.authMethod || null;
-        throw err;
-      }
-      return data;
-    },
-    onSuccess: (data) => {
-      setAuth(data.accessToken, data.user);
-      const role = data.user?.role;
-      if (role === "admin") {
-        navigate("/admin");
-      } else if (role === "moderator") {
-        navigate("/profile");
-      } else {
-        navigate("/");
-      }
-    },
+    mutationFn: loginRequest,
+    onSuccess: (data) => handleAuthSuccess(navigate, data),
   });
 }
 
@@ -52,11 +56,12 @@ export function useSignup() {
         err.authMethod = data.authMethod || null;
         throw err;
       }
-      return res.json().catch(() => ({}));
+      await res.json().catch(() => ({}));
+      // Log straight in with the same credentials rather than making the
+      // user retype them on the login page.
+      return loginRequest({ email, password });
     },
-    onSuccess: () => {
-      navigate("/login");
-    },
+    onSuccess: (data) => handleAuthSuccess(navigate, data),
   });
 }
 
