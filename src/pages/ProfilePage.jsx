@@ -378,7 +378,7 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-4">
                 {venueBookings.map((booking) => (
-                  <VenueBookingRow key={booking._id} booking={booking} />
+                  <VenueBookingRow key={booking._id} booking={booking} onAction={refreshProfile} />
                 ))}
               </div>
             ))}

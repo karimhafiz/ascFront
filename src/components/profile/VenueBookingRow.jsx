@@ -1,11 +1,31 @@
 import React, { useState } from "react";
 import { formatCurrency, BOOKING_STATUS_STYLES } from "./profileHelpers";
+import { useVenueBookingCancelMutation } from "../../hooks/useVenueMutation";
+import ConfirmModal from "../common/ConfirmModal";
+import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
 
-export default function VenueBookingRow({ booking }) {
+export default function VenueBookingRow({ booking, onAction }) {
   const [expanded, setExpanded] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [error, setError] = useState("");
+  const [status, setStatus] = useState(booking.status);
   const slot = booking.slot;
   const venue = booking.venue;
-  const status = booking.status;
+
+  const cancelMutation = useVenueBookingCancelMutation(booking._id);
+
+  const handleCancel = () => {
+    setConfirmOpen(false);
+    setError("");
+    cancelMutation.mutate(undefined, {
+      onSuccess: () => {
+        setStatus("cancelled");
+        onAction?.();
+      },
+      onError: (err) =>
+        setError(err.status === 502 ? STRIPE_DOWN_MESSAGE : err.message || "Failed to cancel"),
+    });
+  };
 
   const slotDateStr = slot?.date
     ? new Date(slot.date).toLocaleDateString("en-GB", {
@@ -68,8 +88,8 @@ export default function VenueBookingRow({ booking }) {
         </div>
       </div>
 
-      {/* Expand toggle */}
-      <div className="border-t border-base-100 px-5 py-2.5">
+      {/* Expand toggle + cancel */}
+      <div className="border-t border-base-100 px-5 py-2.5 flex items-center justify-between">
         <button
           onClick={() => setExpanded((v) => !v)}
           className="flex items-center gap-1.5 text-xs font-medium text-base-content/70 hover:text-base-content transition-colors cursor-pointer"
@@ -84,7 +104,17 @@ export default function VenueBookingRow({ booking }) {
           </svg>
           {expanded ? "Hide details" : "View details"}
         </button>
+        {status === "confirmed" && (
+          <button
+            onClick={() => setConfirmOpen(true)}
+            disabled={cancelMutation.isPending}
+            className="text-xs font-medium text-red-500 hover:text-red-700 hover:underline transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+          >
+            {cancelMutation.isPending ? "Cancelling..." : "Cancel booking"}
+          </button>
+        )}
       </div>
+      {error && <p className="px-5 pt-2 text-xs text-red-500">{error}</p>}
 
       {/* Expanded details */}
       {expanded && (
@@ -164,6 +194,16 @@ export default function VenueBookingRow({ booking }) {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmOpen}
+        title="Cancel booking"
+        message="Are you sure you want to cancel this booking? If it was paid, you'll be refunded and the slot will be released."
+        confirmLabel="Yes, cancel"
+        variant="danger"
+        onConfirm={handleCancel}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }
