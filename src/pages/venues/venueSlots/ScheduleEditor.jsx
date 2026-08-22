@@ -13,7 +13,14 @@ const PRESET_SORTED = {
   Weekends: [...WEEKENDS].sort().join(),
 };
 
-export default function ScheduleEditor({ schedule, setSchedule, onSave, saving, onGenerate }) {
+export default function ScheduleEditor({
+  schedule,
+  setSchedule,
+  onSave,
+  saving,
+  onGenerate,
+  slotHorizon,
+}) {
   const [newEntry, setNewEntry] = useState({ days: [], start: "", end: "" });
   const [addEntryError, setAddEntryError] = useState("");
   const [saveError, setSaveError] = useState("");
@@ -24,6 +31,12 @@ export default function ScheduleEditor({ schedule, setSchedule, onSave, saving, 
 
   const today = formatDate(new Date());
   const newDaysSorted = useMemo(() => [...newEntry.days].sort().join(), [newEntry.days]);
+
+  const horizonDate = slotHorizon ? new Date(slotHorizon) : null;
+  const daysUntilHorizon = horizonDate
+    ? Math.ceil((horizonDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
+  const horizonIsLow = daysUntilHorizon !== null && daysUntilHorizon <= 7;
 
   const toggleDay = (day) =>
     setNewEntry((prev) => ({
@@ -212,7 +225,41 @@ export default function ScheduleEditor({ schedule, setSchedule, onSave, saving, 
 
         {/* Generate Slots — order 3 mobile, row 2 col 1 desktop */}
         <GlassCard className="w-11/12 lg:w-full m-auto rounded-4xl p-6 order-3 lg:row-start-2 lg:col-start-1">
-          <h3 className="mb-4 text-base font-semibold text-base-content">Generate Slots</h3>
+          <h3 className="mb-2 text-base font-semibold text-base-content">Generate Slots</h3>
+
+          <div
+            className={`mb-4 rounded-xl border px-3 py-2.5 text-xs ${
+              !horizonDate || horizonIsLow
+                ? "bg-amber-50 border-amber-200 text-amber-700"
+                : "bg-base-100 border-base-300 text-base-content/60"
+            }`}
+          >
+            {!horizonDate ? (
+              <p className="font-medium">
+                ⚠ No slots generated yet — this venue has nothing bookable until you generate some
+                below.
+              </p>
+            ) : (
+              <p className={horizonIsLow ? "font-medium" : ""}>
+                {horizonIsLow && "⚠ "}
+                Slots generated through{" "}
+                <strong>
+                  {horizonDate.toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </strong>
+                {horizonIsLow &&
+                  " — generate more soon, or bookings will stop showing availability."}
+              </p>
+            )}
+            <p className="mt-1 opacity-70">
+              Generation is manual by design — keeping this topped up is the admin/moderator's
+              responsibility, not something the site does on its own.
+            </p>
+          </div>
+
           <form onSubmit={handleGenerate} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>

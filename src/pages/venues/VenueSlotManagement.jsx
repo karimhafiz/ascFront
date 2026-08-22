@@ -87,6 +87,7 @@ export default function VenueSlotManagement() {
           onSave={handleSaveSchedule}
           saving={savingSchedule}
           onGenerate={handleGenerate}
+          slotHorizon={venue?.slotHorizon}
         />
 
         <SlotList venueId={venueId} />
