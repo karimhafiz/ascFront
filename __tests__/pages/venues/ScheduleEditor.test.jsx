@@ -24,9 +24,13 @@ async function submitGenerateForm() {
 }
 
 describe("ScheduleEditor — slot generation horizon", () => {
-  it("warns when no slots have been generated yet", () => {
+  it("states the general rule when there are no generated slots, without any state/tracking claim", () => {
     renderEditor({ slotHorizon: null });
-    expect(screen.getByText(/No slots generated yet/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/A venue with no generated slots can't be booked/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/yet/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/right now/i)).not.toBeInTheDocument();
   });
 
   it("shows the generated-through date when the horizon is comfortably in the future", () => {

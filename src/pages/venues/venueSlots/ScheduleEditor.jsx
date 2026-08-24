@@ -236,8 +236,7 @@ export default function ScheduleEditor({
           >
             {!horizonDate ? (
               <p className="font-medium">
-                ⚠ No slots generated yet — this venue has nothing bookable until you generate some
-                below.
+                ⚠ A venue with no generated slots can't be booked — generate some below.
               </p>
             ) : (
               <p className={horizonIsLow ? "font-medium" : ""}>
