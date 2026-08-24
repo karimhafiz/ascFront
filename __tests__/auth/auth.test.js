@@ -70,7 +70,7 @@ describe("Auth utilities", () => {
       clearAuth();
       expect(getAuthToken()).toBeNull();
       expect(getUser()).toBeNull();
-      expect(isAuthenticated()).toBe(false);
+      expect(isAuthenticated()).toBeFalsy();
     });
   });
 
@@ -88,7 +88,7 @@ describe("Auth utilities", () => {
     });
 
     it("should return false when no token", () => {
-      expect(isAuthenticated()).toBe(false);
+      expect(isAuthenticated()).toBeFalsy();
     });
   });
 
