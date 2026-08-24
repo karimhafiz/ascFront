@@ -56,6 +56,56 @@ describe("ScheduleEditor — slot generation horizon", () => {
   });
 });
 
+describe("ScheduleEditor — Add Entry overlap validation", () => {
+  it("blocks adding an entry that overlaps an existing one on the same day, before it ever reaches setSchedule", () => {
+    const setSchedule = jest.fn();
+    renderEditor({
+      schedule: [{ dayOfWeek: "monday", startTime: "09:00", endTime: "13:00" }],
+      setSchedule,
+    });
+
+    fireEvent.click(screen.getByLabelText("monday"));
+    fireEvent.change(screen.getByLabelText("Start *"), { target: { value: "12:00" } });
+    fireEvent.change(screen.getByLabelText("End *"), { target: { value: "16:00" } });
+    fireEvent.click(screen.getByText("Add to Schedule"));
+
+    expect(
+      screen.getByText("12:00-16:00 overlaps an existing entry on monday.")
+    ).toBeInTheDocument();
+    expect(setSchedule).not.toHaveBeenCalled();
+  });
+
+  it("allows adding an entry on a day with no conflicting entry", () => {
+    const setSchedule = jest.fn();
+    renderEditor({
+      schedule: [{ dayOfWeek: "monday", startTime: "09:00", endTime: "13:00" }],
+      setSchedule,
+    });
+
+    fireEvent.click(screen.getByLabelText("tuesday"));
+    fireEvent.change(screen.getByLabelText("Start *"), { target: { value: "12:00" } });
+    fireEvent.change(screen.getByLabelText("End *"), { target: { value: "16:00" } });
+    fireEvent.click(screen.getByText("Add to Schedule"));
+
+    expect(setSchedule).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows adding a same-day entry that only touches, not overlaps, an existing one", () => {
+    const setSchedule = jest.fn();
+    renderEditor({
+      schedule: [{ dayOfWeek: "monday", startTime: "09:00", endTime: "13:00" }],
+      setSchedule,
+    });
+
+    fireEvent.click(screen.getByLabelText("monday"));
+    fireEvent.change(screen.getByLabelText("Start *"), { target: { value: "13:00" } });
+    fireEvent.change(screen.getByLabelText("End *"), { target: { value: "17:00" } });
+    fireEvent.click(screen.getByText("Add to Schedule"));
+
+    expect(setSchedule).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("ScheduleEditor — Generate Slots result messaging", () => {
   it("shows a clean success in green when nothing was skipped", async () => {
     const onGenerate = jest.fn().mockResolvedValue("6 slot(s) generated");

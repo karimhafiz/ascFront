@@ -13,6 +13,13 @@ const PRESET_SORTED = {
   Weekends: [...WEEKENDS].sort().join(),
 };
 
+// Time values here are always zero-padded "HH:00" strings from TimeSelect's
+// fixed dropdown, so plain string comparison already sorts chronologically —
+// no need for a minutes-conversion helper like the backend uses.
+function rangesOverlap(aStart, aEnd, bStart, bEnd) {
+  return aStart < bEnd && bStart < aEnd;
+}
+
 export default function ScheduleEditor({
   schedule,
   setSchedule,
@@ -52,6 +59,19 @@ export default function ScheduleEditor({
       return setAddEntryError("Start and end time are required.");
     if (newEntry.end <= newEntry.start)
       return setAddEntryError("End time must be after start time.");
+
+    const conflictDays = newEntry.days.filter((day) =>
+      schedule.some(
+        (entry) =>
+          entry.dayOfWeek === day &&
+          rangesOverlap(newEntry.start, newEntry.end, entry.startTime, entry.endTime)
+      )
+    );
+    if (conflictDays.length > 0) {
+      return setAddEntryError(
+        `${newEntry.start}-${newEntry.end} overlaps an existing entry on ${conflictDays.join(", ")}.`
+      );
+    }
 
     const toAdd = newEntry.days.map((day) => ({
       dayOfWeek: day,
