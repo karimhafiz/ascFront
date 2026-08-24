@@ -140,6 +140,32 @@ describe("SlotList", () => {
     expect(await screen.findByText("Slot already exists")).toBeInTheDocument();
   });
 
+  it("lists every conflict as a separate item when a slot overlaps more than one existing slot", async () => {
+    mockFetchOk([]);
+    mockCreateMutateAsync.mockRejectedValue(
+      new Error(
+        "18:00-22:00 on Sat Sep 05 2026 overlaps an existing slot (18:00-19:00); 18:00-22:00 on Sat Sep 05 2026 overlaps an existing slot (20:00-21:00)."
+      )
+    );
+    renderList();
+    await screen.findByText("No slots for this week.");
+
+    fireEvent.change(screen.getByLabelText("Date *"), { target: { value: "2026-09-05" } });
+    fireEvent.change(screen.getByLabelText("Start *"), { target: { value: "18:00" } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("Add Slot"));
+    });
+
+    expect(await screen.findByText(/Couldn't add this slot/i)).toBeInTheDocument();
+    expect(
+      screen.getByText("18:00-22:00 on Sat Sep 05 2026 overlaps an existing slot (18:00-19:00)")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("18:00-22:00 on Sat Sep 05 2026 overlaps an existing slot (20:00-21:00)")
+    ).toBeInTheDocument();
+  });
+
   it("deletes a slot and alerts on failure instead of crashing", async () => {
     mockFetchOk([availableSlot]);
     mockDeleteMutateAsync.mockRejectedValue(new Error("Cannot delete slot with active bookings."));

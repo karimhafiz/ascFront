@@ -1,11 +1,11 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import ScheduleEditor from "../../../src/pages/venues/venueSlots/ScheduleEditor";
 import "@testing-library/jest-dom";
 
 function renderEditor(props = {}) {
   const defaultProps = {
-    schedule: [],
+    schedule: [{ dayOfWeek: "monday", startTime: "09:00", endTime: "13:00" }],
     setSchedule: jest.fn(),
     onSave: jest.fn(),
     saving: false,
@@ -13,6 +13,14 @@ function renderEditor(props = {}) {
     ...props,
   };
   return render(<ScheduleEditor {...defaultProps} />);
+}
+
+async function submitGenerateForm() {
+  fireEvent.change(screen.getByLabelText("From *"), { target: { value: "2026-09-01" } });
+  fireEvent.change(screen.getByLabelText("To *"), { target: { value: "2026-09-08" } });
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Generate Slots" }));
+  });
 }
 
 describe("ScheduleEditor — slot generation horizon", () => {
@@ -41,5 +49,46 @@ describe("ScheduleEditor — slot generation horizon", () => {
   it("always states that generation is the admin/moderator's responsibility", () => {
     renderEditor({ slotHorizon: null });
     expect(screen.getByText(/admin\/moderator's responsibility/i)).toBeInTheDocument();
+  });
+});
+
+describe("ScheduleEditor — Generate Slots result messaging", () => {
+  it("shows a clean success in green when nothing was skipped", async () => {
+    const onGenerate = jest.fn().mockResolvedValue("6 slot(s) generated");
+    renderEditor({ onGenerate });
+
+    await submitGenerateForm();
+
+    const message = await screen.findByText("6 slot(s) generated");
+    expect(message).toHaveClass("text-green-600");
+  });
+
+  it("flags a partial result in amber when some slots were skipped as occupied", async () => {
+    const onGenerate = jest
+      .fn()
+      .mockResolvedValue("4 slot(s) generated (2 skipped — already occupied)");
+    renderEditor({ onGenerate });
+
+    await submitGenerateForm();
+
+    const message = await screen.findByText("4 slot(s) generated (2 skipped — already occupied)");
+    expect(message).toHaveClass("text-amber-600");
+  });
+
+  it("shows the backend's error when every matching slot is already occupied", async () => {
+    const onGenerate = jest
+      .fn()
+      .mockRejectedValue(
+        new Error("All 3 matching slot(s) in this range are already occupied — nothing generated.")
+      );
+    renderEditor({ onGenerate });
+
+    await submitGenerateForm();
+
+    expect(
+      await screen.findByText(
+        "All 3 matching slot(s) in this range are already occupied — nothing generated."
+      )
+    ).toBeInTheDocument();
   });
 });

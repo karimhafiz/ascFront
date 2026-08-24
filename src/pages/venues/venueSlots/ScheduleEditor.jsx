@@ -293,7 +293,11 @@ export default function ScheduleEditor({
             </div>
             {generateStatus.error && <p className="text-sm text-red-500">{generateStatus.error}</p>}
             {generateStatus.success && (
-              <p className="text-sm text-green-600">{generateStatus.success}</p>
+              <p
+                className={`text-sm ${generateStatus.success.includes("skipped") ? "text-amber-600" : "text-green-600"}`}
+              >
+                {generateStatus.success}
+              </p>
             )}
             <Button type="submit" className="w-full" disabled={generating || !schedule.length}>
               {generating ? "Generating..." : "Generate Slots"}
