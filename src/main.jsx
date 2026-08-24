@@ -5,7 +5,8 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import App from "./App";
 import AuthInitializer from "./components/common/AuthInitializer";
 import BackendStatusOverlay from "./components/common/BackendStatusOverlay";
-import { ApiError, setBackendDown, setDatabaseDown } from "./util/errorUtil";
+import RateLimitBanner from "./components/common/RateLimitBanner";
+import { ApiError, setBackendDown, setDatabaseDown, setRateLimited } from "./util/errorUtil";
 import "./index.css";
 import "./custom-styles.css";
 
@@ -15,6 +16,9 @@ function handleCacheError(error) {
     setDatabaseDown(true);
   } else if (error.status === 502) {
     // Stripe-down is shown inline at the call site, never as a global block.
+  } else if (error.status === 429) {
+    // Rate limiting is transient/self-resolving — a light banner, not a full block.
+    setRateLimited(true);
   } else {
     setBackendDown(true);
   }
@@ -23,6 +27,7 @@ function handleCacheError(error) {
 function handleCacheSuccess() {
   setBackendDown(false);
   setDatabaseDown(false);
+  setRateLimited(false);
 }
 
 const queryClient = new QueryClient({
@@ -46,6 +51,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <SpeedInsights />
       </AuthInitializer>
       <BackendStatusOverlay />
+      <RateLimitBanner />
     </QueryClientProvider>
   </React.StrictMode>
 );

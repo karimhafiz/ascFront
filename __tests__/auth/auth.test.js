@@ -9,8 +9,10 @@ import {
   getUserRole,
   parseJwt,
   fetchWithAuth,
+  fetchOrThrow,
   subscribeToSessionExpired,
 } from "../../src/auth/auth";
+import { STRIPE_DOWN_MESSAGE, RATE_LIMITED_MESSAGE } from "../../src/util/errorUtil";
 
 // Build a fake JWT with a given payload
 function fakeJwt(payload) {
@@ -225,6 +227,44 @@ describe("Auth utilities", () => {
 
       await jest.advanceTimersByTimeAsync(0);
       expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("fetchOrThrow status handling", () => {
+    afterEach(() => {
+      delete global.fetch;
+    });
+
+    it("throws a typed ApiError for a database-down 503", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ status: 503 });
+      await expect(fetchOrThrow("http://api/test")).rejects.toMatchObject({
+        name: "ApiError",
+        status: 503,
+      });
+    });
+
+    it("throws a typed ApiError with the Stripe-down message for a 502", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ status: 502 });
+      await expect(fetchOrThrow("http://api/test")).rejects.toMatchObject({
+        name: "ApiError",
+        status: 502,
+        message: STRIPE_DOWN_MESSAGE,
+      });
+    });
+
+    it("throws a typed ApiError with the rate-limit message for a 429", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ status: 429 });
+      await expect(fetchOrThrow("http://api/test")).rejects.toMatchObject({
+        name: "ApiError",
+        status: 429,
+        message: RATE_LIMITED_MESSAGE,
+      });
+    });
+
+    it("passes an ordinary response straight through untouched", async () => {
+      const response = { status: 404, ok: false };
+      global.fetch = jest.fn().mockResolvedValue(response);
+      await expect(fetchOrThrow("http://api/test")).resolves.toBe(response);
     });
   });
 
