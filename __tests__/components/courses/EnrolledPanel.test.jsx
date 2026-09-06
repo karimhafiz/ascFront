@@ -78,3 +78,31 @@ describe("EnrolledPanel — General display", () => {
     expect(screen.queryByText("Add Participant")).not.toBeInTheDocument();
   });
 });
+
+describe("EnrolledPanel — one-time payment vs subscription messaging", () => {
+  it("explains a one-time paid enrollment has nothing to cancel, and hides the Cancel button", () => {
+    renderPanel();
+    expect(
+      screen.getByText("One-time payment — no recurring charge, so there's nothing to cancel.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Cancel Subscription")).not.toBeInTheDocument();
+  });
+
+  it("does not show the one-time-payment note for a subscription enrollment", () => {
+    renderPanel({
+      course: { ...baseCourse, isSubscription: true },
+      enrollment: { ...baseEnrollment, subscriptionId: "sub_1", subscriptionStatus: "active" },
+    });
+    expect(
+      screen.queryByText("One-time payment — no recurring charge, so there's nothing to cancel.")
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Cancel Subscription")).toBeInTheDocument();
+  });
+
+  it("does not show the one-time-payment note for a free enrollment", () => {
+    renderPanel({ course: { ...baseCourse, price: 0 } });
+    expect(
+      screen.queryByText("One-time payment — no recurring charge, so there's nothing to cancel.")
+    ).not.toBeInTheDocument();
+  });
+});

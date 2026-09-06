@@ -301,6 +301,12 @@ export default function EnrollmentRow({ enrollment, onAction }) {
         </div>
       )}
 
+      {!isSubscription && course.price > 0 && (
+        <div className="px-5 py-2.5 text-xs text-base-content/50 border-t border-base-100">
+          One-time payment — no recurring charge, so there's nothing to cancel.
+        </div>
+      )}
+
       {/* Phone edit */}
       <div className="px-5 py-2.5 border-t border-base-100">
         {editingPhone ? (
