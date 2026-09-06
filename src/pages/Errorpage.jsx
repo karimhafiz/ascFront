@@ -1,7 +1,13 @@
 import React from "react";
+import { useRouteError, isRouteErrorResponse } from "react-router-dom";
 import { Button, PageContainer, GlassCard } from "../components/ui";
 
-export default function ErrorPage({ error }) {
+export default function ErrorPage() {
+  const error = useRouteError();
+  const message = isRouteErrorResponse(error)
+    ? `${error.status} ${error.statusText}`
+    : error?.message;
+
   return (
     <PageContainer center>
       <GlassCard className="p-10 text-center max-w-lg">
@@ -26,7 +32,7 @@ export default function ErrorPage({ error }) {
         {error && (
           <div className="bg-white/30 p-4 rounded-xl text-left text-red-700 mb-6 backdrop-blur-sm">
             <p className="font-medium">Error details:</p>
-            <p className="mt-2">{error.message || "Unknown error"}</p>
+            <p className="mt-2">{message || "Unknown error"}</p>
           </div>
         )}
         <Button variant="primary" onClick={() => (window.location.href = "/")}>

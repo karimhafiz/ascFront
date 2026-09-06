@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { parseJwt, getAuthToken, isAuthenticated, isVerified } from "../../auth/auth";
+import { useAuthState } from "../../auth/useAuthState";
 import { Button, GlassCard, Spinner } from "../ui";
 import { useCheckoutMutation } from "../../hooks/useCheckoutMutation";
 import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
@@ -9,6 +10,7 @@ import VerifyEmailNotice from "../common/VerifyEmailNotice";
 const INTERVAL_LABELS = { week: "week", month: "month" };
 
 export default function TicketPurchaseForm({ event, eventId, onTournamentSignup, isModal }) {
+  useAuthState();
   const isSubscription = event.isReoccurring && event.stripePriceId && event.ticketPrice > 0;
   const loggedIn = isAuthenticated();
   const verified = isVerified();

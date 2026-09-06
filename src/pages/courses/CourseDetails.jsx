@@ -9,6 +9,7 @@ import {
   parseJwt,
   fetchWithAuth,
 } from "../../auth/auth";
+import { useAuthState } from "../../auth/useAuthState";
 import { slugToId, validatePhone } from "../../util/util";
 import { PageContainer, Button, GlassCard, Spinner } from "../../components/ui";
 import VerifyEmailNotice from "../../components/common/VerifyEmailNotice";
@@ -23,6 +24,7 @@ import { STRIPE_DOWN_MESSAGE } from "../../util/errorUtil";
 const INTERVAL_LABELS = { month: "month", year: "year" };
 
 export default function CourseDetails() {
+  useAuthState();
   const { courseSlug } = useParams();
   const courseId = slugToId(courseSlug);
   const navigate = useNavigate();

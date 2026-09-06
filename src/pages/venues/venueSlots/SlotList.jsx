@@ -12,6 +12,27 @@ import {
 
 const API = import.meta.env.VITE_DEV_URI;
 
+// Backend joins multiple conflicts with "; " (see venueController.js's
+// createVenueSlots) — split them back out so each one gets its own line
+// instead of running together in one dense sentence.
+function ConflictError({ message }) {
+  if (!message) return null;
+  const parts = message.replace(/\.$/, "").split("; ").filter(Boolean);
+  if (parts.length <= 1) {
+    return <p className="text-sm text-red-500">{message}</p>;
+  }
+  return (
+    <div className="text-sm text-red-500">
+      <p className="font-medium mb-1">Couldn't add this slot — it conflicts with:</p>
+      <ul className="list-disc list-inside space-y-0.5">
+        {parts.map((part, i) => (
+          <li key={i}>{part}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function SlotList({ venueId }) {
   const createSlotMutation = useVenueSlotCreateMutation(venueId);
   const deleteSlotMutation = useVenueSlotDeleteMutation(venueId);
@@ -131,7 +152,7 @@ export default function SlotList({ venueId }) {
                 />
               </div>
             </div>
-            {oneOffForm.error && <p className="text-sm text-red-500">{oneOffForm.error}</p>}
+            <ConflictError message={oneOffForm.error} />
             <Button type="submit" className="w-full" disabled={addingOneOff}>
               {addingOneOff ? "Adding..." : "Add Slot"}
             </Button>

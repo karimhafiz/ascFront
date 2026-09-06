@@ -89,6 +89,12 @@ export function useVenueSlotCreateMutation(venueId) {
   });
 }
 
+export function useVenueBookingCancelMutation(bookingId) {
+  return useMutation({
+    mutationFn: () => fetchJSON(`${API}venues/booking/${bookingId}/cancel`, { method: "POST" }),
+  });
+}
+
 export function useVenueSlotDeleteMutation(venueId) {
   const queryClient = useQueryClient();
   return useMutation({

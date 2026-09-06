@@ -38,3 +38,4 @@ env.production
 CLAUDE.md
 .vercel
 .env*
+!.env.example

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { isAuthenticated, isVerified, fetchWithAuth } from "../auth/auth";
+import { useAuthState } from "../auth/useAuthState";
 import { Button, Spinner } from "../components/ui";
 import MyTeamRow from "../components/teams/MyTeamRow";
 import OrderRow from "../components/profile/OrderRow";
@@ -16,6 +17,7 @@ import { queryKeys } from "../api/queryKeys";
 const TABS = ["Tickets", "Teams", "Enrollments", "Venues", "Requests"];
 
 export default function ProfilePage() {
+  useAuthState();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -378,7 +380,7 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-4">
                 {venueBookings.map((booking) => (
-                  <VenueBookingRow key={booking._id} booking={booking} />
+                  <VenueBookingRow key={booking._id} booking={booking} onAction={refreshProfile} />
                 ))}
               </div>
             ))}

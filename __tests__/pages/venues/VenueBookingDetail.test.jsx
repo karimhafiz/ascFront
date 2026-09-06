@@ -24,6 +24,8 @@ jest.mock("../../../src/auth/auth", () => ({
   isVerified: () => mockVerified,
   getAuthToken: () => "fake.jwt.token",
   parseJwt: () => ({ email: "user@test.com" }),
+  subscribeToAuth: () => () => {},
+  getAuthVersion: () => 0,
 }));
 
 const mockFetchPublicJSON = jest.fn();

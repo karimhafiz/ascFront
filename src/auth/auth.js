@@ -1,4 +1,4 @@
-import { ApiError, STRIPE_DOWN_MESSAGE } from "../util/errorUtil";
+import { ApiError, STRIPE_DOWN_MESSAGE, RATE_LIMITED_MESSAGE } from "../util/errorUtil";
 
 const API = import.meta.env.VITE_DEV_URI;
 
@@ -186,6 +186,9 @@ export async function fetchOrThrow(url, options) {
   }
   if (response.status === 502) {
     throw new ApiError(STRIPE_DOWN_MESSAGE, 502);
+  }
+  if (response.status === 429) {
+    throw new ApiError(RATE_LIMITED_MESSAGE, 429);
   }
   return response;
 }

@@ -13,7 +13,21 @@ const PRESET_SORTED = {
   Weekends: [...WEEKENDS].sort().join(),
 };
 
-export default function ScheduleEditor({ schedule, setSchedule, onSave, saving, onGenerate }) {
+// Time values here are always zero-padded "HH:00" strings from TimeSelect's
+// fixed dropdown, so plain string comparison already sorts chronologically —
+// no need for a minutes-conversion helper like the backend uses.
+function rangesOverlap(aStart, aEnd, bStart, bEnd) {
+  return aStart < bEnd && bStart < aEnd;
+}
+
+export default function ScheduleEditor({
+  schedule,
+  setSchedule,
+  onSave,
+  saving,
+  onGenerate,
+  slotHorizon,
+}) {
   const [newEntry, setNewEntry] = useState({ days: [], start: "", end: "" });
   const [addEntryError, setAddEntryError] = useState("");
   const [saveError, setSaveError] = useState("");
@@ -24,6 +38,12 @@ export default function ScheduleEditor({ schedule, setSchedule, onSave, saving, 
 
   const today = formatDate(new Date());
   const newDaysSorted = useMemo(() => [...newEntry.days].sort().join(), [newEntry.days]);
+
+  const horizonDate = slotHorizon ? new Date(slotHorizon) : null;
+  const daysUntilHorizon = horizonDate
+    ? Math.ceil((horizonDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
+  const horizonIsLow = daysUntilHorizon !== null && daysUntilHorizon <= 7;
 
   const toggleDay = (day) =>
     setNewEntry((prev) => ({
@@ -39,6 +59,19 @@ export default function ScheduleEditor({ schedule, setSchedule, onSave, saving, 
       return setAddEntryError("Start and end time are required.");
     if (newEntry.end <= newEntry.start)
       return setAddEntryError("End time must be after start time.");
+
+    const conflictDays = newEntry.days.filter((day) =>
+      schedule.some(
+        (entry) =>
+          entry.dayOfWeek === day &&
+          rangesOverlap(newEntry.start, newEntry.end, entry.startTime, entry.endTime)
+      )
+    );
+    if (conflictDays.length > 0) {
+      return setAddEntryError(
+        `${newEntry.start}-${newEntry.end} overlaps an existing entry on ${conflictDays.join(", ")}.`
+      );
+    }
 
     const toAdd = newEntry.days.map((day) => ({
       dayOfWeek: day,
@@ -212,7 +245,40 @@ export default function ScheduleEditor({ schedule, setSchedule, onSave, saving, 
 
         {/* Generate Slots — order 3 mobile, row 2 col 1 desktop */}
         <GlassCard className="w-11/12 lg:w-full m-auto rounded-4xl p-6 order-3 lg:row-start-2 lg:col-start-1">
-          <h3 className="mb-4 text-base font-semibold text-base-content">Generate Slots</h3>
+          <h3 className="mb-2 text-base font-semibold text-base-content">Generate Slots</h3>
+
+          <div
+            className={`mb-4 rounded-xl border px-3 py-2.5 text-xs ${
+              !horizonDate || horizonIsLow
+                ? "bg-amber-50 border-amber-200 text-amber-700"
+                : "bg-base-100 border-base-300 text-base-content/60"
+            }`}
+          >
+            {!horizonDate ? (
+              <p className="font-medium">
+                ⚠ A venue with no generated slots can't be booked — generate some below.
+              </p>
+            ) : (
+              <p className={horizonIsLow ? "font-medium" : ""}>
+                {horizonIsLow && "⚠ "}
+                Slots generated through{" "}
+                <strong>
+                  {horizonDate.toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </strong>
+                {horizonIsLow &&
+                  " — generate more soon, or bookings will stop showing availability."}
+              </p>
+            )}
+            <p className="mt-1 opacity-70">
+              Generation is manual by design — keeping this topped up is the admin/moderator's
+              responsibility, not something the site does on its own.
+            </p>
+          </div>
+
           <form onSubmit={handleGenerate} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -246,7 +312,11 @@ export default function ScheduleEditor({ schedule, setSchedule, onSave, saving, 
             </div>
             {generateStatus.error && <p className="text-sm text-red-500">{generateStatus.error}</p>}
             {generateStatus.success && (
-              <p className="text-sm text-green-600">{generateStatus.success}</p>
+              <p
+                className={`text-sm ${generateStatus.success.includes("skipped") ? "text-amber-600" : "text-green-600"}`}
+              >
+                {generateStatus.success}
+              </p>
             )}
             <Button type="submit" className="w-full" disabled={generating || !schedule.length}>
               {generating ? "Generating..." : "Generate Slots"}

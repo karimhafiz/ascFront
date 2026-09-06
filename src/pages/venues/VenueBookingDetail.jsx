@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, GlassCard, PageContainer, Spinner } from "../../components/ui";
 import { isAuthenticated, isVerified } from "../../auth/auth";
+import { useAuthState } from "../../auth/useAuthState";
 import { slugToId, formatDate } from "../../util/util";
 import moment from "moment";
 import VenueCalendar from "./VenueCalendar";
@@ -24,6 +25,7 @@ const INITIAL_FORM = {
 };
 
 export default function VenueBookingDetail() {
+  useAuthState();
   const { venueSlug } = useParams();
   const venueId = slugToId(venueSlug);
   const navigate = useNavigate();
