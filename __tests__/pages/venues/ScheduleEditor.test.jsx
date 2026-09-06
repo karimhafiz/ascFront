@@ -1,7 +1,17 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import ScheduleEditor from "../../../src/pages/venues/venueSlots/ScheduleEditor";
+import { formatDate } from "../../../src/util/util";
 import "@testing-library/jest-dom";
+
+// Relative to whenever the suite actually runs, not hardcoded — the "From"
+// field's native min is today, so a fixed literal date silently falls behind
+// it and jsdom blocks the click-triggered submit with no visible error.
+function daysFromNow(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return formatDate(d);
+}
 
 function renderEditor(props = {}) {
   const defaultProps = {
@@ -16,8 +26,8 @@ function renderEditor(props = {}) {
 }
 
 async function submitGenerateForm() {
-  fireEvent.change(screen.getByLabelText("From *"), { target: { value: "2026-09-01" } });
-  fireEvent.change(screen.getByLabelText("To *"), { target: { value: "2026-09-08" } });
+  fireEvent.change(screen.getByLabelText("From *"), { target: { value: daysFromNow(1) } });
+  fireEvent.change(screen.getByLabelText("To *"), { target: { value: daysFromNow(8) } });
   await act(async () => {
     fireEvent.click(screen.getByRole("button", { name: "Generate Slots" }));
   });

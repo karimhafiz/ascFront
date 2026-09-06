@@ -2,7 +2,17 @@ import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import SlotList from "../../../src/pages/venues/venueSlots/SlotList";
+import { formatDate } from "../../../src/util/util";
 import "@testing-library/jest-dom";
+
+// Relative to whenever the suite actually runs, not hardcoded — the date
+// field's native min is today, so a fixed literal date silently falls behind
+// it and jsdom blocks the click-triggered submit with no visible error.
+function daysFromNow(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return formatDate(d);
+}
 
 const mockFetchWithAuth = jest.fn();
 jest.mock("../../../src/auth/auth", () => ({
@@ -94,7 +104,7 @@ describe("SlotList", () => {
     renderList();
     await screen.findByText("No slots for this week.");
 
-    fireEvent.change(screen.getByLabelText("Date *"), { target: { value: "2026-09-10" } });
+    fireEvent.change(screen.getByLabelText("Date *"), { target: { value: daysFromNow(4) } });
     fireEvent.change(screen.getByLabelText("Start *"), { target: { value: "18:00" } });
     fireEvent.change(screen.getByLabelText("End"), { target: { value: "17:00" } });
 
@@ -110,7 +120,8 @@ describe("SlotList", () => {
     renderList();
     await screen.findByText("No slots for this week.");
 
-    fireEvent.change(screen.getByLabelText("Date *"), { target: { value: "2026-09-10" } });
+    const date = daysFromNow(4);
+    fireEvent.change(screen.getByLabelText("Date *"), { target: { value: date } });
     fireEvent.change(screen.getByLabelText("Start *"), { target: { value: "18:00" } });
 
     await act(async () => {
@@ -118,7 +129,7 @@ describe("SlotList", () => {
     });
 
     expect(mockCreateMutateAsync).toHaveBeenCalledWith({
-      date: "2026-09-10",
+      date,
       startTime: "18:00",
     });
     expect(screen.getByLabelText("Date *").value).toBe("");
@@ -130,7 +141,7 @@ describe("SlotList", () => {
     renderList();
     await screen.findByText("No slots for this week.");
 
-    fireEvent.change(screen.getByLabelText("Date *"), { target: { value: "2026-09-10" } });
+    fireEvent.change(screen.getByLabelText("Date *"), { target: { value: daysFromNow(4) } });
     fireEvent.change(screen.getByLabelText("Start *"), { target: { value: "18:00" } });
 
     await act(async () => {
@@ -150,7 +161,7 @@ describe("SlotList", () => {
     renderList();
     await screen.findByText("No slots for this week.");
 
-    fireEvent.change(screen.getByLabelText("Date *"), { target: { value: "2026-09-05" } });
+    fireEvent.change(screen.getByLabelText("Date *"), { target: { value: daysFromNow(3) } });
     fireEvent.change(screen.getByLabelText("Start *"), { target: { value: "18:00" } });
 
     await act(async () => {
