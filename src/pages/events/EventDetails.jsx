@@ -5,6 +5,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import TeamSignupForm from "../../components/teams/TeamSignupForm";
 import { slugToId } from "../../util/util";
 import { isAuthenticated, fetchWithAuth } from "../../auth/auth";
+import { useAuthState } from "../../auth/useAuthState";
 import { Button, PageContainer, GlassCard, Spinner } from "../../components/ui";
 import EventDetailsBanner from "../../components/events/EventDetailsBanner";
 import EventInfoGrid from "../../components/events/EventInfoGrid";
@@ -16,6 +17,7 @@ import { queryKeys } from "../../api/queryKeys";
 import { fetchPublicJSON } from "../../api/apiClient";
 
 export default function EventDetails() {
+  useAuthState();
   const { eventSlug } = useParams();
   const eventId = slugToId(eventSlug);
   const navigate = useNavigate();

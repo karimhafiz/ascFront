@@ -19,6 +19,8 @@ jest.mock("../../../src/auth/auth", () => ({
   getAuthToken: () => mockAuth.token,
   parseJwt: (t) => (t ? { email: mockAuth.email } : null),
   fetchWithAuth: jest.fn(),
+  subscribeToAuth: () => () => {},
+  getAuthVersion: () => 0,
 }));
 
 const baseEvent = {
