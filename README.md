@@ -63,6 +63,8 @@ This is a separate layer from `pages/Errorpage.jsx`, which is wired as a React R
 
 `useAuth`/`useAuthState` track the current user from the access token (decoded client-side with `jwt-decode`) plus a proactive refresh timer. `ProtectedRoute` (any authenticated user) and `ModeratorRoute` (moderator/admin) gate routes in `App.jsx`; `isAdmin()`/`isModerator()` in `auth/auth.js` gate UI affordances (buttons, admin-only panels) at the component level.
 
+Auth session, session expiry, and backend/DB-down status are managed via lightweight hand-rolled observable stores (a Set of subscriber callbacks + useSyncExternalStore) rather than a state-management library — the right level of abstraction for three global flags without adding a Redux/Zustand dependency.
+
 ## Styling
 
 Tailwind v4 canonical utility names, not legacy/arbitrary equivalents when a canonical one exists — e.g. `bg-linear-to-r` not `bg-gradient-to-r`, `min-w-7` not `min-w-[28px]`; don't reach for an arbitrary bracket value when a scale value already covers it. Reusable primitives live in `components/common/` (`ConfirmModal` with a `variant` prop for danger actions, `FloatingBar`/`PageEditBar` for toolbars that hover over the page instead of reserving scroll space, `ImageWithFallback` for images that may 404) and `components/ui/` — check there before hand-rolling a new modal/toolbar/etc.
